@@ -508,7 +508,7 @@ function CapacitacionesListing() {
             </Button>
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-card border border-border rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors"
+                className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors"
                 onClick={() => handleViewCapacitacion(capacitacion)}
               >
                 <div className="p-6">
@@ -576,10 +576,10 @@ function CapacitacionesListing() {
             ))}
           </div>
         ) : (
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-muted">
+                <tr className="border-b border-gray-200 dark:border-gray-700 bg-muted">
                   <th className="text-left p-4">Capacitación</th>
                   <th className="text-left p-4">Instructor</th>
                   <th className="text-left p-4">Fecha</th>
@@ -593,7 +593,7 @@ function CapacitacionesListing() {
                     key={capacitacion.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="border-b border-border cursor-pointer hover:bg-accent/50"
+                    className="border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-accent/50"
                     onClick={() => handleViewCapacitacion(capacitacion)}
                   >
                     <td className="p-4">

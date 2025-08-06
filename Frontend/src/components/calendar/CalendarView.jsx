@@ -182,7 +182,7 @@ function CalendarView() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-border rounded-lg p-6"
+        className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6"
       >
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

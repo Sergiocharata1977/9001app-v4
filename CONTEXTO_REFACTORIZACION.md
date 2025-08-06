@@ -32,20 +32,26 @@ El objetivo principal es refactorizar completamente el proyecto `isoflow4-refact
 
 ## 🌐 Relación con Repositorio y VPS
 
-### **Repositorio Original**
-- **Nombre**: `isoflow4-refact`
-- **Ubicación**: Repositorio Git local/remoto
-- **Contenido**: Sistema original completo con estructura legacy
+### **Repositorio GitLab**
+- **Nombre**: `9001app2`
+- **URL**: `https://gitlab.com/late4/9001app2`
+- **Rama**: `master`
+- **Último push**: Hace 32 segundos
+- **Archivos subidos**: 779 archivos (5.65 MiB)
+- **Commit**: `9cf5315d` - "feat: refactorización a Vite - página web funcionando en localhost:3002"
 
 ### **Nueva Estructura**
 - **Nombre**: `9001app2`
 - **Ubicación**: Dentro de `isoflow4-refact/9001app2/`
 - **Tecnologías**: Vite + React + Node.js + Express
+- **Estado**: Refactorización simplificada (solo página web)
 
-### **VPS (Servidor Privado Virtual)**
+### **VPS Hostinger**
 - **Propósito**: Entorno de producción para verificación
 - **Objetivo**: Confirmar que el sistema funciona en condiciones reales
 - **Acceso**: Público a través de internet
+- **Despliegue**: ¿Automático desde GitLab?
+- **URL del VPS**: Por verificar
 
 ## 📋 Estado Actual del Proyecto
 
@@ -56,15 +62,19 @@ El objetivo principal es refactorizar completamente el proyecto `isoflow4-refact
 - [x] Instalación de dependencias
 - [x] Backend funcionando en puerto 5000
 - [x] Frontend funcionando en puerto 3000
+- [x] **Commit y push exitoso a GitLab** (hace 32 segundos)
+- [x] **779 archivos subidos** al repositorio remoto
+- [x] **Refactorización simplificada** - solo página web funcionando
 
 ### **🔄 En Progreso**
 - [ ] Corrección de CSS en página de presentación
 - [ ] Verificación de todas las funcionalidades ABM
 - [ ] Testing de integración frontend-backend
+- [ ] **Verificación de despliegue automático en VPS**
 
 ### **⏳ Pendiente**
-- [ ] Commit y push al repositorio
-- [ ] Despliegue en VPS
+- [x] ~~Commit y push al repositorio~~ ✅ COMPLETADO
+- [ ] Despliegue en VPS (verificar si es automático)
 - [ ] Verificación en entorno de producción
 - [ ] Documentación final
 
@@ -93,7 +103,7 @@ El objetivo principal es refactorizar completamente el proyecto `isoflow4-refact
 
 ### **Problema Actual: CSS no se carga**
 - **Síntoma**: La página se renderiza pero sin estilos
-- **Ubicación**: `http://localhost:3000/web`
+- **Ubicación**: `http://localhost:3002/web`
 - **Posibles causas**:
   - Configuración incorrecta de Tailwind CSS
   - Rutas de archivos CSS incorrectas
@@ -104,6 +114,11 @@ El objetivo principal es refactorizar completamente el proyecto `isoflow4-refact
 2. Revisar importaciones de CSS en componentes
 3. Validar configuración de Vite
 4. Probar con CSS inline para confirmar funcionamiento
+
+### **Despliegue VPS - Pregunta Crítica**
+- **¿Hostinger tiene CI/CD automático con GitLab?**
+- **¿Necesitamos configurar webhooks?**
+- **¿El VPS se actualiza automáticamente al hacer push?**
 
 ## 📁 Estructura del Proyecto
 
@@ -132,14 +147,14 @@ isoflow4-refact/
 ## 🎯 Próximos Pasos
 
 ### **Inmediato (Hoy)**
-1. **Resolver problema de CSS** en página de presentación
-2. **Verificar funcionalidades ABM** del sistema
+1. **Verificar si el VPS se actualizó automáticamente** desde GitLab
+2. **Resolver problema de CSS** en página de presentación
 3. **Testing de integración** frontend-backend
 
 ### **Corto Plazo (Esta semana)**
-1. **Commit de cambios** al repositorio
-2. **Push al repositorio remoto**
-3. **Despliegue en VPS**
+1. ✅ ~~Commit de cambios al repositorio~~ **COMPLETADO**
+2. ✅ ~~Push al repositorio remoto~~ **COMPLETADO**
+3. **Configurar CI/CD automático** en VPS (si no existe)
 4. **Verificación en entorno de producción**
 
 ### **Mediano Plazo**

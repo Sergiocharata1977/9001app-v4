@@ -48,7 +48,7 @@ function DepartamentoSingle({ departamento, onBack, onEdit, onDelete }) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card border border-border rounded-lg p-6"
+            className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6"
           >
             <div className="flex items-start space-x-4">
               <div className="bg-primary/10 p-3 rounded-lg">
@@ -77,7 +77,7 @@ function DepartamentoSingle({ departamento, onBack, onEdit, onDelete }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-card border border-border rounded-lg p-6 space-y-6"
+            className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6 space-y-6"
           >
             <div>
               <h2 className="text-lg font-semibold mb-2">Descripción</h2>
@@ -96,7 +96,7 @@ function DepartamentoSingle({ departamento, onBack, onEdit, onDelete }) {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-2 gap-6"
           >
-            <div className="bg-card border border-border rounded-lg p-6">
+            <div className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6">
               <h2 className="text-lg font-semibold flex items-center mb-4">
                 <Link className="h-5 w-5 mr-2" />
                 Información de Contacto
@@ -116,7 +116,7 @@ function DepartamentoSingle({ departamento, onBack, onEdit, onDelete }) {
                 </div>
               </div>
             </div>
-            <div className="bg-card border border-border rounded-lg p-6">
+            <div className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6">
               <h2 className="text-lg font-semibold flex items-center mb-4">
                 <FileText className="h-5 w-5 mr-2" />
                 Información Adicional
@@ -141,7 +141,7 @@ function DepartamentoSingle({ departamento, onBack, onEdit, onDelete }) {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-card border border-border rounded-lg p-6"
+            className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6"
           >
             <h2 className="text-lg font-semibold flex items-center mb-4">
               <Building className="h-5 w-5 mr-2" />
@@ -166,7 +166,7 @@ function DepartamentoSingle({ departamento, onBack, onEdit, onDelete }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-card border border-border rounded-lg p-6"
+            className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6"
           >
             <h2 className="text-lg font-semibold flex items-center mb-4">
               <Users className="h-5 w-5 mr-2" />
@@ -194,7 +194,7 @@ function DepartamentoSingle({ departamento, onBack, onEdit, onDelete }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-card border border-border rounded-lg p-6"
+            className="bg-card border border-gray-200 dark:border-gray-700 rounded-lg p-6"
           >
             <h2 className="text-lg font-semibold flex items-center mb-4">
               <Target className="h-5 w-5 mr-2" />

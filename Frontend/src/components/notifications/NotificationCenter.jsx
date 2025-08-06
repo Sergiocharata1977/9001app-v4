@@ -72,9 +72,9 @@ function NotificationCenter() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-md shadow-lg z-50"
+            className="absolute right-0 mt-2 w-80 bg-card border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50"
           >
-            <div className="p-3 border-b border-border flex justify-between items-center">
+            <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <h3 className="font-medium">Notificaciones</h3>
               <Button
                 variant="ghost"
@@ -95,7 +95,7 @@ function NotificationCenter() {
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-3 border-b border-border ${
+                    className={`p-3 border-b border-gray-200 dark:border-gray-700 ${
                       !notification.read ? "bg-primary/5" : ""
                     }`}
                   >
