@@ -42,7 +42,7 @@ error() {
 }
 
 # Verificar que estamos en el directorio correcto
-if [ ! -f "package.json" ] && [ ! -d "Frontend" ]; then
+if [ ! -f "package.json" ] && [ ! -d "frontend" ]; then
     error "No se detectó un proyecto válido. Ejecuta desde el directorio raíz del proyecto."
 fi
 
@@ -74,7 +74,7 @@ cat > /tmp/server-deploy.sh << 'EOF'
 
 # Variables del servidor
 PROJECT_DIR="/root/9001app2"
-FRONTEND_DIR="$PROJECT_DIR/Frontend"
+FRONTEND_DIR="$PROJECT_DIR/frontend"
 BACKEND_DIR="$PROJECT_DIR/backend"
 LOG_FILE="/root/deploy.log"
 
