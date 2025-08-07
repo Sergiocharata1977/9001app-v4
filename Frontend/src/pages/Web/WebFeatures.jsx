@@ -12,6 +12,7 @@ import {
   Globe,
   Lock
 } from 'lucide-react';
+import WebLayout from '../../components/layout/WebLayout';
 
 const WebFeatures = () => {
   const mainFeatures = [
@@ -102,7 +103,7 @@ const WebFeatures = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
+    <WebLayout>
       {/* Header */}
       <section className="bg-gradient-to-r from-slate-900 to-emerald-900 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -241,7 +242,7 @@ const WebFeatures = () => {
           </motion.div>
         </div>
       </section>
-    </div>
+    </WebLayout>
   );
 };
 

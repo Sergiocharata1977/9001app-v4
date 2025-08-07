@@ -20,6 +20,11 @@ const LoadingFallback = () => (
 const LoginPage = lazy(() => import("../pages/Registroylogeo/LoginPage"));
 const RegisterPage = lazy(() => import("../pages/Registroylogeo/RegisterPage"));
 
+// Páginas Web (Landing)
+const WebHome = lazy(() => import("../pages/Web/WebHome"));
+const WebFeatures = lazy(() => import("../pages/Web/WebFeatures"));
+const WebContact = lazy(() => import("../pages/Web/WebContact"));
+
 // Documentación
 const DocumentacionLayout = lazy(() => import("../pages/Documentacion/DocumentacionLayout"));
 const DocumentacionHome = lazy(() => import("../pages/Documentacion/DocumentacionHome"));
@@ -130,8 +135,13 @@ const AppRoutes = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/encuestas/responder/:id" element={<ResponderEncuesta />} />
 
-        {/* Redirección en la raíz */}
-        <Route path="/" element={isAuthenticated ? <Navigate to="/documentacion" replace /> : <Navigate to="/login" replace />} />
+        {/* Rutas Web (Landing) */}
+        <Route path="/" element={<WebHome />} />
+        <Route path="/caracteristicas" element={<WebFeatures />} />
+        <Route path="/contacto" element={<WebContact />} />
+
+        {/* Redirección para usuarios autenticados */}
+        <Route path="/app" element={isAuthenticated ? <Navigate to="/documentacion" replace /> : <Navigate to="/login" replace />} />
         
         {/* Rutas Protegidas */}
         <Route 

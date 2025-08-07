@@ -13,6 +13,7 @@ import {
   MapPin,
   Play
 } from 'lucide-react';
+import WebLayout from '../../components/layout/WebLayout';
 
 const WebHome = () => {
   const features = [
@@ -56,7 +57,7 @@ const WebHome = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <WebLayout>
       {/* Header Hero */}
       <section className="relative bg-gradient-to-br from-slate-900 to-emerald-900 text-white py-24 md:py-32 overflow-hidden">
         {/* Elementos decorativos discretos */}
@@ -301,7 +302,7 @@ const WebHome = () => {
           </div>
         </div>
       </footer>
-    </div>
+    </WebLayout>
   );
 };
 
