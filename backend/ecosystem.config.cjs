@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'isoflow-backend',
+    name: '9001app2-backend',
     script: 'index.js',
     instances: 1,
     autorestart: true,
