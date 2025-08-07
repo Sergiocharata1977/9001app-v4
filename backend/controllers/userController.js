@@ -1,6 +1,6 @@
-import bcrypt from 'bcryptjs';
-import { tursoClient } from '../lib/tursoClient.js';
-import { randomUUID } from 'crypto';
+const bcrypt = require('bcryptjs');
+const { tursoClient } = require('../lib/tursoClient.js');
+const { randomUUID } = require('crypto');
 
 /**
  * MODO BÁSICO: SIN RESTRICCIONES DE ROLES
@@ -8,7 +8,7 @@ import { randomUUID } from 'crypto';
  */
 
 // Obtener todos los usuarios de la organización del usuario actual
-export const getOrganizationUsers = async (req, res) => {
+const getOrganizationUsers = async (req, res) => {
   try {
     const currentUser = req.user;
     
@@ -60,7 +60,7 @@ export const getOrganizationUsers = async (req, res) => {
 };
 
 // Crear un nuevo usuario en la organización
-export const createOrganizationUser = async (req, res) => {
+const createOrganizationUser = async (req, res) => {
   try {
     const currentUser = req.user;
     const { name, email, password, role } = req.body;
@@ -144,7 +144,7 @@ export const createOrganizationUser = async (req, res) => {
 };
 
 // Actualizar un usuario de la organización
-export const updateOrganizationUser = async (req, res) => {
+const updateOrganizationUser = async (req, res) => {
   try {
     const currentUser = req.user;
     const userId = req.params.id;
@@ -260,7 +260,7 @@ export const updateOrganizationUser = async (req, res) => {
 };
 
 // Eliminar un usuario de la organización
-export const deleteOrganizationUser = async (req, res) => {
+const deleteOrganizationUser = async (req, res) => {
   try {
     const currentUser = req.user;
     const userId = req.params.id;
@@ -325,7 +325,7 @@ export const deleteOrganizationUser = async (req, res) => {
  */
 
 // Obtener todas las organizaciones (solo super-admin)
-export const getAllOrganizations = async (req, res) => {
+const getAllOrganizations = async (req, res) => {
   try {
     const currentUser = req.user;
 
@@ -373,7 +373,7 @@ export const getAllOrganizations = async (req, res) => {
 };
 
 // Crear nueva organización (solo super-admin)
-export const createOrganization = async (req, res) => {
+const createOrganization = async (req, res) => {
   try {
     const currentUser = req.user;
     const { name, plan, max_users, adminName, adminEmail, adminPassword } = req.body;
@@ -479,7 +479,7 @@ export const createOrganization = async (req, res) => {
 };
 
 // Actualizar plan de organización (solo super-admin)
-export const updateOrganizationPlan = async (req, res) => {
+const updateOrganizationPlan = async (req, res) => {
   try {
     const currentUser = req.user;
     const organizationId = req.params.id;
@@ -577,7 +577,7 @@ export const updateOrganizationPlan = async (req, res) => {
   }
 };
 
-export default {
+module.exports = {
   // Nivel 1: Gestión de usuarios por organización
   getOrganizationUsers,
   createOrganizationUser,
