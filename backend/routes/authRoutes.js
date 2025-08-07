@@ -1,7 +1,7 @@
-import express from 'express';
-import { register, login, refreshToken, logout, getProfile } from '../controllers/authController.js';
-import authenticateToken from '../middleware/authMiddleware.js';
-import { auditLogin, auditLogout, auditRegister } from '../middleware/auditMiddleware.js';
+const express = require('express');
+const { register, login, refreshToken, logout, getProfile } = require('../controllers/authController.js');
+const authenticateToken = require('../middleware/authMiddleware.js');
+const { auditLogin, auditLogout, auditRegister } = require('../middleware/auditMiddleware.js');
 
 const router = express.Router();
 
@@ -30,4 +30,4 @@ router.post('/logout', auditLogout, logout);
 // @access  Private
 router.get('/profile', authenticateToken, getProfile);
 
-export default router;
+module.exports = router;

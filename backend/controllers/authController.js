@@ -1,11 +1,11 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { tursoClient as db } from '../lib/tursoClient.js';
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { tursoClient: db } = require('../lib/tursoClient.js');
 
 // @desc    Registrar una nueva organización y su usuario admin
 // @route   POST /api/auth/register
 // @access  Public
-export const register = async (req, res) => {
+const register = async (req, res) => {
   try {
     const { 
       organizationName, 
@@ -120,8 +120,6 @@ export const register = async (req, res) => {
         organization: {
           id: organizationId,
           name: organizationName,
-          email: organizationEmail,
-          phone: organizationPhone,
           plan
         },
         tokens: {
@@ -132,10 +130,10 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error en registro:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error interno del servidor' 
+    console.error('Error en register:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
     });
   }
 };
@@ -143,163 +141,50 @@ export const register = async (req, res) => {
 // @desc    Iniciar sesión
 // @route   POST /api/auth/login
 // @access  Public
-export const login = async (req, res) => {
-  console.log('\n--- 🚀 INICIANDO PROCESO DE LOGIN 🚀 ---');
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(`[1/6] 📥 Datos recibidos: Email=${email}`);
 
+    // Validaciones básicas
     if (!email || !password) {
-      console.log('  [❌ ERROR] Email o contraseña no recibidos.');
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email y contraseña son requeridos' 
+      return res.status(400).json({
+        success: false,
+        message: 'Email y contraseña son requeridos'
       });
     }
 
-    console.log(`[2/6] 🤫 Verificando JWT_SECRET: ${process.env.JWT_SECRET ? '✅ Encontrado' : '❌ NO ENCONTRADO'}`);
-    
-    console.log('[3/6] 🔍 Buscando usuario en la base de datos...');
+    // Buscar usuario
     const userResult = await db.execute({
-      sql: `SELECT * FROM usuarios WHERE email = ?`,
+      sql: `
+        SELECT u.id, u.name, u.email, u.password_hash, u.role, u.organization_id,
+               o.name as organization_name, o.plan as organization_plan
+        FROM usuarios u
+        JOIN organizations o ON u.organization_id = o.id
+        WHERE u.email = ?
+      `,
       args: [email]
     });
 
     if (userResult.rows.length === 0) {
-      console.log('  [❌ ERROR] Usuario no encontrado en la base de datos.');
-      return res.status(401).json({ 
-        success: false, 
-        message: 'El email ingresado no está registrado en el sistema' 
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciales inválidas'
       });
     }
 
     const user = userResult.rows[0];
-    console.log('  [✅ OK] Usuario encontrado:', { id: user.id, email: user.email, role: user.role, org_id: user.organization_id });
-    console.log('  [INFO] Hash almacenado:', user.password_hash);
 
-    console.log('[4/6] 🔐 Comparando contraseñas...');
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    console.log(`  [INFO] Resultado de la comparación: ${isPasswordValid ? '✅ Válida' : '❌ Inválida'}`);
-
-    if (!isPasswordValid) {
-      console.log('  [❌ ERROR] La contraseña no coincide.');
-      return res.status(401).json({ 
-        success: false, 
-        message: 'La contraseña ingresada es incorrecta' 
+    // Verificar contraseña
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciales inválidas'
       });
     }
 
-    console.log('[5/6] ✍️  Generando tokens JWT...');
+    // Generar tokens
     const accessToken = jwt.sign(
-      { 
-        userId: Number(user.id), 
-        organizationId: Number(user.organization_id), 
-        role: user.role 
-      },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '1h' }
-    );
-
-    const refreshToken = jwt.sign(
-      { userId: Number(user.id), organizationId: Number(user.organization_id) },
-      process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret',
-      { expiresIn: '7d' }
-    );
-    console.log('  [✅ OK] Tokens generados.');
-
-    console.log('[6/6] 💾 Guardando refresh token...');
-    await db.execute({
-      sql: 'DELETE FROM refresh_tokens WHERE user_id = ?',
-      args: [user.id]
-    });
-    await db.execute({
-      sql: 'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, datetime("now", "+7 days"))',
-      args: [user.id, refreshToken]
-    });
-    console.log('  [✅ OK] Refresh token guardado.');
-
-    console.log('📤 Enviando respuesta al cliente...');
-    console.log('--- ✅ FIN PROCESO DE LOGIN ✅ ---\n');
-    res.json({
-      success: true,
-      message: 'Login exitoso',
-      data: {
-        user: {
-          id: Number(user.id),
-          name: user.name,
-          email: user.email,
-          role: user.role
-        },
-        organization: {
-          id: Number(user.organization_id)
-        },
-        tokens: {
-          accessToken,
-          refreshToken
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ Error catastrófico en login:', error);
-    console.log('--- ❌ FIN PROCESO DE LOGIN CON ERROR ❌ ---\n');
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error interno del servidor' 
-    });
-  }
-};
-
-// @desc    Renovar access token
-// @route   POST /api/auth/refresh
-// @access  Public
-export const refreshToken = async (req, res) => {
-  try {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Refresh token es requerido' 
-      });
-    }
-
-    // Verificar refresh token
-    const decoded = jwt.verify(
-      refreshToken, 
-      process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret'
-    );
-
-    // Verificar que el token existe en la base de datos
-    const tokenResult = await db.execute({
-      sql: 'SELECT * FROM refresh_tokens WHERE token = ? AND expires_at > datetime("now")',
-      args: [refreshToken]
-    });
-
-    if (tokenResult.rows.length === 0) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Refresh token inválido o expirado' 
-      });
-    }
-
-    // Obtener información del usuario
-    const userResult = await db.execute({
-      sql: 'SELECT * FROM usuarios WHERE id = ?',
-      args: [decoded.userId]
-    });
-
-    if (userResult.rows.length === 0) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Usuario no encontrado' 
-      });
-    }
-
-    const user = userResult.rows[0];
-
-    // Generar nuevo access token
-    const newAccessToken = jwt.sign(
       { 
         userId: user.id, 
         organizationId: user.organization_id, 
@@ -309,19 +194,102 @@ export const refreshToken = async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    const refreshToken = jwt.sign(
+      { userId: user.id, organizationId: user.organization_id },
+      process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret',
+      { expiresIn: '7d' }
+    );
+
+    // Guardar refresh token
+    await db.execute({
+      sql: 'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, datetime("now", "+7 days"))',
+      args: [user.id, refreshToken]
+    });
+
     res.json({
       success: true,
-      message: 'Token renovado exitosamente',
+      message: 'Login exitoso',
       data: {
-        accessToken: newAccessToken
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          organization: {
+            id: user.organization_id,
+            name: user.organization_name,
+            plan: user.organization_plan
+          }
+        },
+        tokens: {
+          accessToken,
+          refreshToken
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en login:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// @desc    Renovar access token
+// @route   POST /api/auth/refresh
+// @access  Public
+const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken: token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token es requerido'
+      });
+    }
+
+    // Verificar token
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret');
+
+    // Verificar que el token existe en la base de datos
+    const tokenResult = await db.execute({
+      sql: 'SELECT * FROM refresh_tokens WHERE token = ? AND expires_at > datetime("now")',
+      args: [token]
+    });
+
+    if (tokenResult.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token inválido o expirado'
+      });
+    }
+
+    // Generar nuevo access token
+    const accessToken = jwt.sign(
+      { 
+        userId: decoded.userId, 
+        organizationId: decoded.organizationId,
+        role: decoded.role 
+      },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '1h' }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        accessToken
       }
     });
 
   } catch (error) {
     console.error('Error en refresh token:', error);
-    res.status(401).json({ 
-      success: false, 
-      message: 'Refresh token inválido' 
+    res.status(401).json({
+      success: false,
+      message: 'Refresh token inválido'
     });
   }
 };
@@ -329,15 +297,15 @@ export const refreshToken = async (req, res) => {
 // @desc    Cerrar sesión
 // @route   POST /api/auth/logout
 // @access  Public
-export const logout = async (req, res) => {
+const logout = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken: token } = req.body;
 
-    if (refreshToken) {
-      // Eliminar refresh token de la base de datos
+    if (token) {
+      // Revocar refresh token
       await db.execute({
         sql: 'DELETE FROM refresh_tokens WHERE token = ?',
-        args: [refreshToken]
+        args: [token]
       });
     }
 
@@ -348,9 +316,9 @@ export const logout = async (req, res) => {
 
   } catch (error) {
     console.error('Error en logout:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error interno del servidor' 
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
     });
   }
 };
@@ -358,24 +326,25 @@ export const logout = async (req, res) => {
 // @desc    Obtener perfil del usuario
 // @route   GET /api/auth/profile
 // @access  Private
-export const getProfile = async (req, res) => {
+const getProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
 
     const userResult = await db.execute({
       sql: `
-        SELECT u.*, o.name as organization_name, o.plan as organization_plan 
-        FROM usuarios u 
-        JOIN organizations o ON u.organization_id = o.id 
+        SELECT u.id, u.name, u.email, u.role, u.organization_id,
+               o.name as organization_name, o.plan as organization_plan
+        FROM usuarios u
+        JOIN organizations o ON u.organization_id = o.id
         WHERE u.id = ?
       `,
       args: [userId]
     });
 
     if (userResult.rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Usuario no encontrado' 
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
       });
     }
 
@@ -389,21 +358,28 @@ export const getProfile = async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
-          created_at: user.created_at
-        },
-        organization: {
-          id: user.organization_id,
-          name: user.organization_name,
-          type: user.organization_type
+          organization: {
+            id: user.organization_id,
+            name: user.organization_name,
+            plan: user.organization_plan
+          }
         }
       }
     });
 
   } catch (error) {
-    console.error('Error al obtener perfil:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error interno del servidor' 
+    console.error('Error en getProfile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
     });
   }
+};
+
+module.exports = {
+  register,
+  login,
+  refreshToken,
+  logout,
+  getProfile
 }; 

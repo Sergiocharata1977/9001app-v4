@@ -168,6 +168,82 @@ cd backend && npm run dev
 ./clean-structure.ps1
 ```
 
+## 🔧 ESTANDARIZACIÓN DE MÓDULOS
+
+### **DECISIÓN: CommonJS en todo el proyecto**
+
+**Razones:**
+- ✅ Más compatible con Node.js
+- ✅ Menos problemas de configuración
+- ✅ Mejor para desarrollo local
+- ✅ Compatible con todas las librerías
+
+### **REGLAS DE ESTANDARIZACIÓN:**
+
+#### **BACKEND - Todo CommonJS:**
+```javascript
+// ✅ CORRECTO - CommonJS
+const express = require('express');
+const { authController } = require('../controllers/authController.js');
+module.exports = router;
+
+// ❌ INCORRECTO - ES Modules
+import express from 'express';
+import { authController } from '../controllers/authController.js';
+export default router;
+```
+
+#### **FRONTEND - ES Modules (React):**
+```javascript
+// ✅ CORRECTO - ES Modules para React
+import React from 'react';
+import { useState } from 'react';
+export default Component;
+
+// ❌ INCORRECTO - CommonJS en React
+const React = require('react');
+module.exports = Component;
+```
+
+### **ARCHIVOS A CONVERTIR:**
+
+#### **Backend - Convertir a CommonJS:**
+- [x] `backend/controllers/authController.js`
+- [x] `backend/middleware/authMiddleware.js`
+- [x] `backend/lib/tursoClient.js`
+- [x] `backend/config/env-setup.js`
+- [ ] `backend/routes/userRoutes.js`
+- [ ] `backend/routes/authRoutes.js`
+- [ ] `backend/controllers/userController.js`
+
+#### **Frontend - Mantener ES Modules:**
+- ✅ `frontend/src/App.jsx`
+- ✅ `frontend/src/main.jsx`
+- ✅ Todos los componentes React
+
+### **COMANDOS DE CONVERSIÓN:**
+
+```bash
+# Convertir import/export a require/module.exports
+# Ejemplo:
+# ANTES: import express from 'express';
+# DESPUÉS: const express = require('express');
+
+# ANTES: export default router;
+# DESPUÉS: module.exports = router;
+```
+
+### **VERIFICACIÓN DE ESTANDARIZACIÓN:**
+
+```bash
+# Verificar que no hay ES modules en backend
+grep -r "import " backend/ --include="*.js"
+grep -r "export " backend/ --include="*.js"
+
+# Verificar que frontend usa ES modules
+grep -r "require(" frontend/src/ --include="*.jsx"
+```
+
 ---
 
 **Última actualización**: $(date)

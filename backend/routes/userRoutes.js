@@ -1,5 +1,5 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
   // Nivel 1: Gestión de usuarios por organización
   getOrganizationUsers,
   createOrganizationUser,
@@ -10,9 +10,9 @@ import {
   getAllOrganizations,
   createOrganization,
   updateOrganizationPlan
-} from '../controllers/userController.js';
-import { getProfile } from '../controllers/authController.js';
-import { auditCreateUser, auditUpdateUser, auditDeleteUser } from '../middleware/auditMiddleware.js';
+} = require('../controllers/userController.js');
+const { getProfile } = require('../controllers/authController.js');
+const { auditCreateUser, auditUpdateUser, auditDeleteUser } = require('../middleware/auditMiddleware.js');
 
 const router = express.Router();
 
@@ -102,6 +102,4 @@ router.put('/organizations/:id/plan',
   updateOrganizationPlan
 );
 
-console.log('✅ Rutas de usuarios básicas configuradas');
-
-export default router;
+module.exports = router;

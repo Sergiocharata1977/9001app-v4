@@ -1,5 +1,5 @@
-import { createClient } from '@libsql/client';
-import { loadEnvConfig } from '../config/env-setup.js';
+const { createClient } = require('@libsql/client');
+const { loadEnvConfig } = require('../config/env-setup.js');
 
 // Cargar configuración de entorno
 loadEnvConfig();
@@ -14,10 +14,12 @@ if (!process.env.DATABASE_URL || !process.env.TURSO_AUTH_TOKEN) {
 }
 
 // Crear el cliente de Turso
-export const tursoClient = createClient({
+const tursoClient = createClient({
   url: process.env.DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN
 });
 
 console.log('🌐 Conectado a Turso:', process.env.DATABASE_URL);
 console.log('🔧 Entorno:', process.env.NODE_ENV || 'development');
+
+module.exports = { tursoClient };

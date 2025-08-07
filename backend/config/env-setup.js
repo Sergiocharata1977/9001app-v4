@@ -1,9 +1,6 @@
-import dotenv from 'dotenv';
-import { existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const dotenv = require('dotenv');
+const { existsSync } = require('fs');
+const { join } = require('path');
 
 // 🔍 Cargar variables de entorno en orden de prioridad
 function loadEnvConfig() {
@@ -37,4 +34,4 @@ function loadEnvConfig() {
 }
 
 // Exportar función para usar en otros archivos
-export { loadEnvConfig };
+module.exports = { loadEnvConfig };

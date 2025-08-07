@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
-import WebRoutes from './routes/WebRoutes.jsx';
+import AppRoutes from './routes/AppRoutes.jsx';
 import { QueryProvider } from './hooks/useQueryClient.jsx';
 import './index.css';
 
@@ -15,12 +15,8 @@ function App() {
           <Router>
             <div className="App">
               <Routes>
-                {/* Solo mostrar la página web de presentación */}
-                <Route path="/" element={<WebRoutes />} />
-                <Route path="/web/*" element={<WebRoutes />} />
-                
-                {/* Redireccionar todo lo demás a la página web */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Usar AppRoutes que incluye login y registro */}
+                <Route path="/*" element={<AppRoutes />} />
               </Routes>
               
               <Toaster

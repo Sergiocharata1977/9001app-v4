@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import { tursoClient } from '../lib/tursoClient.js';
+const jwt = require('jsonwebtoken');
+const { tursoClient } = require('../lib/tursoClient.js');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_jwt_super_secreto';
 
@@ -55,5 +55,4 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-export default authMiddleware;
-export { authMiddleware };
+module.exports = authMiddleware;

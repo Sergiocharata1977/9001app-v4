@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import { tursoClient } from '../lib/tursoClient.js';
-import crypto from 'crypto';
-import ActivityLogService from '../services/activityLogService.js';
+const { Router } = require('express');
+const { tursoClient } = require('../lib/tursoClient.js');
+const crypto = require('crypto');
+const ActivityLogService = require('../services/activityLogService.js');
 
 const router = Router();
 
@@ -292,4 +292,4 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
-export default router;
+module.exports = router;
