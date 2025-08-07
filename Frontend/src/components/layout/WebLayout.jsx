@@ -58,7 +58,7 @@ const WebLayout = ({ children }) => {
               ))}
               
               <Link
-                to="/app/login"
+                to="/login"
                 className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Acceder al Sistema
@@ -108,7 +108,7 @@ const WebLayout = ({ children }) => {
                 ))}
                 
                 <Link
-                  to="/app/login"
+                  to="/login"
                   onClick={() => setIsMenuOpen(false)}
                   className="block bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-xl font-medium text-center mt-4 transition-all duration-300 shadow-lg"
                 >

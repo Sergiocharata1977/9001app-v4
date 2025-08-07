@@ -31,10 +31,16 @@ Refactorización del proyecto `isoflow4-refact` a `9001app2` con arquitectura mo
    - ✅ Solución: `npm install recharts terser`
    - ✅ Resultado: Frontend desplegado en `http://31.97.162.229:3000`
 
+5. **Backend - Crash crítico en servidor:**
+   - ❌ Error: `SyntaxError: Cannot use import statement outside a module` en `userController.js`
+   - ✅ Solución: Conversión completa de `userController.js` a CommonJS
+   - ✅ Resultado: Backend funcionando en servidor y local
+
 #### **✅ RUTAS DE AUTENTICACIÓN VERIFICADAS:**
 
 1. **Backend funcionando:** ✅
-   - Puerto: `http://localhost:5000`
+   - Puerto: `http://localhost:5000` (local)
+   - Puerto: `http://31.97.162.229:5000` (servidor)
    - Health check: `GET /api/health` ✅
    - Login: `POST /api/auth/login` ✅
    - Register: `POST /api/auth/register` ✅
@@ -87,6 +93,11 @@ Refactorización del proyecto `isoflow4-refact` a `9001app2` con arquitectura mo
 - **ES Modules en Frontend:** Para React y Vite
 - **Deferir mejoras:** Centralización de errores, toast(), React Query (causaron problemas en sistema anterior)
 
+### **PROBLEMAS CRÍTICOS RESUELTOS:**
+- **userController.js ES Modules:** Convertido completamente a CommonJS
+- **Backend crash en servidor:** Resuelto con conversión de módulos
+- **Deployment conflictos:** Resueltos con git stash y pull
+
 ### **COMANDOS ÚTILES:**
 ```bash
 # Frontend
@@ -101,4 +112,4 @@ cd backend && npm run dev
 
 ---
 
-*Última actualización: 2025-08-07*
+*Última actualización: 2025-08-07 - Backend funcionando en servidor y local*
