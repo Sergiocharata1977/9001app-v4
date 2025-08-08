@@ -157,6 +157,39 @@ const useAuthStore = create(
           }
         },
 
+        // Función para inicializar la autenticación (verificar token al cargar)
+        initializeAuth: async () => {
+          try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+              set({ isAuthenticated: false, isLoading: false });
+              return false;
+            }
+
+            set({ isLoading: true });
+            const response = await authApi.verifyToken();
+            const { user } = response.data;
+            
+            set({
+              user,
+              token,
+              isAuthenticated: true,
+              isLoading: false
+            });
+            return true;
+          } catch (error) {
+            console.warn('Token inválido, limpiando sesión:', error);
+            set({
+              user: null,
+              token: null,
+              isAuthenticated: false,
+              isLoading: false
+            });
+            localStorage.removeItem('token');
+            return false;
+          }
+        },
+
         // Utilidades
         reset: () => {
           set({
@@ -188,4 +221,4 @@ const useAuthStore = create(
 export default useAuthStore;
 
 // Exportación nombrada para uso específico
-export { useAuthStore }; 
+export { useAuthStore };

@@ -25,6 +25,7 @@ export const useAuth = () => {
   const login = useAuthStore((state) => state.login);
   const register = useAuthStore((state) => state.register);
   const verifyToken = useAuthStore((state) => state.verifyToken);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const updateUser = useAuthStore((state) => state.updateUser);
   const clearError = useAuthStore((state) => state.clearError);
   const isLoading = useAuthStore((state) => state.isLoading);
@@ -41,6 +42,7 @@ export const useAuth = () => {
     login,
     register,
     verifyToken,
+    initializeAuth,
     updateUser,
     clearError,
     isAuthenticated,
