@@ -4,7 +4,7 @@
 
 **Fecha de inicio:** 2025-08-07  
 **Estado actual:** Frontend y Backend funcionando en servidor  
-**Última actualización:** 2025-08-07 20:30:00
+**Última actualización:** 2025-01-27 15:30:00
 
 ---
 
@@ -116,6 +116,22 @@
 1. **Documentación completa** del sistema
 2. **Testing automatizado** de funcionalidades
 3. **Optimización de rendimiento**
+
+---
+
+## 📅 **REGISTRO DIARIO DE ACTIVIDADES**
+
+### **2025-01-27 - 15:30:00**
+**Actividad:** Arreglar errores de autenticación MVP y completar funcionalidad básica
+- ✅ **Frontend local funcionando:** Botón "Acceder al Sistema" redirige correctamente a /login
+- ✅ **Backend:** Agregada ruta GET /api/auth/verify para verificar tokens
+- ✅ **Frontend:** Arreglada función refreshAccessToken en authStore.js
+- ✅ **API:** Corregida función refreshToken en authApi.js para enviar refresh token
+- ✅ **Git:** Commit y push exitoso a GitLab con mensaje "MVP: Arreglar autenticación y botón Acceder al Sistema"
+- 🔄 **Pendiente:** Desplegar cambios al servidor VPS
+- 🔄 **Pendiente:** Verificar que no haya errores 404/401 en el servidor
+
+**Estado:** MVP básico completado localmente, listo para deploy al servidor.
 
 ---
 
