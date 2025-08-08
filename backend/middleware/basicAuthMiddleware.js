@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import { tursoClient } from '../lib/tursoClient.js';
+const jwt = require('jsonwebtoken');
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_jwt_super_secreto';
 
@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_jwt_super_secreto';
  * Middleware básico de autenticación + multi-tenant
  * Solo verifica que el usuario esté logueado y agrega info de organización
  */
-export const basicAuth = async (req, res, next) => {
+const basicAuth = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     
@@ -56,7 +56,7 @@ export const basicAuth = async (req, res, next) => {
  * Middleware para asegurar aislamiento multi-tenant
  * Agrega organization_id a todas las consultas
  */
-export const ensureMultiTenant = (req, res, next) => {
+const ensureMultiTenant = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Usuario no autenticado' });
   }
@@ -78,7 +78,7 @@ export const ensureMultiTenant = (req, res, next) => {
 /**
  * Helper function para agregar filtro de organización a queries
  */
-export const addOrgFilter = (query, args, organizationId) => {
+const addOrgFilter = (query, args, organizationId) => {
   if (!organizationId) return { query, args };
   
   // Si ya tiene WHERE, agregar AND

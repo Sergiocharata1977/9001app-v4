@@ -1,5 +1,5 @@
-import express from 'express';
-import { tursoClient } from '../lib/tursoClient.js';
+const express = require('express');
+const { tursoClient } = require('../lib/tursoClient.js');
 
 const router = express.Router();
 
@@ -268,4 +268,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export default router; 
+module.exports = router; 

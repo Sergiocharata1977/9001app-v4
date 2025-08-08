@@ -1,11 +1,11 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 /**
  * Middleware para validar límites del plan de la organización
  * @param {string} resourceType - Tipo de recurso a validar (usuarios, departamentos, documentos, etc.)
  * @param {number} currentCount - Cantidad actual del recurso
  */
-export const validatePlanLimit = (resourceType, currentCount = null) => {
+const validatePlanLimit = (resourceType, currentCount = null) => {
   return async (req, res, next) => {
     try {
       const { organization_id } = req.user;
@@ -107,7 +107,7 @@ export const validatePlanLimit = (resourceType, currentCount = null) => {
  * Middleware para validar límites antes de crear un nuevo recurso
  * @param {string} resourceType - Tipo de recurso a validar
  */
-export const validateCreateLimit = (resourceType) => {
+const validateCreateLimit = (resourceType) => {
   return validatePlanLimit(resourceType, null);
 };
 
@@ -116,7 +116,7 @@ export const validateCreateLimit = (resourceType) => {
  * @param {string} resourceType - Tipo de recurso a validar
  * @param {Function} countFunction - Función que retorna el conteo actual
  */
-export const validateCustomLimit = (resourceType, countFunction) => {
+const validateCustomLimit = (resourceType, countFunction) => {
   return async (req, res, next) => {
     try {
       const currentCount = await countFunction(req);
@@ -131,7 +131,7 @@ export const validateCustomLimit = (resourceType, countFunction) => {
 /**
  * Función para obtener estadísticas de uso de la organización
  */
-export const getOrganizationUsage = async (organization_id) => {
+const getOrganizationUsage = async (organization_id) => {
   try {
     // Obtener la suscripción activa
     const { rows: subscription } = await tursoClient.execute({

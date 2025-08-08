@@ -1,4 +1,4 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 async function crearTablaPoliticaCalidad() {
   try {
@@ -100,4 +100,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export default crearTablaPoliticaCalidad; 
+module.exports = crearTablaPoliticaCalidad; 

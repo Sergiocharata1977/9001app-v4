@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "vps-connection": {
+      "command": "ssh",
+      "args": ["usuario@tu-servidor-vps.com"],
+      "env": {
+        "SSH_KEY_PATH": "c:\\Users\\Usuario\\.ssh\\9001app2"
+      }
+    },
+    "gitlab-connection": {
+      "command": "git",
+      "args": ["remote", "add", "origin", "git@gitlab.com:tu-usuario/tu-repositorio.git"],
+      "env": {
+        "GIT_SSH_COMMAND": "ssh -i c:\\Users\\Usuario\\.ssh\\9001app2"
+      }
+    }
+  },
+  "workspaceFolders": [
+    {
+      "name": "VPS Workspace",
+      "path": "/home/usuario/proyectos",
+      "remote": "vps-connection"
+    },
+    {
+      "name": "Local Workspace", 
+      "path": "C:\\Users\\Usuario\\Documents\\Proyectos\\ISO -conjunto\\9001app2"
+    }
+  ]
+}
+

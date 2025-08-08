@@ -1,5 +1,5 @@
 // Tests de integración para verificar que todas las rutas API funcionan correctamente
-import axios from 'axios';
+const axios = require('axios');
 
 // URL base para las pruebas
 const API_URL = 'http://localhost:3002';

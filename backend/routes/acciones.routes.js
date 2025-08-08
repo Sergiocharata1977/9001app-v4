@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import { randomUUID } from 'crypto';
-import { tursoClient } from '../lib/tursoClient.js';
+const { Router  } = require('express');
+const { randomUUID  } = require('crypto');
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 // Helper function to convert BigInt to string in objects
 function convertBigIntToString(obj) {
@@ -188,4 +188,4 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-export default router;
+module.exports = router;

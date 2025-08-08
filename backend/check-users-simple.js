@@ -1,4 +1,4 @@
-import { tursoClient } from './lib/tursoClient.js';
+const { tursoClient  } = require('./lib/tursoClient.js');
 
 async function checkUsers() {
   try {

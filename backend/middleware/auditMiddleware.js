@@ -1,8 +1,8 @@
-import { tursoClient } from '../lib/tursoClient.js';
-import { randomUUID } from 'crypto';
+const { tursoClient } = require('../lib/tursoClient.js');
+const { randomUUID } = require('crypto');
 
 // Función para registrar una acción en los logs de auditoría
-export const logAuditAction = async (userId, organizationId, action, resourceType, resourceId = null, details = null, req = null) => {
+const logAuditAction = async (userId, organizationId, action, resourceType, resourceId = null, details = null, req = null) => {
   try {
     // Validar que los parámetros requeridos estén presentes
     if (!userId || !organizationId) {
@@ -32,7 +32,7 @@ export const logAuditAction = async (userId, organizationId, action, resourceTyp
 };
 
 // Middleware para registrar automáticamente las acciones de auditoría
-export const auditMiddleware = (action, resourceType) => {
+const auditMiddleware = (action, resourceType) => {
   return async (req, res, next) => {
     // Almacenar la información original del response
     const originalSend = res.send;
@@ -102,7 +102,7 @@ export const auditMiddleware = (action, resourceType) => {
 };
 
 // Funciones específicas para diferentes tipos de acciones
-export const auditActions = {
+const auditActions = {
   // Acciones de autenticación
   LOGIN: 'LOGIN',
   LOGOUT: 'LOGOUT',
@@ -133,7 +133,7 @@ export const auditActions = {
 };
 
 // Tipos de recursos
-export const resourceTypes = {
+const resourceTypes = {
   USER: 'USER',
   ORGANIZATION: 'ORGANIZATION',
   DOCUMENT: 'DOCUMENT',
@@ -145,25 +145,25 @@ export const resourceTypes = {
 };
 
 // Middleware específicos para diferentes operaciones
-export const auditLogin = auditMiddleware(auditActions.LOGIN, resourceTypes.USER);
-export const auditLogout = auditMiddleware(auditActions.LOGOUT, resourceTypes.USER);
-export const auditRegister = auditMiddleware(auditActions.REGISTER, resourceTypes.USER);
+const auditLogin = auditMiddleware(auditActions.LOGIN, resourceTypes.USER);
+const auditLogout = auditMiddleware(auditActions.LOGOUT, resourceTypes.USER);
+const auditRegister = auditMiddleware(auditActions.REGISTER, resourceTypes.USER);
 
-export const auditCreateUser = auditMiddleware(auditActions.CREATE_USER, resourceTypes.USER);
-export const auditUpdateUser = auditMiddleware(auditActions.UPDATE_USER, resourceTypes.USER);
-export const auditDeleteUser = auditMiddleware(auditActions.DELETE_USER, resourceTypes.USER);
+const auditCreateUser = auditMiddleware(auditActions.CREATE_USER, resourceTypes.USER);
+const auditUpdateUser = auditMiddleware(auditActions.UPDATE_USER, resourceTypes.USER);
+const auditDeleteUser = auditMiddleware(auditActions.DELETE_USER, resourceTypes.USER);
 
-export const auditCreateDocument = auditMiddleware(auditActions.CREATE, resourceTypes.DOCUMENT);
-export const auditUpdateDocument = auditMiddleware(auditActions.UPDATE, resourceTypes.DOCUMENT);
-export const auditDeleteDocument = auditMiddleware(auditActions.DELETE, resourceTypes.DOCUMENT);
-export const auditDownloadDocument = auditMiddleware(auditActions.DOWNLOAD_FILE, resourceTypes.DOCUMENT);
+const auditCreateDocument = auditMiddleware(auditActions.CREATE, resourceTypes.DOCUMENT);
+const auditUpdateDocument = auditMiddleware(auditActions.UPDATE, resourceTypes.DOCUMENT);
+const auditDeleteDocument = auditMiddleware(auditActions.DELETE, resourceTypes.DOCUMENT);
+const auditDownloadDocument = auditMiddleware(auditActions.DOWNLOAD_FILE, resourceTypes.DOCUMENT);
 
-export const auditCreateHallazgo = auditMiddleware(auditActions.CREATE, resourceTypes.HALLAZGO);
-export const auditUpdateHallazgo = auditMiddleware(auditActions.UPDATE, resourceTypes.HALLAZGO);
-export const auditDeleteHallazgo = auditMiddleware(auditActions.DELETE, resourceTypes.HALLAZGO);
+const auditCreateHallazgo = auditMiddleware(auditActions.CREATE, resourceTypes.HALLAZGO);
+const auditUpdateHallazgo = auditMiddleware(auditActions.UPDATE, resourceTypes.HALLAZGO);
+const auditDeleteHallazgo = auditMiddleware(auditActions.DELETE, resourceTypes.HALLAZGO);
 
 // Función para obtener logs de auditoría de una organización
-export const getAuditLogs = async (organizationId, limit = 100, offset = 0, filters = {}) => {
+const getAuditLogs = async (organizationId, limit = 100, offset = 0, filters = {}) => {
   try {
     let sql = `
       SELECT al.*, u.name as user_name, u.email as user_email 
@@ -209,4 +209,25 @@ export const getAuditLogs = async (organizationId, limit = 100, offset = 0, filt
     console.error('Error al obtener logs de auditoría:', error);
     throw error;
   }
+};
+
+module.exports = {
+  logAuditAction,
+  auditMiddleware,
+  auditActions,
+  resourceTypes,
+  auditLogin,
+  auditLogout,
+  auditRegister,
+  auditCreateUser,
+  auditUpdateUser,
+  auditDeleteUser,
+  auditCreateDocument,
+  auditUpdateDocument,
+  auditDeleteDocument,
+  auditDownloadDocument,
+  auditCreateHallazgo,
+  auditUpdateHallazgo,
+  auditDeleteHallazgo,
+  getAuditLogs
 }; 

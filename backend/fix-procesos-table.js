@@ -1,4 +1,4 @@
-import { tursoClient } from './lib/tursoClient.js';
+const { tursoClient  } = require('./lib/tursoClient.js');
 
 async function fixProcesosTable() {
   try {
@@ -91,4 +91,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   fixProcesosTable();
 }
 
-export { fixProcesosTable };
+module.exports = { fixProcesosTable  };

@@ -6,17 +6,17 @@
  * Uso: node backend/scripts/crear-tablas-planificacion-estrategica.js
  */
 
-import { createClient } from '@libsql/client';
-import dotenv from 'dotenv';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+const { createClient  } = require('@libsql/client');
+const dotenv = require('dotenv');
+const { readFileSync  } = require('fs');
+const { fileURLToPath  } = require('url');
+const { dirname, join  } = require('path');
 
 // Cargar variables de entorno
 dotenv.config();
 
 // Configurar rutas
-const __filename = fileURLToPath(import.meta.url);
+
 const __dirname = dirname(__filename);
 
 const client = createClient({

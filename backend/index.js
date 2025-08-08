@@ -16,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/authRoutes.js');
 const userRoutes = require('./routes/userRoutes.js');
 const departamentosRoutes = require('./routes/departamentos.routes.js');
+const personalRoutes = require('./routes/personal.routes.js');
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -26,6 +27,9 @@ app.use('/api/usuarios', userRoutes);
 // Rutas de departamentos
 app.use('/api/departamentos', departamentosRoutes);
 
+// Rutas de personal
+app.use('/api/personal', personalRoutes);
+
 // Ruta de prueba
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend funcionando correctamente!' });
@@ -34,7 +38,7 @@ app.get('/api/test', (req, res) => {
 // Ruta de salud
 app.get('/api/health', (req, res) => {
   res.json({ 
-    status: 'OK', 
+    status: 'ok', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });

@@ -1,10 +1,10 @@
-import { createClient } from "@libsql/client";
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const { createClient  } = require('@libsql/client');
+const dotenv = require('dotenv');
+const path = require('path');
+const { fileURLToPath  } = require('url');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
+
 
 // Cargar variables de entorno desde .env en el directorio actual (backend)
 dotenv.config({ path: path.resolve(__dirname, '.env') });

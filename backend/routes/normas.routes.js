@@ -1,6 +1,6 @@
-import express from 'express';
-import { tursoClient } from '../lib/tursoClient.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+const express = require('express');
+const { tursoClient  } = require('../lib/tursoClient.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
@@ -223,4 +223,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

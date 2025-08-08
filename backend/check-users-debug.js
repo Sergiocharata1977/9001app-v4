@@ -1,4 +1,4 @@
-import { db } from './lib/tursoClient.js';
+const { db  } = require('./lib/tursoClient.js');
 
 const checkUsers = async () => {
   try {

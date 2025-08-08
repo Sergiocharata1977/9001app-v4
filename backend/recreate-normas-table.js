@@ -1,6 +1,6 @@
 // Script para recrear la tabla de normas con estructura simplificada
-import { tursoClient } from './lib/tursoClient.js';
-import crypto from 'crypto';
+const { tursoClient  } = require('./lib/tursoClient.js');
+const crypto = require('crypto');
 
 async function recreateNormasTable() {
   try {

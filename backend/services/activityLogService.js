@@ -1,5 +1,5 @@
-import { tursoClient } from '../lib/tursoClient.js';
-import crypto from 'crypto';
+const { tursoClient } = require('../lib/tursoClient.js');
+const crypto = require('crypto');
 
 /**
  * Servicio para registrar actividades del sistema en la bitácora unificada
@@ -215,4 +215,4 @@ class ActivityLogService {
   }
 }
 
-export default ActivityLogService; 
+module.exports = ActivityLogService; 

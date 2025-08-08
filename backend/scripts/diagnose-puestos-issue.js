@@ -1,4 +1,4 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 const diagnosePuestos = async () => {
   console.log('🔍 Diagnóstico de la tabla puestos...\n');

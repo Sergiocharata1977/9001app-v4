@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login, refreshToken, logout, getProfile } = require('../controllers/authController.js');
+const { register, login, refreshToken, logout, getProfile, verifyToken } = require('../controllers/authController.js');
 const authenticateToken = require('../middleware/authMiddleware.js');
 const { auditLogin, auditLogout, auditRegister } = require('../middleware/auditMiddleware.js');
 
@@ -29,5 +29,10 @@ router.post('/logout', auditLogout, logout);
 // @desc    Obtener perfil del usuario autenticado
 // @access  Private
 router.get('/profile', authenticateToken, getProfile);
+
+// @route   GET api/auth/verify
+// @desc    Verificar si el token es válido
+// @access  Private
+router.get('/verify', authenticateToken, verifyToken);
 
 module.exports = router;

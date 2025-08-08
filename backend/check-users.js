@@ -1,5 +1,5 @@
-import { tursoClient } from './lib/tursoClient.js';
-import bcrypt from 'bcrypt';
+const { tursoClient  } = require('./lib/tursoClient.js');
+const bcrypt = require('bcrypt');
 
 async function checkAndCreateUsers() {
   try {

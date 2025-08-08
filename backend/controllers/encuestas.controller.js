@@ -1,7 +1,7 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 // GET /api/encuestas - Listar todas las encuestas
-export const getEncuestas = async (req, res) => {
+const getEncuestas = async (req, res) => {
   try {
     const result = await tursoClient.execute(`
       SELECT * FROM encuestas
@@ -15,7 +15,7 @@ export const getEncuestas = async (req, res) => {
 };
 
 // POST /api/encuestas - Crear una nueva encuesta
-export const createEncuesta = async (req, res) => {
+const createEncuesta = async (req, res) => {
   const { titulo, descripcion, preguntas, estado, creador } = req.body;
 
   if (!titulo) {
@@ -52,7 +52,7 @@ export const createEncuesta = async (req, res) => {
 };
 
 // GET /api/encuestas/:id - Obtener una encuesta por ID
-export const getEncuesta = async (req, res) => {
+const getEncuesta = async (req, res) => {
   const { id } = req.params;
   try {
     const result = await tursoClient.execute({
@@ -71,7 +71,7 @@ export const getEncuesta = async (req, res) => {
 };
 
 // PUT /api/encuestas/:id - Actualizar una encuesta
-export const updateEncuesta = async (req, res) => {
+const updateEncuesta = async (req, res) => {
   const { id } = req.params;
   const { titulo, descripcion, preguntas, estado } = req.body;
 
@@ -110,7 +110,7 @@ export const updateEncuesta = async (req, res) => {
 };
 
 // DELETE /api/encuestas/:id - Eliminar una encuesta
-export const deleteEncuesta = async (req, res) => {
+const deleteEncuesta = async (req, res) => {
   const { id } = req.params;
   try {
     const result = await tursoClient.execute({
@@ -129,7 +129,7 @@ export const deleteEncuesta = async (req, res) => {
 };
 
 // POST /api/encuestas/:id/respuestas - Añadir respuestas a una encuesta
-export const addRespuesta = async (req, res) => {
+const addRespuesta = async (req, res) => {
   const { id } = req.params;
   const { respuestas, respondente_id } = req.body;
 

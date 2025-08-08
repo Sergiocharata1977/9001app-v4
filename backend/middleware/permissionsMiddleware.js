@@ -1,10 +1,10 @@
-import jwt from 'jsonwebtoken';
-import { tursoClient } from '../lib/tursoClient.js';
+const jwt = require('jsonwebtoken');
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_jwt_super_secreto';
 
 // Middleware de autenticación básica
-export const authenticate = async (req, res, next) => {
+const authenticate = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     
@@ -51,7 +51,7 @@ export const authenticate = async (req, res, next) => {
  * Middleware simplificado para verificar que el usuario está autenticado
  * Por ahora no hay restricciones de plan o rol
  */
-export const checkPermissions = (requiredFeature = null, requiredAction = 'read') => {
+const checkPermissions = (requiredFeature = null, requiredAction = 'read') => {
   return async (req, res, next) => {
     try {
       const user = req.user;
@@ -98,7 +98,7 @@ export const checkPermissions = (requiredFeature = null, requiredAction = 'read'
  * Middleware simplificado para verificar límites de usuarios
  * Por ahora no hay límites activos
  */
-export const checkUserLimits = async (req, res, next) => {
+const checkUserLimits = async (req, res, next) => {
   try {
     const user = req.user;
     
@@ -128,7 +128,7 @@ export const checkUserLimits = async (req, res, next) => {
  * Middleware simplificado para auto-detectar permisos
  * Por ahora solo verifica autenticación
  */
-export const autoCheckPermissions = (req, res, next) => {
+const autoCheckPermissions = (req, res, next) => {
   // Por ahora solo verificamos que el usuario esté autenticado
   if (!req.user) {
     return res.status(401).json({ message: 'Usuario no autenticado' });

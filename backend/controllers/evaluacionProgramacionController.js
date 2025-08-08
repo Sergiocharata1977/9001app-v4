@@ -1,7 +1,7 @@
-import { tursoClient as turso } from '../lib/tursoClient.js';
+const { tursoClient as turso  } = require('../lib/tursoClient.js');
 
 // Obtener todas las programaciones de evaluación de una organización
-export const getProgramaciones = async (req, res) => {
+const getProgramaciones = async (req, res) => {
   const { organization_id } = req.user;
 
   try {
@@ -29,7 +29,7 @@ export const getProgramaciones = async (req, res) => {
 };
 
 // Crear una nueva programación de evaluación
-export const createProgramacion = async (req, res) => {
+const createProgramacion = async (req, res) => {
   const { organization_id, id: user_id } = req.user;
   const { titulo, nombre, descripcion, fecha_inicio, fecha_fin, estado } = req.body;
 
@@ -66,7 +66,7 @@ export const createProgramacion = async (req, res) => {
 };
 
 // Obtener una programación específica por ID
-export const getProgramacionById = async (req, res) => {
+const getProgramacionById = async (req, res) => {
   const { organization_id } = req.user;
   const { id } = req.params;
 
@@ -88,7 +88,7 @@ export const getProgramacionById = async (req, res) => {
 };
 
 // Actualizar una programación existente
-export const updateProgramacion = async (req, res) => {
+const updateProgramacion = async (req, res) => {
   const { organization_id } = req.user;
   const { id } = req.params;
   const { titulo, nombre, descripcion, fecha_inicio, fecha_fin, estado } = req.body;
@@ -127,7 +127,7 @@ export const updateProgramacion = async (req, res) => {
 };
 
 // Eliminar una programación
-export const deleteProgramacion = async (req, res) => {
+const deleteProgramacion = async (req, res) => {
   const { organization_id } = req.user;
   const { id } = req.params;
 

@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import ActivityLogService from '../services/activityLogService.js';
+const { Router  } = require('express');
+const ActivityLogService = require('../services/activityLogService.js');
 
 const router = Router();
 
@@ -144,4 +144,4 @@ router.get('/timeline', async (req, res, next) => {
   }
 });
 
-export default router; 
+module.exports = router; 

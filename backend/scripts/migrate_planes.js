@@ -1,6 +1,6 @@
-import { tursoClient } from '../lib/tursoClient.js';
-import fs from 'fs';
-import path from 'path';
+const { tursoClient  } = require('../lib/tursoClient.js');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Script de migración para crear las tablas del sistema de planes
@@ -76,4 +76,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   migratePlanes();
 }
 
-export default migratePlanes; 
+module.exports = migratePlanes; 

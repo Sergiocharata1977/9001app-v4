@@ -1,10 +1,10 @@
-import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
-import cors from 'cors';
-import { validationResult } from 'express-validator';
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const cors = require('cors');
+const { validationResult  } = require('express-validator');
 
 // 🛡️ RATE LIMITING
-export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
+const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
   return rateLimit({
     windowMs,
     max,
@@ -18,7 +18,7 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
 };
 
 // 🔒 CORS CONFIGURATION
-export const corsOptions = {
+const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
       'http://localhost:3000',
@@ -36,7 +36,7 @@ export const corsOptions = {
 };
 
 // 🚨 SECURITY HEADERS
-export const securityHeaders = helmet({
+const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
@@ -60,7 +60,7 @@ export const securityHeaders = helmet({
 });
 
 // 🔍 INPUT VALIDATION
-export const validateInput = (req, res, next) => {
+const validateInput = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -72,7 +72,7 @@ export const validateInput = (req, res, next) => {
 };
 
 // 🛡️ SQL INJECTION PROTECTION
-export const sanitizeInput = (req, res, next) => {
+const sanitizeInput = (req, res, next) => {
   const sanitize = (obj) => {
     for (let key in obj) {
       if (typeof obj[key] === 'string') {
@@ -95,7 +95,7 @@ export const sanitizeInput = (req, res, next) => {
 };
 
 // 🔐 CSRF PROTECTION
-export const csrfProtection = (req, res, next) => {
+const csrfProtection = (req, res, next) => {
   if (req.method === 'GET') {
     return next();
   }
@@ -113,7 +113,7 @@ export const csrfProtection = (req, res, next) => {
 };
 
 // 📊 REQUEST LOGGING
-export const requestLogger = (req, res, next) => {
+const requestLogger = (req, res, next) => {
   const start = Date.now();
   
   res.on('finish', () => {
@@ -125,7 +125,7 @@ export const requestLogger = (req, res, next) => {
 };
 
 // 🚨 ERROR HANDLER
-export const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
   if (err.name === 'ValidationError') {
@@ -147,7 +147,7 @@ export const errorHandler = (err, req, res, next) => {
 };
 
 // 🔍 REQUEST SIZE LIMITER
-export const requestSizeLimiter = (req, res, next) => {
+const requestSizeLimiter = (req, res, next) => {
   const maxSize = 10 * 1024 * 1024; // 10MB
   
   if (req.headers['content-length'] && parseInt(req.headers['content-length']) > maxSize) {

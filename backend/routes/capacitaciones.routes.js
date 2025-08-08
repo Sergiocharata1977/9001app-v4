@@ -1,6 +1,6 @@
-import express from 'express';
-import { tursoClient } from '../lib/tursoClient.js';
-import { randomUUID } from 'crypto';
+const express = require('express');
+const { tursoClient  } = require('../lib/tursoClient.js');
+const { randomUUID  } = require('crypto');
 
 const router = express.Router();
 
@@ -375,4 +375,4 @@ router.delete('/:id/evaluaciones/:evalId', async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

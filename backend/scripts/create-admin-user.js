@@ -1,5 +1,5 @@
-import bcrypt from 'bcryptjs';
-import { db } from '../lib/tursoClient.js';
+const bcrypt = require('bcryptjs');
+const { db  } = require('../lib/tursoClient.js');
 
 async function createAdminUser() {
   console.log('🔧 Iniciando creación del usuario admin...');
@@ -98,4 +98,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export { createAdminUser };
+module.exports = { createAdminUser  };

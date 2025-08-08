@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import evaluacionesController from '../controllers/evaluacionesController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+const { Router  } = require('express');
+const evaluacionesController = require('../controllers/evaluacionesController.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = Router();
 
@@ -19,4 +19,4 @@ router.get('/estadisticas', evaluacionesController.getEstadisticasEvaluaciones);
 // GET /api/evaluaciones/:id -> Obtener una evaluación específica
 router.get('/:id', evaluacionesController.getEvaluacionById);
 
-export default router;
+module.exports = router;

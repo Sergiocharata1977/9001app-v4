@@ -10,7 +10,11 @@ import ProtectedRoute, { SuperAdminRoute } from "./ProtectedRoute";
 // --- Componente de Carga ---
 const LoadingFallback = () => (
   <div className="flex h-screen items-center justify-center bg-slate-900">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
+      <p className="text-white text-lg">Cargando componente...</p>
+      <p className="text-gray-400 text-sm mt-2">Si esto tarda más de 10 segundos, hay un problema</p>
+    </div>
   </div>
 );
 
@@ -25,9 +29,9 @@ const WebHome = lazy(() => import("../pages/Web/WebHome"));
 const WebFeatures = lazy(() => import("../pages/Web/WebFeatures"));
 const WebContact = lazy(() => import("../pages/Web/WebContact"));
 
-// Documentación
-const DocumentacionLayout = lazy(() => import("../pages/Documentacion/DocumentacionLayout"));
-const DocumentacionHome = lazy(() => import("../pages/Documentacion/DocumentacionHome"));
+// Documentación - IMPORTACIÓN DIRECTA PARA DEBUG
+import DocumentacionLayout from "../pages/Documentacion/DocumentacionLayout";
+import DocumentacionHome from "../pages/Documentacion/DocumentacionHome";
 const CasosUsoPage = lazy(() => import("../pages/Documentacion/CasosUsoPage"));
 const ManualUsuarioPage = lazy(() => import("../pages/Documentacion/funcional/ManualUsuarioPage"));
 const SoportePage = lazy(() => import("../pages/Documentacion/funcional/SoportePage"));
@@ -141,7 +145,7 @@ const AppRoutes = () => {
         <Route path="/contacto" element={<WebContact />} />
 
         {/* Rutas de la aplicación (con /app prefix) */}
-        <Route path="/app/*" element={isAuthenticated ? <Navigate to="/app/documentacion" replace /> : <Navigate to="/login" replace />} />
+        <Route path="/app/*" element={isAuthenticated ? <Navigate to="/personal" replace /> : <Navigate to="/login" replace />} />
         
         {/* Rutas Protegidas */}
         <Route 

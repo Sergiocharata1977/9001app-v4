@@ -1,4 +1,4 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 async function crearTablaIdentificacionProcesos() {
   try {
@@ -74,4 +74,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export default crearTablaIdentificacionProcesos; 
+module.exports = crearTablaIdentificacionProcesos; 

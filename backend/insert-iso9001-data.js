@@ -1,6 +1,6 @@
 // Script para insertar puntos de norma ISO 9001:2015
-import { tursoClient } from './lib/tursoClient.js';
-import crypto from 'crypto';
+const { tursoClient  } = require('./lib/tursoClient.js');
+const crypto = require('crypto');
 
 async function insertISO9001Data() {
   try {

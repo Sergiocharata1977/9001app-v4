@@ -1,9 +1,8 @@
-import { Router } from 'express';
-import {
-  getDetallesPorProgramacion,
+const { Router  } = require('express');
+const { getDetallesPorProgramacion,
   createDetalle,
-} from '../controllers/evaluacionDetalleController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+ } = require('../controllers/evaluacionDetalleController.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = Router();
 
@@ -33,4 +32,4 @@ router.delete('/:id', (req, res) => {
   res.status(501).json({ message: 'Ruta para eliminar detalle no implementada.' });
 });
 
-export default router;
+module.exports = router;

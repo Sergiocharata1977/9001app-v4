@@ -1,6 +1,5 @@
-import express from 'express';
-import { 
-  getAllOrganizations,
+const express = require('express');
+const { getAllOrganizations,
   getOrganizationById,
   createOrganization,
   updateOrganization,
@@ -14,7 +13,7 @@ import {
   deleteOrganizationUser,
   getOrganizationFeatures,
   updateOrganizationFeatures
-} from '../controllers/adminController.js';
+ } = require('../controllers/adminController.js');
 
 const router = express.Router();
 
@@ -69,4 +68,4 @@ router.delete('/organization/:organizationId/users/:userId', requireAdmin, delet
 router.get('/organization/:organizationId/features', requireAdmin, getOrganizationFeatures);
 router.put('/organization/:organizationId/features', requireAdmin, updateOrganizationFeatures);
 
-export default router; 
+module.exports = router; 

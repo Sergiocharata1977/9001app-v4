@@ -1,6 +1,6 @@
-import express from 'express';
-import { tursoClient } from '../lib/tursoClient.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+const express = require('express');
+const { tursoClient  } = require('../lib/tursoClient.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
@@ -152,4 +152,4 @@ router.get('/procesos/:id/hierarchy', authMiddleware, async (req, res, next) => 
   }
 });
 
-export default router; 
+module.exports = router; 

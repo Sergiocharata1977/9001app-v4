@@ -1,15 +1,15 @@
-import { Router } from 'express';
-import multer from 'multer';
-import path from 'path';
-import { tursoClient } from '../lib/tursoClient.js';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
+const { Router  } = require('express');
+const multer = require('multer');
+const path = require('path');
+const { tursoClient  } = require('../lib/tursoClient.js');
+const { fileURLToPath  } = require('url');
+const fs = require('fs');
 
 const router = Router();
 
 // --- Configuración de Multer para la subida de archivos ---
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
+
 
 // Crear directorio si no existe
 const uploadsDir = path.join(__dirname, '../uploads/documentos');
@@ -226,4 +226,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

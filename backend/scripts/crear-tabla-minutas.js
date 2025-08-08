@@ -1,4 +1,4 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 async function crearTablaMinutas() {
   try {
@@ -105,4 +105,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   crearTablaMinutas();
 }
 
-export default crearTablaMinutas; 
+module.exports = crearTablaMinutas; 

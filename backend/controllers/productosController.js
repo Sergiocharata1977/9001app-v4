@@ -1,9 +1,9 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 // @desc    Obtener todos los productos de la organización
 // @route   GET /api/productos
 // @access  Private
-export const getProductos = async (req, res) => {
+const getProductos = async (req, res) => {
   try {
     const organization_id = req.user?.organization_id;
     console.log(`🔍 Obteniendo productos para organización ${organization_id}...`);
@@ -40,7 +40,7 @@ export const getProductos = async (req, res) => {
 // @desc    Obtener un producto específico
 // @route   GET /api/productos/:id
 // @access  Private
-export const getProducto = async (req, res) => {
+const getProducto = async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;
@@ -81,7 +81,7 @@ export const getProducto = async (req, res) => {
 // @desc    Crear un nuevo producto
 // @route   POST /api/productos
 // @access  Private
-export const createProducto = async (req, res) => {
+const createProducto = async (req, res) => {
   try {
     const organization_id = req.user?.organization_id;
     const {
@@ -156,7 +156,7 @@ export const createProducto = async (req, res) => {
 // @desc    Actualizar un producto
 // @route   PUT /api/productos/:id
 // @access  Private
-export const updateProducto = async (req, res) => {
+const updateProducto = async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;
@@ -234,7 +234,7 @@ export const updateProducto = async (req, res) => {
 // @desc    Eliminar un producto
 // @route   DELETE /api/productos/:id
 // @access  Private
-export const deleteProducto = async (req, res) => {
+const deleteProducto = async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;
@@ -274,7 +274,7 @@ export const deleteProducto = async (req, res) => {
 // @desc    Obtener historial de cambios de un producto
 // @route   GET /api/productos/:id/historial
 // @access  Private
-export const getHistorialProducto = async (req, res) => {
+const getHistorialProducto = async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;

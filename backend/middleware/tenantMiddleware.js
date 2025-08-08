@@ -1,10 +1,10 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 /**
  * Middleware para asegurar que todas las operaciones estén limitadas a la organización del usuario
  * Este middleware debe aplicarse DESPUÉS del middleware de autenticación
  */
-export const ensureTenant = (req, res, next) => {
+const ensureTenant = (req, res, next) => {
   // Verificar que el usuario esté autenticado y tenga organization_id
   if (!req.user || !req.user.organization_id) {
     return res.status(403).json({ 
@@ -23,7 +23,7 @@ export const ensureTenant = (req, res, next) => {
 /**
  * Helper para crear queries seguros con filtro automático por organización
  */
-export const secureQuery = (req) => {
+const secureQuery = (req) => {
   const organizationId = req.organizationId;
   
   return {
@@ -57,7 +57,7 @@ export const secureQuery = (req) => {
 /**
  * Helper para verificar si el usuario tiene permisos para una operación específica
  */
-export const checkPermission = (req, requiredRole) => {
+const checkPermission = (req, requiredRole) => {
   const userRole = req.userRole;
   
   // Jerarquía de roles: super_admin > admin > manager > employee
@@ -77,7 +77,7 @@ export const checkPermission = (req, requiredRole) => {
 /**
  * Middleware para verificar roles específicos
  */
-export const requireRole = (requiredRole) => {
+const requireRole = (requiredRole) => {
   return (req, res, next) => {
     if (!checkPermission(req, requiredRole)) {
       return res.status(403).json({
@@ -94,7 +94,7 @@ export const requireRole = (requiredRole) => {
 /**
  * Helper para logging de operaciones con contexto de organización
  */
-export const logTenantOperation = (req, operation, details = {}) => {
+const logTenantOperation = (req, operation, details = {}) => {
   console.log(`[TENANT-${req.organizationId}] ${operation}`, {
     userId: req.user.id,
     userRole: req.userRole,
@@ -106,7 +106,7 @@ export const logTenantOperation = (req, operation, details = {}) => {
 /**
  * Middleware para verificar que un recurso pertenece a la organización del usuario
  */
-export const verifyResourceOwnership = (tableName, resourceIdParam = 'id') => {
+const verifyResourceOwnership = (tableName, resourceIdParam = 'id') => {
   return async (req, res, next) => {
     try {
       const resourceId = req.params[resourceIdParam];

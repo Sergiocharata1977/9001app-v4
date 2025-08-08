@@ -1,5 +1,5 @@
-import { tursoClient } from './lib/tursoClient.js';
-import crypto from 'crypto';
+const { tursoClient  } = require('./lib/tursoClient.js');
+const crypto = require('crypto');
 
 async function testDb() {
   try {

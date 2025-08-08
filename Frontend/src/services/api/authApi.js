@@ -32,7 +32,8 @@ export const authApi = {
 
   /**
    * Renovar token
+   * @param {Object} data - Datos del refresh token
    * @returns {Promise} Respuesta de la API
    */
-  refreshToken: () => apiClient.post('/auth/refresh'),
+  refreshToken: (data) => apiClient.post('/auth/refresh', data),
 }; 

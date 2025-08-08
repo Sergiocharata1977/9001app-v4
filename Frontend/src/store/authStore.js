@@ -130,6 +130,33 @@ const useAuthStore = create(
           return null;
         },
 
+        // Función para refrescar el token de acceso
+        refreshAccessToken: async () => {
+          try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken) {
+              throw new Error('No hay refresh token disponible');
+            }
+
+            const response = await authApi.refreshToken({ refreshToken });
+            const { token: newToken, user } = response.data;
+            
+            set({
+              token: newToken,
+              user,
+              isAuthenticated: true
+            });
+            
+            localStorage.setItem('token', newToken);
+            return newToken;
+          } catch (error) {
+            console.error('Error al refrescar token:', error);
+            // Si falla el refresh, hacer logout
+            get().logout();
+            throw error;
+          }
+        },
+
         // Utilidades
         reset: () => {
           set({

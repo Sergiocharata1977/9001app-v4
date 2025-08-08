@@ -1,11 +1,10 @@
-import express from 'express';
-import {
-  getAllEvents,
+const express = require('express');
+const { getAllEvents,
   createEvent,
   updateEvent,
   deleteEvent,
-} from '../controllers/eventController.js';
-import { protect } from '../middleware/authMiddleware.js';
+ } = require('../controllers/eventController.js');
+const { protect  } = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
@@ -20,4 +19,4 @@ router.route('/:id')
   .put(protect, updateEvent)    // Actualizar un evento por su ID
   .delete(protect, deleteEvent);// Eliminar un evento por su ID
 
-export default router;
+module.exports = router;

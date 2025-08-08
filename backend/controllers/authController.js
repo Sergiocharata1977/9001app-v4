@@ -376,10 +376,32 @@ const getProfile = async (req, res) => {
   }
 };
 
+// @desc    Verificar si el token es válido
+// @route   GET /api/auth/verify
+// @access  Private
+const verifyToken = async (req, res) => {
+  try {
+    // Si llegamos aquí, el middleware de autenticación ya validó el token
+    res.json({ 
+      success: true, 
+      valid: true,
+      user: req.user 
+    });
+  } catch (error) {
+    console.error('Error al verificar token:', error);
+    res.status(401).json({ 
+      success: false, 
+      valid: false,
+      message: 'Token inválido' 
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   refreshToken,
   logout,
-  getProfile
+  getProfile,
+  verifyToken
 }; 

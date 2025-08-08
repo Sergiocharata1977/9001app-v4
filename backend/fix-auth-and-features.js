@@ -1,5 +1,5 @@
-import { tursoClient } from './lib/tursoClient.js';
-import bcrypt from 'bcryptjs';
+const { tursoClient  } = require('./lib/tursoClient.js');
+const bcrypt = require('bcryptjs');
 
 /**
  * Script para corregir problemas de autenticación y configurar features
@@ -203,4 +203,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export default fixAuthAndFeatures; 
+module.exports = fixAuthAndFeatures; 

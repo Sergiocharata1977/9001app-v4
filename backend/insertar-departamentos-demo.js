@@ -1,5 +1,5 @@
-import { tursoClient } from './lib/tursoClient.js';
-import { randomUUID } from 'crypto';
+const { tursoClient  } = require('./lib/tursoClient.js');
+const { randomUUID  } = require('crypto');
 
 async function insertarDepartamentosDemo() {
   const organizationId = 21; // Cambia este valor si tu organización es otra

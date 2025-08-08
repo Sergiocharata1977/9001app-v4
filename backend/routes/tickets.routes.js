@@ -1,7 +1,7 @@
-import express from 'express';
-import { tursoClient } from '../lib/tursoClient.js';
-import authMiddleware from '../middleware/authMiddleware.js';
-import { ensureTenant, secureQuery, logTenantOperation, checkPermission } from '../middleware/tenantMiddleware.js';
+const express = require('express');
+const { tursoClient } = require('../lib/tursoClient.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
+const { ensureTenant, secureQuery, logTenantOperation, checkPermission } = require('../middleware/tenantMiddleware.js');
 
 const router = express.Router();
 
@@ -183,4 +183,4 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
-export default router;
+module.exports = router;

@@ -1,6 +1,6 @@
-import { createClient } from '@libsql/client';
-import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
+const { createClient  } = require('@libsql/client');
+const bcrypt = require('bcrypt');
+const dotenv = require('dotenv');
 dotenv.config();
 
 const db = createClient({

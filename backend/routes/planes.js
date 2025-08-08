@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 const router = express.Router();
 
 // GET - Obtener todos los planes
@@ -31,4 +31,4 @@ router.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Planes service running' });
 });
 
-export default router; 
+module.exports = router; 

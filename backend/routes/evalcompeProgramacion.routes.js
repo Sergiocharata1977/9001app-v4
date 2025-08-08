@@ -1,12 +1,11 @@
-import { Router } from 'express';
-import {
-  getProgramaciones,
+const { Router  } = require('express');
+const { getProgramaciones,
   createProgramacion,
   getProgramacionById,
   updateProgramacion,
   deleteProgramacion,
-} from '../controllers/evaluacionProgramacionController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+ } = require('../controllers/evaluacionProgramacionController.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = Router();
 
@@ -35,4 +34,4 @@ router.delete('/:id', (req, res) => {
   res.status(501).json({ message: 'Ruta para eliminar no implementada.' });
 });
 
-export default router;
+module.exports = router;

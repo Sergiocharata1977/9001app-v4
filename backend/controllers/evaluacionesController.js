@@ -1,7 +1,7 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 // Obtener todas las evaluaciones individuales de la organización
-export const getEvaluaciones = async (req, res) => {
+const getEvaluaciones = async (req, res) => {
   try {
     const organization_id = req.user?.organization_id;
     
@@ -47,7 +47,7 @@ export const getEvaluaciones = async (req, res) => {
 };
 
 // Crear una nueva evaluación individual
-export const createEvaluacion = async (req, res) => {
+const createEvaluacion = async (req, res) => {
   try {
     const { 
       empleado_id, 
@@ -137,7 +137,7 @@ export const createEvaluacion = async (req, res) => {
 };
 
 // Obtener una evaluación específica con sus detalles
-export const getEvaluacionById = async (req, res) => {
+const getEvaluacionById = async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;
@@ -202,7 +202,7 @@ export const getEvaluacionById = async (req, res) => {
 };
 
 // Obtener estadísticas de evaluaciones para dashboard
-export const getEstadisticasEvaluaciones = async (req, res) => {
+const getEstadisticasEvaluaciones = async (req, res) => {
   try {
     const organization_id = req.user?.organization_id;
     

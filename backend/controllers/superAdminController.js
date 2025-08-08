@@ -1,9 +1,9 @@
-import { tursoClient } from '../lib/tursoClient.js';
-import { randomUUID } from 'crypto';
-import bcrypt from 'bcryptjs';
+const { tursoClient  } = require('../lib/tursoClient.js');
+const { randomUUID  } = require('crypto');
+const bcrypt = require('bcryptjs');
 
 // Obtener todas las organizaciones (solo super admin)
-export const getAllOrganizations = async (req, res) => {
+const getAllOrganizations = async (req, res) => {
   try {
     const result = await tursoClient.execute(`
       SELECT 
@@ -26,7 +26,7 @@ export const getAllOrganizations = async (req, res) => {
 };
 
 // Obtener detalles de una organización específica
-export const getOrganizationDetails = async (req, res) => {
+const getOrganizationDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -70,7 +70,7 @@ export const getOrganizationDetails = async (req, res) => {
 };
 
 // Crear una nueva organización con usuario admin
-export const createOrganization = async (req, res) => {
+const createOrganization = async (req, res) => {
   try {
     const { organizationName, adminName, adminEmail, adminPassword } = req.body;
 
@@ -134,7 +134,7 @@ export const createOrganization = async (req, res) => {
 };
 
 // Actualizar una organización
-export const updateOrganization = async (req, res) => {
+const updateOrganization = async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -177,7 +177,7 @@ export const updateOrganization = async (req, res) => {
 };
 
 // Desactivar una organización (soft delete)
-export const deactivateOrganization = async (req, res) => {
+const deactivateOrganization = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -211,7 +211,7 @@ export const deactivateOrganization = async (req, res) => {
 };
 
 // Obtener estadísticas del sistema completo
-export const getSystemStats = async (req, res) => {
+const getSystemStats = async (req, res) => {
   try {
     // Estadísticas generales
     const generalStats = await tursoClient.execute(`
@@ -269,7 +269,7 @@ export const getSystemStats = async (req, res) => {
 };
 
 // Obtener logs de auditoría de todo el sistema
-export const getSystemAuditLogs = async (req, res) => {
+const getSystemAuditLogs = async (req, res) => {
   try {
     const { page = 1, limit = 50, organizationId, action, dateFrom, dateTo } = req.query;
     const offset = (page - 1) * limit;

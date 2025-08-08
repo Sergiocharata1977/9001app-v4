@@ -1,7 +1,7 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 // Listar todas las competencias de la organización del usuario
-export const getCompetencias = async (req, res) => {
+const getCompetencias = async (req, res) => {
   try {
     const organization_id = req.user?.organization_id;
     
@@ -37,7 +37,7 @@ export const getCompetencias = async (req, res) => {
 };
 
 // Crear una competencia
-export const createCompetencia = async (req, res) => {
+const createCompetencia = async (req, res) => {
   try {
     const { nombre, descripcion } = req.body;
     const organization_id = req.user?.organization_id;
@@ -84,7 +84,7 @@ export const createCompetencia = async (req, res) => {
 };
 
 // Actualizar una competencia
-export const updateCompetencia = async (req, res) => {
+const updateCompetencia = async (req, res) => {
   try {
     const { id } = req.params;
     const { nombre, descripcion } = req.body;
@@ -140,7 +140,7 @@ export const updateCompetencia = async (req, res) => {
 };
 
 // Eliminar una competencia
-export const deleteCompetencia = async (req, res) => {
+const deleteCompetencia = async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;

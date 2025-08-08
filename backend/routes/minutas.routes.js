@@ -1,5 +1,5 @@
-import express from 'express';
-import { tursoClient } from '../lib/tursoClient.js';
+const express = require('express');
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 const router = express.Router();
 
@@ -514,4 +514,4 @@ router.post('/:id/duplicate', async (req, res) => {
   }
 });
 
-export default router; 
+module.exports = router; 

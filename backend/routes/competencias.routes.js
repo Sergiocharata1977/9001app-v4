@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import competenciasController from '../controllers/competenciasController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+const { Router  } = require('express');
+const competenciasController = require('../controllers/competenciasController.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = Router();
 
@@ -13,4 +13,4 @@ router.put('/:id', authMiddleware, competenciasController.updateCompetencia);
 // Eliminar una competencia
 router.delete('/:id', authMiddleware, competenciasController.deleteCompetencia);
 
-export default router; 
+module.exports = router; 

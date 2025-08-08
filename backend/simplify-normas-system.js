@@ -1,5 +1,5 @@
 // Script para simplificar completamente el sistema de normas eliminando todas las conexiones/relaciones
-import { tursoClient } from './lib/tursoClient.js';
+const { tursoClient  } = require('./lib/tursoClient.js');
 
 async function simplifyNormasSystem() {
   try {

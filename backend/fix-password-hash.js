@@ -1,5 +1,5 @@
-import bcrypt from 'bcryptjs';
-import { tursoClient } from './lib/tursoClient.js';
+const bcrypt = require('bcryptjs');
+const { tursoClient  } = require('./lib/tursoClient.js');
 
 async function fixPasswordHash() {
   try {

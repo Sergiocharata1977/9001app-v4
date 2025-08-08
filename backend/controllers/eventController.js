@@ -1,4 +1,4 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 // @desc    Obtener todos los eventos de una organización
 // @route   GET /api/events
@@ -115,4 +115,4 @@ const deleteEvent = async (req, res) => {
 };
 
 
-export { getAllEvents, createEvent, updateEvent, deleteEvent };
+module.exports = { getAllEvents, createEvent, updateEvent, deleteEvent  };

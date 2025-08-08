@@ -1,12 +1,11 @@
-import { Router } from 'express';
-import {
-  getEncuestas,
+const { Router  } = require('express');
+const { getEncuestas,
   createEncuesta,
   getEncuesta,
   updateEncuesta,
   deleteEncuesta,
   addRespuesta
-} from '../controllers/encuestas.controller.js';
+ } = require('../controllers/encuestas.controller.js');
 
 const router = Router();
 
@@ -20,4 +19,4 @@ router.delete('/:id', deleteEncuesta);
 // Ruta para Respuestas de una Encuesta
 router.post('/:id/respuestas', addRespuesta);
 
-export default router;
+module.exports = router;

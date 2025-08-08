@@ -201,7 +201,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
         },
         { 
           name: 'Manual del Sistema', 
-          path: '/app/documentacion', 
+          path: '/documentacion', 
           icon: BookOpen,
           show: () => true
         },

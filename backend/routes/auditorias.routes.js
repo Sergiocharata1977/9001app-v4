@@ -1,6 +1,5 @@
-import express from 'express';
-import {
-  getAllAuditorias,
+const express = require('express');
+const { getAllAuditorias,
   getAuditoriaById,
   createAuditoria,
   updateAuditoria,
@@ -13,7 +12,7 @@ import {
   getRelaciones,
   deleteRelacion,
   getRegistrosRelacionables
-} from '../controllers/auditoriasController.js';
+ } = require('../controllers/auditoriasController.js');
 
 const router = express.Router();
 
@@ -42,4 +41,4 @@ router.delete('/relaciones/:relacionId', deleteRelacion);
 // Ruta para obtener registros relacionables
 router.get('/registros-relacionables/:tipo', getRegistrosRelacionables);
 
-export default router; 
+module.exports = router; 

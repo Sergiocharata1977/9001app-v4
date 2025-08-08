@@ -1,5 +1,5 @@
-import { createClient } from '@libsql/client';
-import dotenv from 'dotenv';
+const { createClient  } = require('@libsql/client');
+const dotenv = require('dotenv');
 dotenv.config();
 
 const db = createClient({

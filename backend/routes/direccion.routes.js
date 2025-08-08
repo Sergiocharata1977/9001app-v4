@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import { getConfiguracion, updateConfiguracion } from '../controllers/direccion.controller.js';
+const { Router  } = require('express');
+const { getConfiguracion, updateConfiguracion  } = require('../controllers/direccion.controller.js');
 
 const router = Router();
 
@@ -11,4 +11,4 @@ router.get('/direccion/configuracion', getConfiguracion);
 // El frontend llamará a PUT /api/direccion/configuracion
 router.put('/direccion/configuracion', updateConfiguracion);
 
-export default router;
+module.exports = router;

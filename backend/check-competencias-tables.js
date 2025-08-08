@@ -1,5 +1,5 @@
 // Script para verificar las tablas de competencias
-import { tursoClient } from './lib/tursoClient.js';
+const { tursoClient  } = require('./lib/tursoClient.js');
 
 async function checkCompetenciasTables() {
   console.log('🔍 Verificando tablas de competencias...\n');

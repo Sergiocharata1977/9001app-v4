@@ -1,5 +1,5 @@
-import { db } from './lib/tursoClient.js';
-import bcrypt from 'bcryptjs';
+const { db  } = require('./lib/tursoClient.js');
+const bcrypt = require('bcryptjs');
 
 const createDemoUser = async () => {
   try {

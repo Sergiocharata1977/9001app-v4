@@ -1,7 +1,7 @@
-import { createClient } from '@libsql/client';
-import bcrypt from 'bcryptjs';
-import dotenv from 'dotenv';
-import path from 'path';
+const { createClient  } = require('@libsql/client');
+const bcrypt = require('bcryptjs');
+const dotenv = require('dotenv');
+const path = require('path');
 
 // Cargar variables de entorno
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });

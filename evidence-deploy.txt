@@ -1,0 +1,2 @@
+Already up to date.
+bash: line 1: ./deploy-server.sh: Permission denied

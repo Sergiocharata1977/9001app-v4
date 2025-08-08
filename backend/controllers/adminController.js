@@ -1,10 +1,10 @@
-import { tursoClient } from '../lib/tursoClient.js';
-import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+const { tursoClient  } = require('../lib/tursoClient.js');
+const bcrypt = require('bcrypt');
+const { randomUUID  } = require('crypto');
 
 // ===== SUPER ADMIN FUNCTIONS =====
 
-export const getAllOrganizations = async (req, res) => {
+const getAllOrganizations = async (req, res) => {
   try {
     console.log('🔍 Super Admin: Obteniendo todas las organizaciones...');
     
@@ -37,7 +37,7 @@ export const getAllOrganizations = async (req, res) => {
   }
 };
 
-export const getOrganizationById = async (req, res) => {
+const getOrganizationById = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🔍 Super Admin: Obteniendo organización ${id}...`);
@@ -78,7 +78,7 @@ export const getOrganizationById = async (req, res) => {
   }
 };
 
-export const createOrganization = async (req, res) => {
+const createOrganization = async (req, res) => {
   try {
     const { name, email, phone, plan = 'basic' } = req.body;
     console.log('🔍 Super Admin: Creando nueva organización...');
@@ -129,7 +129,7 @@ export const createOrganization = async (req, res) => {
   }
 };
 
-export const updateOrganization = async (req, res) => {
+const updateOrganization = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, phone, plan, is_active } = req.body;
@@ -168,7 +168,7 @@ export const updateOrganization = async (req, res) => {
   }
 };
 
-export const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     console.log('🔍 Super Admin: Obteniendo todos los usuarios...');
     
@@ -199,7 +199,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const createUser = async (req, res) => {
+const createUser = async (req, res) => {
   try {
     const { name, email, password, role, organization_id } = req.body;
     console.log('🔍 Super Admin: Creando nuevo usuario...');
@@ -254,7 +254,7 @@ export const createUser = async (req, res) => {
   }
 };
 
-export const updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, password, role, organization_id, is_active } = req.body;
@@ -342,7 +342,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
-export const deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🔍 Super Admin: Eliminando usuario ${id}...`);
@@ -390,7 +390,7 @@ export const deleteUser = async (req, res) => {
 
 // ===== ORGANIZATION ADMIN FUNCTIONS =====
 
-export const getOrganizationUsers = async (req, res) => {
+const getOrganizationUsers = async (req, res) => {
   try {
     const { organizationId } = req.params;
     console.log(`🔍 Admin: Obteniendo usuarios de organización ${organizationId}...`);
@@ -424,7 +424,7 @@ export const getOrganizationUsers = async (req, res) => {
   }
 };
 
-export const createOrganizationUser = async (req, res) => {
+const createOrganizationUser = async (req, res) => {
   try {
     const { organizationId } = req.params;
     const { name, email, password, role = 'employee' } = req.body;
@@ -489,7 +489,7 @@ export const createOrganizationUser = async (req, res) => {
   }
 };
 
-export const updateOrganizationUser = async (req, res) => {
+const updateOrganizationUser = async (req, res) => {
   try {
     const { organizationId, userId } = req.params;
     const { name, email, role, is_active } = req.body;
@@ -528,7 +528,7 @@ export const updateOrganizationUser = async (req, res) => {
   }
 };
 
-export const deleteOrganizationUser = async (req, res) => {
+const deleteOrganizationUser = async (req, res) => {
   try {
     const { organizationId, userId } = req.params;
     console.log(`🔍 Admin: Eliminando usuario ${userId} de organización ${organizationId}...`);
@@ -562,7 +562,7 @@ export const deleteOrganizationUser = async (req, res) => {
 
 // ===== FEATURES MANAGEMENT =====
 
-export const getOrganizationFeatures = async (req, res) => {
+const getOrganizationFeatures = async (req, res) => {
   try {
     const { organizationId } = req.params;
     console.log(`🔍 Obteniendo features de organización ${organizationId}...`);
@@ -592,7 +592,7 @@ export const getOrganizationFeatures = async (req, res) => {
   }
 };
 
-export const updateOrganizationFeatures = async (req, res) => {
+const updateOrganizationFeatures = async (req, res) => {
   try {
     const { organizationId } = req.params;
     const { features } = req.body; // Array de { feature_name, is_enabled }

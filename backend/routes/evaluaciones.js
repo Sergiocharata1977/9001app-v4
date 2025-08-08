@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 const router = express.Router();
 
 // GET - Obtener todas las evaluaciones
@@ -31,4 +31,4 @@ router.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Evaluaciones service running' });
 });
 
-export default router; 
+module.exports = router; 

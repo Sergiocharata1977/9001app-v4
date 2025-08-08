@@ -1,7 +1,7 @@
-import { tursoClient } from '../lib/tursoClient.js';
+const { tursoClient  } = require('../lib/tursoClient.js');
 
 // Obtener la configuración actual
-export const getConfiguracion = async (req, res) => {
+const getConfiguracion = async (req, res) => {
   try {
     const organizationId = req.user?.organization_id || 1; // Default a 1 si no hay usuario
     const result = await tursoClient.execute(
@@ -21,7 +21,7 @@ export const getConfiguracion = async (req, res) => {
 };
 
 // Actualizar la configuración
-export const updateConfiguracion = async (req, res) => {
+const updateConfiguracion = async (req, res) => {
   const { 
     politica_calidad, 
     alcance, 

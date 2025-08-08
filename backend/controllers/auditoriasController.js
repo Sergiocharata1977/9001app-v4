@@ -1,12 +1,12 @@
-import { tursoClient } from '../lib/tursoClient.js';
-import { randomUUID } from 'crypto';
+const { tursoClient  } = require('../lib/tursoClient.js');
+const { randomUUID  } = require('crypto');
 
 // ===============================================
 // CONTROLADOR DE AUDITORÍAS - SGC PRO
 // ===============================================
 
 // Obtener todas las auditorías con relaciones
-export const getAllAuditorias = async (req, res) => {
+const getAllAuditorias = async (req, res) => {
   try {
     console.log('🔍 Obteniendo auditorías con relaciones...');
     
@@ -64,7 +64,7 @@ export const getAllAuditorias = async (req, res) => {
 };
 
 // Obtener auditoría por ID con relaciones completas
-export const getAuditoriaById = async (req, res) => {
+const getAuditoriaById = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -155,7 +155,7 @@ export const getAuditoriaById = async (req, res) => {
 };
 
 // Crear nueva auditoría con relaciones
-export const createAuditoria = async (req, res) => {
+const createAuditoria = async (req, res) => {
   try {
     console.log('🆕 Creando nueva auditoría con relaciones...');
     console.log('📋 Datos recibidos:', req.body);
@@ -298,7 +298,7 @@ export const createAuditoria = async (req, res) => {
 };
 
 // Actualizar auditoría
-export const updateAuditoria = async (req, res) => {
+const updateAuditoria = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`✏️ Actualizando auditoría ${id}...`);
@@ -379,7 +379,7 @@ export const updateAuditoria = async (req, res) => {
 };
 
 // Eliminar auditoría
-export const deleteAuditoria = async (req, res) => {
+const deleteAuditoria = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🗑️ Eliminando auditoría ${id}...`);
@@ -418,7 +418,7 @@ export const deleteAuditoria = async (req, res) => {
 // ===============================================
 
 // Obtener aspectos de una auditoría
-export const getAspectos = async (req, res) => {
+const getAspectos = async (req, res) => {
   try {
     const { auditoriaId } = req.params;
     console.log(`🔍 Obteniendo aspectos de auditoría ${auditoriaId}...`);
@@ -453,7 +453,7 @@ export const getAspectos = async (req, res) => {
 };
 
 // Agregar aspecto a auditoría
-export const addAspecto = async (req, res) => {
+const addAspecto = async (req, res) => {
   try {
     const { auditoriaId } = req.params;
     console.log(`➕ Agregando aspecto a auditoría ${auditoriaId}...`);
@@ -520,7 +520,7 @@ export const addAspecto = async (req, res) => {
 };
 
 // Actualizar aspecto
-export const updateAspecto = async (req, res) => {
+const updateAspecto = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`✏️ Actualizando aspecto ${id}...`);
@@ -581,7 +581,7 @@ export const updateAspecto = async (req, res) => {
 };
 
 // Eliminar aspecto
-export const deleteAspecto = async (req, res) => {
+const deleteAspecto = async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🗑️ Eliminando aspecto ${id}...`);
@@ -616,7 +616,7 @@ export const deleteAspecto = async (req, res) => {
 };
 
 // Agregar relación a auditoría
-export const addRelacion = async (req, res) => {
+const addRelacion = async (req, res) => {
   try {
     const { auditoriaId } = req.params;
     console.log(`🔗 Agregando relación a auditoría ${auditoriaId}...`);
@@ -714,7 +714,7 @@ export const addRelacion = async (req, res) => {
 };
 
 // Obtener relaciones de una auditoría
-export const getRelaciones = async (req, res) => {
+const getRelaciones = async (req, res) => {
   try {
     const { auditoriaId } = req.params;
     console.log(`🔗 Obteniendo relaciones de auditoría ${auditoriaId}...`);
@@ -760,7 +760,7 @@ export const getRelaciones = async (req, res) => {
 };
 
 // Eliminar relación de auditoría
-export const deleteRelacion = async (req, res) => {
+const deleteRelacion = async (req, res) => {
   try {
     const { relacionId } = req.params;
     console.log(`🗑️ Eliminando relación ${relacionId}...`);
@@ -798,7 +798,7 @@ export const deleteRelacion = async (req, res) => {
 };
 
 // Obtener registros relacionables disponibles para auditoría
-export const getRegistrosRelacionables = async (req, res) => {
+const getRegistrosRelacionables = async (req, res) => {
   try {
     const { tipo } = req.query;
     console.log(`🔍 Obteniendo registros relacionables de tipo: ${tipo}`);

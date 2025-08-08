@@ -1,7 +1,7 @@
-import { tursoClient as turso } from '../lib/tursoClient.js';
+const { tursoClient as turso  } = require('../lib/tursoClient.js');
 
 // Obtener todos los detalles de una programación de evaluación
-export const getDetallesPorProgramacion = async (req, res) => {
+const getDetallesPorProgramacion = async (req, res) => {
   const { organization_id } = req.user;
   const { programacionId } = req.params;
 
@@ -18,7 +18,7 @@ export const getDetallesPorProgramacion = async (req, res) => {
 };
 
 // Crear un nuevo detalle de evaluación (un puntaje para una competencia)
-export const createDetalle = async (req, res) => {
+const createDetalle = async (req, res) => {
   const { organization_id, id: evaluador_id } = req.user;
   const { programacion_id, evaluado_id, competencia_id, puntaje, observaciones } = req.body;
 

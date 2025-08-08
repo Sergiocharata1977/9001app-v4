@@ -1,5 +1,5 @@
-import { tursoClient } from './lib/tursoClient.js';
-import bcrypt from 'bcryptjs';
+const { tursoClient  } = require('./lib/tursoClient.js');
+const bcrypt = require('bcryptjs');
 
 /**
  * Script para diagnosticar problemas de usuarios y autenticación
@@ -153,4 +153,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export default debugUsers; 
+module.exports = debugUsers; 
