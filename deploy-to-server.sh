@@ -1,8 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 
 # ===============================================
 # SCRIPT DE DESPLIEGUE LOCAL A SERVIDOR
-# ISO FLOW - Refactorización Vite
+# 9001APP2 - Refactorización Vite
 # ===============================================
 
 echo "🚀 Iniciando despliegue desde local a servidor..."
@@ -71,11 +72,14 @@ log "🌐 Conectando al servidor $SERVER_IP..."
 # Crear script temporal para el servidor
 cat > /tmp/server-deploy.sh << 'EOF'
 #!/bin/bash
+set -euo pipefail
 
 # Variables del servidor
 PROJECT_DIR="/root/9001app2"
 FRONTEND_DIR="$PROJECT_DIR/frontend"
 BACKEND_DIR="$PROJECT_DIR/backend"
+STATIC_ROOT="/var/www/9001app2"
+STATIC_DIR="$STATIC_ROOT/dist"
 LOG_FILE="/root/deploy.log"
 
 # Función de logging
@@ -120,16 +124,28 @@ cd $BACKEND_DIR || error "No se pudo acceder al Backend"
 
 npm install --production=false
 
-# Reiniciar servicios
-log "🔄 Reiniciando servicios..."
-pm2 stop all 2>/dev/null
-pm2 delete all 2>/dev/null
+# Reiniciar/recargar backend via PM2
+log "🔄 Reiniciando/recargando backend..."
+if pm2 describe "9001app2-backend" >/dev/null 2>&1; then
+    pm2 reload "9001app2-backend"
+else
+    pm2 start ecosystem.config.cjs --name "9001app2-backend"
+fi
 
-cd $BACKEND_DIR
-pm2 start ecosystem.config.cjs --name "isoflow-backend"
+# Health check backend
+log "🩺 Verificando salud del backend..."
+sleep 2
+curl -fsS http://127.0.0.1:5000/api/health >/dev/null || error "Backend no saludable"
 
-cd $FRONTEND_DIR
-npx serve -s dist -l 3000 --host 0.0.0.0 --name "isoflow-frontend" &
+# Publicar frontend para Nginx
+log "📦 Publicando frontend en ${STATIC_DIR}..."
+mkdir -p "$STATIC_DIR"
+rsync -a --delete "$FRONTEND_DIR/dist/" "$STATIC_DIR/"
+chown -R www-data:www-data "$STATIC_ROOT" 2>/dev/null || true
+
+# Recargar Nginx
+log "🔁 Recargando Nginx..."
+nginx -t && systemctl reload nginx
 
 log "✅ Despliegue completado en servidor"
 EOF
@@ -150,9 +166,9 @@ log "🔍 Verificando despliegue..."
 
 sleep 10
 
-# Verificar que el servidor responde
-if curl -s http://$SERVER_IP:3000 > /dev/null; then
-    success "Frontend funcionando en http://$SERVER_IP:3000"
+# Verificar que el servidor responde por Nginx
+if curl -s http://$SERVER_IP/ > /dev/null; then
+    success "Frontend funcionando en http://$SERVER_IP/"
 else
     warning "Frontend puede tardar en estar disponible"
 fi

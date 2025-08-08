@@ -140,8 +140,8 @@ const AppRoutes = () => {
         <Route path="/caracteristicas" element={<WebFeatures />} />
         <Route path="/contacto" element={<WebContact />} />
 
-        {/* Redirección para usuarios autenticados */}
-        <Route path="/app" element={isAuthenticated ? <Navigate to="/documentacion" replace /> : <Navigate to="/login" replace />} />
+        {/* Rutas de la aplicación (con /app prefix) */}
+        <Route path="/app/*" element={isAuthenticated ? <Navigate to="/app/documentacion" replace /> : <Navigate to="/login" replace />} />
         
         {/* Rutas Protegidas */}
         <Route 

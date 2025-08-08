@@ -1,8 +1,8 @@
-# 🚀 Despliegue Automático ISO Flow
+# 🚀 Despliegue Automático 9001APP2
 
 ## 📋 Descripción
 
-Este sistema permite el despliegue automático de la aplicación ISO Flow desde GitLab al servidor VPS de Hostinger.
+Este sistema permite el despliegue automático de la aplicación 9001APP2 desde GitLab al servidor VPS de Hostinger.
 
 ## 📁 Archivos Incluidos
 
@@ -41,17 +41,13 @@ cd ~/9001app2
 ./deploy-server.sh
 ```
 
-### Opción 2: Despliegue Automático con Cron
-El script `setup-server.sh` configura automáticamente un cron job que:
-- Se ejecuta cada 5 minutos
-- Verifica cambios en GitLab
-- Despliega automáticamente si hay cambios
+### Opción 2: Despliegue Automático con GitLab CI (recomendado)
+1. Agrega `.gitlab-ci.yml` con un job de deploy por SSH
+2. Configura variables seguras: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`
+3. El job ejecutará `deploy-server.sh` en el VPS
 
-### Opción 3: Webhook de GitLab
-1. Crear webhook en GitLab
-2. URL: `http://31.97.162.229/webhook.php`
-3. Trigger: Push events
-4. Branch: master
+### Opción 3: Cron (temporal, no recomendado)
+Si no usas CI aún, puedes mantener un cron que ejecute `deploy-server.sh`, pero no es la opción recomendada.
 
 ## 📊 Monitoreo
 
@@ -68,9 +64,9 @@ tail -f /root/deploy.log
 ```
 
 ### URLs de acceso
-- **Frontend**: `http://31.97.162.229:3000`
-- **Backend**: `http://31.97.162.229:5000`
-- **Nginx**: `http://31.97.162.229` (puerto 80)
+- **Frontend (Nginx)**: `http://31.97.162.229`
+- **Backend directo**: `http://31.97.162.229:5000`
+- **API vía Nginx**: `http://31.97.162.229/api/*`
 
 ## 🔍 Troubleshooting
 
@@ -81,9 +77,9 @@ tail -f /root/deploy.log
 chmod +x deploy-server.sh
 ```
 
-2. **Node.js no encontrado**
+2. **Node.js desactualizado (react-router >=7 requiere Node >=20)**
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
 ```
 
@@ -126,12 +122,9 @@ nano .env
 ```
 
 ### Configurar Nginx
+- Servir estáticos desde `/var/www/9001app2/dist` y proxy `/api` a `http://127.0.0.1:5000`.
 ```bash
-# Editar configuración
-nano /etc/nginx/sites-available/isoflow
-
-# Reiniciar
-systemctl restart nginx
+nginx -t && systemctl reload nginx
 ```
 
 ### Configurar SSL (opcional)
@@ -145,11 +138,9 @@ certbot --nginx -d tu-dominio.com
 
 ## 🎯 Estado del Proyecto
 
-- ✅ **Frontend**: Funcionando en puerto 3000
-- ✅ **Backend**: Configurado con PM2
-- ✅ **Nginx**: Proxy configurado
-- ✅ **Firewall**: Puertos abiertos
-- ✅ **Cron**: Auto-despliegue configurado
+- ✅ **Frontend**: Servido por Nginx (puerto 80)
+- ✅ **Backend**: PM2 gestionando `9001app2-backend`
+- ✅ **Nginx**: Sirve estáticos y proxy `/api`
 - ✅ **Logs**: Sistema de logging activo
 
 ## 📞 Soporte

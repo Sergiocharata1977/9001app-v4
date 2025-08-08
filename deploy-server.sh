@@ -1,7 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # ===============================================
-# SCRIPT DE DESPLIEGUE AUTOMÁTICO ISO FLOW
+# SCRIPT DE DESPLIEGUE AUTOMÁTICO 9001APP2
 # ===============================================
 
 echo "🚀 Iniciando despliegue automático..."
@@ -12,6 +13,8 @@ echo "=============================================="
 PROJECT_DIR="/root/9001app2"
 FRONTEND_DIR="$PROJECT_DIR/frontend"
 BACKEND_DIR="$PROJECT_DIR/backend"
+STATIC_ROOT="/var/www/9001app2"
+STATIC_DIR="$STATIC_ROOT/dist"
 LOG_FILE="/root/deploy.log"
 
 # Función de logging
@@ -87,39 +90,52 @@ fi
 
 log "✅ Backend configurado exitosamente"
 
-# 4. REINICIAR SERVICIOS
-log "🔄 Reiniciando servicios..."
-
-# Detener servicios existentes
-pm2 stop all 2>/dev/null
-pm2 delete all 2>/dev/null
-
-# Iniciar backend
-log "🚀 Iniciando Backend..."
+# 4. REINICIAR/RECARGAR BACKEND CON PM2
+log "🔄 Reiniciando/recargando backend con PM2..."
 cd $BACKEND_DIR
-pm2 start ecosystem.config.cjs --name "isoflow-backend"
+if pm2 describe "9001app2-backend" >/dev/null 2>&1; then
+    pm2 reload "9001app2-backend"
+else
+    pm2 start ecosystem.config.cjs --name "9001app2-backend"
+fi
 
-# Iniciar frontend (servir archivos estáticos)
-log "🌐 Iniciando Frontend..."
-cd $FRONTEND_DIR
-npx serve -s dist -l 3000 --host 0.0.0.0 --name "isoflow-frontend" &
+# 5. HEALTH CHECK BACKEND
+log "🩺 Verificando salud del backend..."
+sleep 2
+if curl -fsS http://127.0.0.1:5000/api/health >/dev/null; then
+    log "✅ Backend OK"
+else
+    error "❌ Backend no responde en /api/health. Abortando publicación de frontend"
+fi
 
-# 5. VERIFICAR ESTADO
-sleep 5
+# 6. PUBLICAR FRONTEND ESTÁTICO PARA NGINX
+log "📦 Publicando frontend en ${STATIC_DIR}..."
+mkdir -p "$STATIC_DIR"
+rsync -a --delete "$FRONTEND_DIR/dist/" "$STATIC_DIR/"
+# Si el servidor usa usuario www-data para Nginx, asegura permisos (ignora errores si no aplica)
+chown -R www-data:www-data "$STATIC_ROOT" 2>/dev/null || true
+
+# 7. RECARGAR NGINX
+log "🔁 Validando y recargando Nginx..."
+if nginx -t; then
+    systemctl reload nginx
+    log "✅ Nginx recargado"
+else
+    error "❌ Configuración de Nginx inválida"
+fi
+
+# 8. VERIFICAR ESTADO FINAL
 log "🔍 Verificando estado de servicios..."
-
-# Verificar backend
-if pm2 list | grep -q "isoflow-backend.*online"; then
+if pm2 list | grep -q "9001app2-backend.*online"; then
     log "✅ Backend funcionando correctamente"
 else
     error "❌ Backend no está funcionando"
 fi
 
-# Verificar frontend
-if curl -s http://localhost:3000 > /dev/null; then
-    log "✅ Frontend funcionando correctamente"
+if curl -fsS http://127.0.0.1/ >/dev/null; then
+    log "✅ Frontend servido por Nginx en puerto 80"
 else
-    log "⚠️ Frontend puede tardar en iniciar"
+    log "⚠️ Frontend podría tardar en estar disponible"
 fi
 
 # 6. LIMPIAR LOGS ANTIGUOS
@@ -128,8 +144,8 @@ find /root -name "*.log" -mtime +7 -delete 2>/dev/null
 # 7. RESUMEN FINAL
 log "🎉 DESPLIEGUE COMPLETADO EXITOSAMENTE"
 log "📊 Resumen:"
-log "   - Frontend: http://31.97.162.229:3000"
-log "   - Backend: Puerto 5000"
+log "   - Frontend: http://31.97.162.229/"
+log "   - Backend: http://31.97.162.229:5000 (proxy /api)"
 log "   - Logs: $LOG_FILE"
 log "=============================================="
 
