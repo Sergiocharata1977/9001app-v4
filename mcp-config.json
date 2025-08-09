@@ -1,30 +1,47 @@
 {
   "mcpServers": {
-    "vps-connection": {
+    "vps-hostinger": {
       "command": "ssh",
-      "args": ["usuario@tu-servidor-vps.com"],
+      "args": ["root@31.97.162.229", "-p", "22"],
       "env": {
-        "SSH_KEY_PATH": "c:\\Users\\Usuario\\.ssh\\9001app2"
+        "SSH_KEY_PATH": "c:\\Users\\Usuario\\.ssh\\id_rsa",
+        "SSH_OPTIONS": "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
       }
     },
-    "gitlab-connection": {
+    "gitlab-9001app2": {
       "command": "git",
-      "args": ["remote", "add", "origin", "git@gitlab.com:tu-usuario/tu-repositorio.git"],
+      "args": ["remote", "set-url", "origin", "https://gitlab.com/late4/9001app2.git"],
       "env": {
-        "GIT_SSH_COMMAND": "ssh -i c:\\Users\\Usuario\\.ssh\\9001app2"
+        "GIT_CONFIG_GLOBAL_USER_NAME": "Usuario",
+        "GIT_CONFIG_GLOBAL_USER_EMAIL": "usuario@domain.com"
       }
     }
   },
   "workspaceFolders": [
     {
-      "name": "VPS Workspace",
-      "path": "/home/usuario/proyectos",
-      "remote": "vps-connection"
+      "name": "VPS Hostinger - 9001app2",
+      "path": "/root/9001app2",
+      "remote": "vps-hostinger"
     },
     {
-      "name": "Local Workspace", 
+      "name": "Local Workspace - 9001app2", 
       "path": "C:\\Users\\Usuario\\Documents\\Proyectos\\ISO -conjunto\\9001app2"
     }
-  ]
+  ],
+  "deploymentConfig": {
+    "server": {
+      "host": "31.97.162.229",
+      "user": "root",
+      "port": 22,
+      "projectPath": "/root/9001app2",
+      "frontendPath": "/root/9001app2/frontend",
+      "backendPath": "/root/9001app2/backend",
+      "staticPath": "/var/www/9001app2"
+    },
+    "gitlab": {
+      "repository": "https://gitlab.com/late4/9001app2.git",
+      "branch": "master"
+    }
+  }
 }
 

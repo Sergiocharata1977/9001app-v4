@@ -8,7 +8,7 @@ export const capacitacionesService = {
   async getAll() {
     console.log('📋 Obteniendo todas las capacitaciones...');
     try {
-      const response = await apiClient.get('/');
+      const response = await apiClient.get('');
       console.log(`✅ ${response.length} capacitaciones obtenidas`);
       return response;
     } catch (error) {
@@ -34,7 +34,7 @@ export const capacitacionesService = {
   async create(capacitacion) {
     console.log('➕ Creando capacitación:', capacitacion);
     try {
-      const response = await apiClient.post('/', capacitacion);
+      const response = await apiClient.post('', capacitacion);
       console.log(`✅ Capacitación creada: ${response.titulo}`);
       return response;
     } catch (error) {

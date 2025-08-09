@@ -106,7 +106,7 @@ const updateCompetencia = async (req, res) => {
     
     // Verificar que la competencia pertenece a la organización
     const existingResult = await tursoClient.execute({
-      sql: 'SELECT id FROM competencias WHERE id = ? AND organizacion_id = ?',
+      sql: 'SELECT id FROM competencias WHERE id = ? AND organization_id = ?',
       args: [id, organization_id]
     });
     
@@ -118,7 +118,7 @@ const updateCompetencia = async (req, res) => {
     }
     
     await tursoClient.execute({
-      sql: 'UPDATE competencias SET nombre = ?, descripcion = ?, updated_at = datetime("now") WHERE id = ? AND organizacion_id = ?',
+      sql: 'UPDATE competencias SET nombre = ?, descripcion = ?, updated_at = datetime("now") WHERE id = ? AND organization_id = ?',
       args: [nombre, descripcion || '', id, organization_id]
     });
     
@@ -154,7 +154,7 @@ const deleteCompetencia = async (req, res) => {
     
     // Verificar que la competencia pertenece a la organización
     const existingResult = await tursoClient.execute({
-      sql: 'SELECT id FROM competencias WHERE id = ? AND organizacion_id = ?',
+      sql: 'SELECT id FROM competencias WHERE id = ? AND organization_id = ?',
       args: [id, organization_id]
     });
     
@@ -166,7 +166,7 @@ const deleteCompetencia = async (req, res) => {
     }
     
     await tursoClient.execute({
-      sql: 'DELETE FROM competencias WHERE id = ? AND organizacion_id = ?',
+      sql: 'DELETE FROM competencias WHERE id = ? AND organization_id = ?',
       args: [id, organization_id]
     });
     
@@ -186,9 +186,9 @@ const deleteCompetencia = async (req, res) => {
   }
 };
 
-export default {
+module.exports = {
   getCompetencias,
   createCompetencia,
   updateCompetencia,
   deleteCompetencia
-}; 
+};

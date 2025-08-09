@@ -13,7 +13,9 @@ export const departamentosService = {
   async getAll() {
     try {
       const response = await apiClient.get('');
-      return response;
+      // createApiClient.get devuelve response.data del apiService.request → que retorna response.data del axios base
+      // En backend para departamentos, devolvemos array de filas directamente
+      return Array.isArray(response) ? response : (response?.data ?? response);
     } catch (error) {
       console.error('Error al obtener departamentos:', error);
       throw new Error(error.response?.data?.message || 'Error al cargar los departamentos');

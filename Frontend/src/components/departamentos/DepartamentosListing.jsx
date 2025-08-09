@@ -33,11 +33,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { departamentosService } from "@/services/departamentos";
+import { useAuth } from "@/context/AuthContext";
 import { useDepartamentos } from "@/hooks/useDepartamentos";
 import { Input } from "@/components/ui/input";
 
 function DepartamentosListing() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDepartamento, setSelectedDepartamento] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -418,6 +420,7 @@ function DepartamentosListing() {
         departamento={selectedDepartamento}
         onSave={handleSave}
         departamentos={departamentos}
+        organizacionId={user?.organization_id}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

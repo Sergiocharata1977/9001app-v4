@@ -1,6 +1,6 @@
-import { apiService } from './apiService';
+import { createApiClient } from './apiService.js';
 
-const BASE_URL = '/procesos';
+const apiClient = createApiClient('/procesos');
 
 /**
  * Servicio para gestionar las operaciones CRUD de procesos
@@ -12,16 +12,22 @@ const procesosService = {
    */
   // Alias para mantener compatibilidad con componentes antiguos
   getAllProcesos: async () => {
-    return await apiService.get(BASE_URL);
+    try {
+      const response = await apiClient.get('');
+      return Array.isArray(response.data) ? response.data : (response.data?.data || []);
+    } catch (error) {
+      console.error('❌ Error al obtener procesos:', error);
+      return [];
+    }
   },
 
   getProcesos: async () => {
-    return await apiService.get(BASE_URL);
+    return await procesosService.getAllProcesos();
   },
 
   // Métodos con nombres cortos para nuevo ProcesosListing
   getAll: async () => {
-    return await apiService.get(BASE_URL);
+    return await procesosService.getAllProcesos();
   },
 
   /**
@@ -30,7 +36,11 @@ const procesosService = {
    * @returns {Promise<Object>} Proceso encontrado
    */
   getProcesoById: async (id) => {
-    return await apiService.get(`${BASE_URL}/${id}`);
+    return await apiClient.get(`/${id}`);
+  },
+
+  getById: async (id) => {
+    return await apiClient.get(`/${id}`);
   },
 
   /**
@@ -39,7 +49,7 @@ const procesosService = {
    * @returns {Promise<Object>} Proceso creado
    */
   createProceso: async (procesoData) => {
-    return await apiService.post(BASE_URL, procesoData);
+    return await apiClient.post('', procesoData);
   },
 
   /**
@@ -48,7 +58,7 @@ const procesosService = {
    * @param {Object} procesoData - Nuevos datos del proceso
    * @returns {Promise<Object>} Proceso actualizado
    */
-  updateProceso: (id, data) => apiService.put(`${BASE_URL}/${id}`, data),
+  updateProceso: (id, data) => apiClient.put(`/${id}`, data),
 
   /**
    * Elimina un proceso
@@ -56,20 +66,20 @@ const procesosService = {
    * @returns {Promise<Object>} Respuesta de confirmación
    */
   deleteProceso: async (id) => {
-    return await apiService.delete(`${BASE_URL}/${id}`);
+    return await apiClient.delete(`/${id}`);
   },
 
   // Métodos con nombres cortos para nuevo ProcesosListing
   create: async (procesoData) => {
-    return await apiService.post(BASE_URL, procesoData);
+    return await apiClient.post('', procesoData);
   },
 
   update: async (id, procesoData) => {
-    return await apiService.put(`${BASE_URL}/${id}`, procesoData);
+    return await apiClient.put(`/${id}`, procesoData);
   },
 
   delete: async (id) => {
-    return await apiService.delete(`${BASE_URL}/${id}`);
+    return await apiClient.delete(`/${id}`);
   }
 };
 

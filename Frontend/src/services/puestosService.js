@@ -1,4 +1,5 @@
 import { createApiClient } from './apiService';
+import useAuthStore from '@/store/authStore';
 
 const apiClient = createApiClient('/puestos');
 
@@ -8,7 +9,8 @@ export const puestosService = {
       const response = await apiClient.get('', {
         params: { organization_id: organizationId }
       });
-      return response.data || response;
+      // apiClient.get devuelve cuerpo; backend retorna array de filas
+      return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : response?.rows || response);
     } catch (error) {
       console.error('Error en puestosService.getAll:', error);
       throw error;
@@ -29,27 +31,22 @@ export const puestosService = {
 
   create: async (puestoData) => {
     try {
-      const {
-        nombre,
-        descripcion,
-        requisitos_experiencia,
-        requisitos_formacion,
-        organization_id
-      } = puestoData;
+      const user = useAuthStore.getState()?.user;
+      const organizationId = puestoData.organization_id || user?.organization_id;
 
-      if (!organization_id) {
+      if (!organizationId) {
         throw new Error('Se requiere organization_id para crear un puesto');
       }
 
       const response = await apiClient.post('', {
-        nombre,
-        descripcion,
-        requisitos_experiencia,
-        requisitos_formacion,
-        organization_id
+        nombre: puestoData.nombre,
+        descripcion: puestoData.descripcion,
+        requisitos_experiencia: puestoData.requisitos_experiencia,
+        requisitos_formacion: puestoData.requisitos_formacion,
+        organization_id: organizationId
       });
 
-      return response.data;
+      return response?.data ?? response;
     } catch (error) {
       console.error('Error en puestosService.create:', error);
       if (error.response?.data) {
@@ -61,27 +58,22 @@ export const puestosService = {
 
   update: async (id, puestoData) => {
     try {
-      const {
-        nombre,
-        descripcion,
-        requisitos_experiencia,
-        requisitos_formacion,
-        organization_id
-      } = puestoData;
+      const user = useAuthStore.getState()?.user;
+      const organizationId = puestoData.organization_id || user?.organization_id;
 
-      if (!organization_id) {
+      if (!organizationId) {
         throw new Error('Se requiere organization_id para actualizar un puesto');
       }
 
       const response = await apiClient.put(`/${id}`, {
-        nombre,
-        descripcion,
-        requisitos_experiencia,
-        requisitos_formacion,
-        organization_id
+        nombre: puestoData.nombre,
+        descripcion: puestoData.descripcion,
+        requisitos_experiencia: puestoData.requisitos_experiencia,
+        requisitos_formacion: puestoData.requisitos_formacion,
+        organization_id: organizationId
       });
 
-      return response.data;
+      return response?.data ?? response;
     } catch (error) {
       console.error(`Error en puestosService.update ${id}:`, error);
       if (error.response?.data) {

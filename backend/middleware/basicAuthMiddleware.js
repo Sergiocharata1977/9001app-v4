@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { tursoClient  } = require('../lib/tursoClient.js');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_jwt_super_secreto';
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 /**
  * Middleware básico de autenticación + multi-tenant

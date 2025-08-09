@@ -144,12 +144,9 @@ const AppRoutes = () => {
         <Route path="/caracteristicas" element={<WebFeatures />} />
         <Route path="/contacto" element={<WebContact />} />
 
-        {/* Rutas de la aplicación (con /app prefix) */}
-        <Route path="/app/*" element={isAuthenticated ? <Navigate to="/personal" replace /> : <Navigate to="/login" replace />} />
-        
-        {/* Rutas Protegidas */}
+        {/* Rutas Protegidas de la aplicación (con /app prefix) */}
         <Route 
-          path="/*"
+          path="/app/*"
           element={
             <ProtectedRoute>
               <MainLayout>
@@ -286,8 +283,8 @@ const AppRoutes = () => {
                   <Route path="sgc-hierarchy" element={<SGCHierarchyPage />} />
 
                   {/* Redirección por defecto dentro del layout */}
-                  <Route path="/" element={<Navigate to="/personal" replace />} />
-                  <Route path="*" element={<Navigate to="/personal" replace />} />
+                  <Route path="/" element={<Navigate to="/app/personal" replace />} />
+                  <Route path="*" element={<Navigate to="/app/personal" replace />} />
                 </Routes>
               </MainLayout>
             </ProtectedRoute>

@@ -27,7 +27,7 @@ const AppContent = () => {
   return (
     <div className="App">
       <Routes>
-        {/* Usar AppRoutes que incluye login y registro */}
+        {/* Usar AppRoutes, toda la app va bajo /app y públicas fuera */}
         <Route path="/*" element={<AppRoutes />} />
       </Routes>
       

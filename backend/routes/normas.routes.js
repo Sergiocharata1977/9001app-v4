@@ -4,32 +4,74 @@ const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
+// Ruta de prueba rápida sin autenticación
+router.get('/test', async (req, res) => {
+  try {
+    console.log('🧪 Test rápido de normas...');
+    const result = await tursoClient.execute('SELECT COUNT(*) as count FROM normas WHERE organization_id = 0');
+    console.log('🧪 Resultado test:', result.rows[0]);
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('🧪 Error test:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Test con parámetros como la consulta real
+router.get('/test2', async (req, res) => {
+  try {
+    console.log('🧪 Test con parámetros...');
+    const result = await tursoClient.execute({
+      sql: 'SELECT id, codigo, titulo FROM normas WHERE organization_id = 0 OR organization_id = ? LIMIT 5',
+      args: [2]
+    });
+    console.log('🧪 Resultado test2:', result.rows);
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('🧪 Error test2:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ===========================================
 // RUTAS ULTRA SIMPLES SIN RESTRICCIONES
 // ===========================================
 
 // Obtener TODAS las normas de la organización del usuario
 router.get('/', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
   try {
     const organization_id = req.user?.organization_id;
 
+    console.log(`🚀 [${new Date().toISOString()}] GET /api/normas iniciado para org: ${organization_id}`);
+
     if (!organization_id) {
+      console.log(`❌ [${Date.now() - startTime}ms] Sin organization_id`);
       return res.status(403).json({
         success: false,
         message: 'No se pudo determinar la organización del usuario.'
       });
     }
 
-    console.log(`🔓 Obteniendo normas globales y para la organización ID: ${organization_id}`);
+    console.log(`🔍 [${Date.now() - startTime}ms] Ejecutando consulta SQL...`);
     
-    const result = await tursoClient.execute({
-      sql: `SELECT * FROM normas 
-            WHERE CAST(organization_id AS TEXT) = '0' OR CAST(organization_id AS TEXT) = ?
-            ORDER BY id ASC`,
-      args: [String(organization_id)]
+    // Consulta simplificada sin ORDER BY para debuggear
+    console.log(`🔍 [${Date.now() - startTime}ms] Consultando normas para org_id: ${organization_id}`);
+    
+    const queryPromise = tursoClient.execute({
+      sql: `SELECT id, codigo, titulo, version, tipo, estado, organization_id 
+            FROM normas 
+            WHERE organization_id = 0 OR organization_id = ?`,
+      args: [organization_id]
     });
 
-    console.log(`✅ Encontradas ${result.rows.length} normas para la organización ID: ${organization_id}`);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Query timeout after 5 seconds')), 5000);
+    });
+
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+
+    console.log(`✅ [${Date.now() - startTime}ms] Consulta completada. Encontradas ${result.rows.length} normas`);
     
     res.json({
       success: true,
@@ -39,11 +81,12 @@ router.get('/', authMiddleware, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error obteniendo normas:', error);
+    console.error(`❌ [${Date.now() - startTime}ms] Error obteniendo normas:`, error.message);
     res.status(500).json({
       success: false,
-      message: 'Error al obtener normas',
-      error: error.message
+      data: [],
+      total: 0,
+      message: `Error al obtener normas: ${error.message}`
     });
   }
 });

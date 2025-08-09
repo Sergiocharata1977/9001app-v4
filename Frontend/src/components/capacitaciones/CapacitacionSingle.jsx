@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   ArrowLeft, 
   Edit, 
@@ -24,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const CapacitacionSingle = ({ capacitacionId, onBack }) => {
+  const { toast } = useToast();
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   const [capacitacion, setCapacitacion] = useState(null);

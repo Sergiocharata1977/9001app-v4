@@ -28,19 +28,19 @@ import {
   GraduationCap
 } from "lucide-react";
 import { capacitacionesService } from "@/services/capacitacionesService";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import CapacitacionModal from "./CapacitacionModal";
 import CapacitacionSingle from "./CapacitacionSingle";
-import CapacitacionKanbanBoard from "./CapacitacionKanbanBoard";
 import UnifiedHeader from "../common/UnifiedHeader";
 import UnifiedCard from "../common/UnifiedCard";
 
 export default function CapacitacionesListing() {
+  const { toast } = useToast();
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterEstado, setFilterEstado] = useState("todos");
-  const [viewMode, setViewMode] = useState("grid"); // grid | list | kanban
+  const [viewMode, setViewMode] = useState("grid"); // grid | list
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCapacitacion, setSelectedCapacitacion] = useState(null);
   const [showSingle, setShowSingle] = useState(false);
@@ -56,9 +56,9 @@ export default function CapacitacionesListing() {
       const data = await capacitacionesService.getAll();
       setCapacitaciones(data);
       console.log('✅ Capacitaciones cargadas:', data);
-    } catch (error) {
+      } catch (error) {
       console.error('❌ Error al cargar capacitaciones:', error);
-      toast.error("Error al cargar las capacitaciones");
+      toast({ variant: "destructive", title: "Error", description: "Error al cargar las capacitaciones" });
     } finally {
       setLoading(false);
     }
@@ -89,10 +89,10 @@ export default function CapacitacionesListing() {
     try {
       if (selectedCapacitacion) {
         await capacitacionesService.update(selectedCapacitacion.id, formData);
-        toast.success("Capacitación actualizada exitosamente");
+        toast({ title: "Éxito", description: "Capacitación actualizada exitosamente" });
       } else {
         await capacitacionesService.create(formData);
-        toast.success("Capacitación creada exitosamente");
+        toast({ title: "Éxito", description: "Capacitación creada exitosamente" });
       }
       setModalOpen(false);
       fetchCapacitaciones();
@@ -110,13 +110,13 @@ export default function CapacitacionesListing() {
         fetchCapacitaciones();
       } catch (error) {
         console.error('Error al eliminar capacitación:', error);
-        toast.error("Error al eliminar la capacitación");
+        toast({ variant: "destructive", title: "Error", description: "Error al eliminar la capacitación" });
       }
     }
   };
 
   const handleExport = () => {
-    toast.info("Función de exportación en desarrollo");
+    toast({ title: "Exportación", description: "Función de exportación en desarrollo" });
   };
 
   const handleViewModeChange = (mode) => {
@@ -206,91 +206,7 @@ export default function CapacitacionesListing() {
     );
   }
 
-  // Vista Kanban especial
-  if (viewMode === 'kanban') {
-    return (
-      <div className="p-6 space-y-6">
-        <UnifiedHeader
-          title="Gestión de Capacitaciones"
-          description="Administra las capacitaciones del personal según ISO 9001"
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          onNew={handleCreate}
-          onExport={handleExport}
-          viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
-          showViewToggle={false}
-          newButtonText="Nueva Capacitación"
-          totalCount={capacitaciones.length}
-          lastUpdated="hoy"
-          icon={GraduationCap}
-          primaryColor="emerald"
-        />
-
-        {/* Kanban View Mode Selector */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
-            <Button
-              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="h-8"
-            >
-              <Grid3X3 className="h-4 w-4 mr-2" />
-              Tarjetas
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="h-8"
-            >
-              <List className="h-4 w-4 mr-2" />
-              Lista
-            </Button>
-            <Button
-              variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('kanban')}
-              className="h-8"
-            >
-              <Target className="h-4 w-4 mr-2" />
-              Kanban
-            </Button>
-          </div>
-
-          <Select value={filterEstado} onValueChange={setFilterEstado}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos los estados</SelectItem>
-              <SelectItem value="planificacion">Planificación</SelectItem>
-              <SelectItem value="en preparacion">En Preparación</SelectItem>
-              <SelectItem value="en evaluacion">En Evaluación</SelectItem>
-              <SelectItem value="completada">Completada</SelectItem>
-              <SelectItem value="cancelada">Cancelada</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <CapacitacionKanbanBoard 
-          capacitaciones={filteredCapacitaciones}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleViewSingle}
-          loading={loading}
-        />
-
-        <CapacitacionModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          capacitacion={selectedCapacitacion}
-          onSave={handleSave}
-        />
-      </div>
-    );
-  }
+  // Vista Kanban deshabilitada temporalmente (requiere @dnd-kit/*)
 
   const stats = getStats();
 

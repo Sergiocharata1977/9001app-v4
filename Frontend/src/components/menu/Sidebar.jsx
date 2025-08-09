@@ -121,6 +121,8 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       icon: Users,
       color: 'emerald',
       items: [
+        { name: 'Puntos de la Norma', path: '/app/normas', icon: ListChecks },
+        { name: 'Documentos', path: '/app/documentos', icon: FileText },
         {
           type: 'submenu',
           name: 'Organización',
@@ -141,24 +143,22 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
             { name: 'Capacitaciones', path: '/app/capacitaciones', icon: GraduationCap },
             { name: 'Competencias', path: '/app/competencias', icon: ClipboardList },
             { name: 'Evaluaciones Individuales', path: '/app/evaluaciones-individuales', icon: User },
-            // { name: 'Eval. de Competencias', path: '/app/evaluacion-competencias', icon: Star },
           ]
         },
-        { name: 'Puntos de la Norma', path: '/app/normas', icon: ListChecks },
       ]
     },
-    {
-      id: 'procesos',
-      name: 'Procesos',
-      icon: ClipboardCheck,
-      color: 'blue',
-      items: [
-        { name: 'Procesos', path: '/app/procesos', icon: ClipboardCheck },
-        { name: 'Objetivos de calidad', path: '/app/objetivos-calidad', icon: Briefcase },
-        { name: 'Indicadores de calidad', path: '/app/indicadores', icon: GraduationCap },
-        { name: 'Mediciones', path: '/app/mediciones', icon: Users },
-      ]
-    },
+        {
+          id: 'procesos',
+          name: 'Procesos',
+          icon: ClipboardCheck,
+          color: 'blue',
+          items: [
+            { name: 'Procesos', path: '/app/procesos', icon: ClipboardCheck },
+            { name: 'Objetivos de calidad', path: '/app/objetivos-calidad', icon: Briefcase },
+            { name: 'Indicadores de calidad', path: '/app/indicadores', icon: GraduationCap },
+            { name: 'Mediciones', path: '/app/mediciones', icon: Users },
+          ]
+        },
     {
       id: 'mejora',
       name: 'Mejora',

@@ -4,6 +4,7 @@ const path = require('path');
 const { tursoClient  } = require('../lib/tursoClient.js');
 const { fileURLToPath  } = require('url');
 const fs = require('fs');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = Router();
 
@@ -39,7 +40,7 @@ const upload = multer({
 // --- Rutas de la API ---
 
 // GET /api/documentos - Listar todos los documentos de una organización
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const organization_id = req.user?.organization_id;
     if (!organization_id) {
@@ -67,7 +68,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/documentos/:id - Obtener un documento específico
-router.get('/:id', async (req, res) => {
+router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;
@@ -98,7 +99,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/documentos - Subir un nuevo documento
-router.post('/', upload.single('archivo'), async (req, res) => {
+router.post('/', authMiddleware, upload.single('archivo'), async (req, res) => {
   try {
     console.log('📤 POST /api/documentos - Iniciando...');
     console.log('📋 Body recibido:', req.body);
@@ -153,7 +154,7 @@ router.post('/', upload.single('archivo'), async (req, res) => {
 });
 
 // GET /api/documentos/:id/download - Descargar un documento
-router.get('/:id/download', async (req, res) => {
+router.get('/:id/download', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;
@@ -185,7 +186,7 @@ router.get('/:id/download', async (req, res) => {
 });
 
 // DELETE /api/documentos/:id - Eliminar un documento
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const organization_id = req.user?.organization_id;

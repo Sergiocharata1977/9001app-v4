@@ -1,4 +1,4 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const { tursoClient } = require('../lib/tursoClient.js');
 
 /**
  * Middleware para asegurar que todas las operaciones estén limitadas a la organización del usuario
@@ -46,7 +46,7 @@ const secureQuery = (req) => {
     
     // Función para ejecutar query seguro
     execute: async (sql, args = []) => {
-      return await db.execute({
+      return await tursoClient.execute({
         sql,
         args: [organizationId, ...args]
       });
@@ -112,7 +112,7 @@ const verifyResourceOwnership = (tableName, resourceIdParam = 'id') => {
       const resourceId = req.params[resourceIdParam];
       const { organizationId } = secureQuery(req);
       
-      const result = await db.execute({
+      const result = await tursoClient.execute({
         sql: `SELECT id FROM ${tableName} WHERE id = ? AND organization_id = ?`,
         args: [resourceId, organizationId]
       });
@@ -135,7 +135,7 @@ const verifyResourceOwnership = (tableName, resourceIdParam = 'id') => {
   };
 };
 
-export default {
+module.exports = {
   ensureTenant,
   secureQuery,
   checkPermission,

@@ -21,20 +21,41 @@ const useAuthStore = create(
           try {
             set({ isLoading: true, error: null });
             const response = await authApi.login(credentials);
-            const { user, token } = response.data;
-            
+
+            // Backend responde: { success, message, data: { user, tokens: { accessToken, refreshToken } } }
+            const body = response?.data || {};
+            const rawUser = body?.data?.user || body?.user || null;
+            const accessToken = body?.data?.tokens?.accessToken || body?.token || null;
+            const refreshToken = body?.data?.tokens?.refreshToken || body?.refreshToken || null;
+
+            if (!rawUser || !accessToken) {
+              throw new Error('Respuesta de login inválida');
+            }
+
+            // Normalizar shape de usuario para compatibilidad con código legado
+            const user = {
+              ...rawUser,
+              organization_id: rawUser.organization_id || rawUser.organization?.id || rawUser.organizationId || null,
+              organization_name: rawUser.organization_name || rawUser.organization?.name || null,
+              organization_plan: rawUser.organization_plan || rawUser.organization?.plan || null,
+            };
+
             set({
               user,
-              token,
+              token: accessToken,
               isAuthenticated: true,
               isLoading: false
             });
 
-            localStorage.setItem('token', token);
-            return response.data;
+            localStorage.setItem('token', accessToken);
+            if (refreshToken) {
+              localStorage.setItem('refreshToken', refreshToken);
+            }
+
+            return body?.data || body;
           } catch (error) {
             set({
-              error: error.response?.data?.message || 'Error al iniciar sesión',
+              error: error.response?.data?.message || error.message || 'Error al iniciar sesión',
               isLoading: false
             });
             throw error;
@@ -54,6 +75,7 @@ const useAuthStore = create(
               error: null
             });
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
           }
         },
 
@@ -96,6 +118,7 @@ const useAuthStore = create(
               isAuthenticated: false
             });
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
             return false;
           }
         },
@@ -139,13 +162,17 @@ const useAuthStore = create(
             }
 
             const response = await authApi.refreshToken({ refreshToken });
-            const { token: newToken, user } = response.data;
-            
-            set({
+            // Backend responde: { success, data: { accessToken } }
+            const newToken = response?.data?.data?.accessToken;
+            if (!newToken) {
+              throw new Error('No se pudo obtener nuevo access token');
+            }
+
+            set((state) => ({
               token: newToken,
-              user,
+              user: state.user,
               isAuthenticated: true
-            });
+            }));
             
             localStorage.setItem('token', newToken);
             return newToken;
@@ -192,7 +219,7 @@ const useAuthStore = create(
 
         // Utilidades
         reset: () => {
-          set({
+            set({
             user: null,
             token: null,
             isAuthenticated: false,
@@ -200,6 +227,7 @@ const useAuthStore = create(
             error: null
           });
           localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
         }
       }),
       {

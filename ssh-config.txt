@@ -2,12 +2,22 @@
 # Guarda este contenido en: C:\Users\Usuario\.ssh\config
 
 Host vps-hostinger
-    HostName tu-servidor-vps.com
-    User tu-usuario-vps
+    HostName 31.97.162.229
+    User root
     IdentityFile c:\Users\Usuario\.ssh\9001app2
     IdentitiesOnly yes
     ServerAliveInterval 60
     ServerAliveCountMax 3
+    StrictHostKeyChecking no
+
+Host 31.97.162.229
+    HostName 31.97.162.229
+    User root
+    IdentityFile c:\Users\Usuario\.ssh\9001app2
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    StrictHostKeyChecking no
 
 Host gitlab.com
     HostName gitlab.com
@@ -16,5 +26,9 @@ Host gitlab.com
     IdentitiesOnly yes
     ServerAliveInterval 60
     ServerAliveCountMax 3
+
+
+
+
 
 

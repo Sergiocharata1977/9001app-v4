@@ -36,7 +36,7 @@ const LoginPage = () => {
       
       // Redirigir después de un breve delay
       setTimeout(() => {
-        navigate('/personal');
+        navigate('/app/personal');
       }, 1000);
     } catch (error) {
       toast.error(error.message || 'Error al iniciar sesión');

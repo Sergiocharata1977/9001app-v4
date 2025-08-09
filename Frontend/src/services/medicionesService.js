@@ -3,8 +3,15 @@ import { createService } from './serviceFactory';
 const apiClient = createService('/mediciones');
 
 const medicionesService = {
-  getAll: () => {
-    return apiClient.get();
+  getAll: async () => {
+    try {
+      const data = await apiClient.get();
+      console.log('📈 Mediciones response:', data);
+      return Array.isArray(data) ? data : (data?.data || []);
+    } catch (error) {
+      console.error('❌ Error al obtener mediciones:', error);
+      return [];
+    }
   },
 
   getById: (id) => {

@@ -12,8 +12,15 @@ const indicadoresService = {
    * Obtiene todos los indicadores.
    * @returns {Promise<Array>} Lista de indicadores.
    */
-  getAll() {
-    return apiClient.get();
+  async getAll() {
+    try {
+      const data = await apiClient.get();
+      console.log('📊 Indicadores response:', data);
+      return Array.isArray(data) ? data : (data?.data || []);
+    } catch (error) {
+      console.error('❌ Error al obtener indicadores:', error);
+      return [];
+    }
   },
 
   /**

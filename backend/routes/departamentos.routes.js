@@ -2,19 +2,23 @@ const { Router } = require('express');
 const { tursoClient } = require('../lib/tursoClient.js');
 const crypto = require('crypto');
 const ActivityLogService = require('../services/activityLogService.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = Router();
+
+// Aplicar autenticación para tener req.user y organization_id
+router.use(authMiddleware);
 
 // GET /api/departamentos - Listar todos los departamentos
 router.get('/', async (req, res, next) => {
   try {
-    const organizationId = req.user?.organization_id || req.user?.org_id || 2; // Valor por defecto
+    const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log('🔓 Obteniendo departamentos para organización:', organizationId);
     
     // TODO: Considerar un JOIN para obtener el nombre del responsable si es necesario en el listado
     const result = await tursoClient.execute({
       sql: 'SELECT * FROM departamentos WHERE organization_id = ? ORDER BY created_at DESC',
-      args: [organizationId]
+      args: [String(organizationId)]
     });
     
     console.log(`✅ Encontrados ${result.rows.length} departamentos en organización ${organizationId}`);
@@ -28,12 +32,12 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   const { id } = req.params;
   try {
-    const organizationId = req.user?.organization_id || req.user?.org_id || 2; // Valor por defecto
+    const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log(`🔓 Obteniendo departamento ${id} para organización ${organizationId}`);
     
     const result = await tursoClient.execute({
       sql: 'SELECT * FROM departamentos WHERE id = ? AND organization_id = ?',
-      args: [id, organizationId],
+      args: [id, String(organizationId)],
     });
 
     if (result.rows.length === 0) {

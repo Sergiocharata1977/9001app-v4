@@ -1,5 +1,6 @@
 // Servicio para el módulo de Personal - Migrado a Backend API
 import { createApiClient } from './apiService';
+import useAuthStore from '@/store/authStore';
 
 const personalApi = createApiClient('/personal');
 const relacionesApi = createApiClient('/relaciones');
@@ -9,24 +10,23 @@ const personalService = {
     try {
       console.log('🔄 [PersonalService] Obteniendo lista de personal...');
       const response = await personalApi.get();
-      console.log('📡 [PersonalService] Respuesta completa:', response);
-      
-      // Manejar diferentes formatos de respuesta del backend
-      let personalData = [];
-      if (response) {
-        if (response.data && Array.isArray(response.data)) {
-          personalData = response.data;
-        } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-          personalData = response.data.data;
-        } else if (Array.isArray(response)) {
-          personalData = response;
-        }
-      }
-      
-      console.log('✅ [PersonalService] Personal procesado:', personalData.length, 'registros');
-      console.log('📋 [PersonalService] Primer registro:', personalData[0]);
-      
-      return personalData;
+      console.log('📡 [PersonalService] Respuesta cuerpo:', response);
+
+      // personalApi.get devuelve el cuerpo JSON del backend
+      // Backend shape esperado: { success: true, data: [...] }
+      const body = response;
+      const personalRows = Array.isArray(body)
+        ? body
+        : Array.isArray(body?.data)
+          ? body.data
+          : Array.isArray(body?.rows)
+            ? body.rows
+            : [];
+
+      console.log('✅ [PersonalService] Personal procesado:', personalRows.length, 'registros');
+      console.log('📋 [PersonalService] Primer registro:', personalRows[0]);
+
+      return personalRows;
     } catch (error) {
       console.error('❌ [PersonalService] Error fetching personal:', error);
       console.error('❌ [PersonalService] Error details:', error.response?.data);
@@ -40,8 +40,8 @@ const personalService = {
     }
     try {
       const response = await personalApi.get(`/${id}`);
-      // El backend devuelve { success: true, data: {...} }
-      return response.data || response;
+      // El backend suele responder { success: true, data: {...} }
+      return response?.data ?? response;
     } catch (error) {
       console.error(`Error fetching personal with id ${id}:`, error);
       throw new Error('No se pudo obtener el detalle del personal');
@@ -150,8 +150,29 @@ const personalService = {
 
   createPersonal: async (personalData) => {
     try {
-      const response = await personalApi.post('', personalData);
-      return response.data || response;
+      const user = useAuthStore.getState()?.user;
+      const organizationId = personalData.organization_id || user?.organization_id;
+
+      // Mapear campos del frontend al backend
+      const payload = {
+        nombre: personalData.nombres || personalData.nombre || '',
+        apellido: personalData.apellidos || personalData.apellido || '',
+        dni: personalData.documento_identidad || personalData.dni || '',
+        email: personalData.email || null,
+        telefono: personalData.telefono || null,
+        puesto: personalData.puesto || null,
+        departamento: personalData.departamento || null,
+        fecha_ingreso: personalData.fecha_contratacion || personalData.fecha_ingreso || new Date().toISOString().split('T')[0],
+        estado: personalData.estado || 'Activo',
+        organization_id: organizationId,
+      };
+
+      if (!payload.organization_id) {
+        throw new Error('No se pudo determinar la organización para crear el personal');
+      }
+
+      const response = await personalApi.post('', payload);
+      return response?.data ?? response;
     } catch (error) {
       console.error('Error creating personal:', error);
       if (error.response?.data?.message) {
@@ -166,8 +187,25 @@ const personalService = {
       throw new Error('ID de personal no válido');
     }
     try {
-      const response = await personalApi.put(`/${id}`, personalData);
-      return response.data || response;
+      const user = useAuthStore.getState()?.user;
+      const organizationId = personalData.organization_id || user?.organization_id;
+
+      // Mantener valores existentes si no vienen en el payload (backend actualizará campos presentes)
+      const payload = {
+        nombre: personalData.nombres ?? personalData.nombre,
+        apellido: personalData.apellidos ?? personalData.apellido,
+        dni: personalData.documento_identidad ?? personalData.dni,
+        email: personalData.email,
+        telefono: personalData.telefono,
+        puesto: personalData.puesto,
+        departamento: personalData.departamento,
+        fecha_ingreso: personalData.fecha_contratacion ?? personalData.fecha_ingreso,
+        estado: personalData.estado,
+        organization_id: organizationId,
+      };
+
+      const response = await personalApi.put(`/${id}`, payload);
+      return response?.data ?? response;
     } catch (error) {
       console.error(`Error updating personal with id ${id}:`, error);
       if (error.response?.data?.message) {

@@ -1,19 +1,24 @@
 const express = require('express');
 const { tursoClient  } = require('../lib/tursoClient.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
 // GET /api/procesos - Obtener todos los procesos
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
-    console.log('📋 Obteniendo todos los procesos...');
+    const orgId = req.user?.organization_id || 2;
+    console.log('📋 Obteniendo todos los procesos para organización:', orgId);
     const result = await tursoClient.execute({
-      sql: 'SELECT * FROM procesos WHERE organization_id = ? ORDER BY nombre',
-      args: [req.user?.organization_id || 2]
+      sql: `SELECT id, nombre, responsable, descripcion, organization_id, created_at, updated_at 
+            FROM procesos 
+            WHERE organization_id = ? 
+            ORDER BY nombre`,
+      args: [orgId]
     });
     
     console.log(`✅ Encontrados ${result.rows.length} procesos`);
-    res.json(result.rows);
+    res.json({ success: true, data: result.rows, total: result.rows.length });
   } catch (error) {
     console.error('❌ Error al obtener procesos:', error);
     res.status(500).json({ 
