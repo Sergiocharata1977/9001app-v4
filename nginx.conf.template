@@ -60,7 +60,11 @@ server {
         proxy_read_timeout 30s;
     }
 
+<<<<<<< HEAD
     # Frontend static files
+=======
+    # frontend static files
+>>>>>>> temp-branch
     location / {
         root /var/www/9001app2/frontend/dist;
         index index.html;

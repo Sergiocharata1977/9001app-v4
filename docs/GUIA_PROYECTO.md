@@ -6,7 +6,11 @@
 - **Stack:** React + Vite + Node.js + Express + Turso DB  
 - **Estado:** ✅ MVP Funcionando en Producción  
 - **URLs Producción:**
+<<<<<<< HEAD
   - Frontend: http://31.97.162.229:3000
+=======
+  - frontend: http://31.97.162.229:3000
+>>>>>>> temp-branch
   - Backend: http://31.97.162.229:5000
 
 ---
@@ -14,7 +18,11 @@
 ## 🏗️ Arquitectura del Sistema
 
 ### Stack Tecnológico
+<<<<<<< HEAD
 - **Frontend:** React 19 + Vite + TailwindCSS + React Router + Zustand
+=======
+- **frontend:** React 19 + Vite + TailwindCSS + React Router + Zustand
+>>>>>>> temp-branch
 - **Backend:** Node.js + Express + JWT Auth + CommonJS
 - **Base de Datos:** Turso (LibSQL) 
 - **CI/CD:** GitLab CI → VPS Hostinger
@@ -85,7 +93,11 @@ const controllerName = {
 };
 ```
 
+<<<<<<< HEAD
 ### Frontend (ESM)
+=======
+### frontend (ESM)
+>>>>>>> temp-branch
 ```javascript
 // ✅ CORRECTO - ES Modules para frontend
 import React, { memo } from 'react';
@@ -133,7 +145,11 @@ NODE_ENV=production
 CORS_ORIGIN=http://localhost:3000
 ```
 
+<<<<<<< HEAD
 ### Variables de Entorno Frontend
+=======
+### Variables de Entorno frontend
+>>>>>>> temp-branch
 ```bash
 # API
 VITE_API_URL=http://localhost:5000
@@ -159,12 +175,20 @@ VITE_ENABLE_RAG=true
 
 ### Smoke Tests
 - Verificación rápida de servicios en funcionamiento
+<<<<<<< HEAD
 - Frontend, Backend y endpoints críticos
+=======
+- frontend, Backend y endpoints críticos
+>>>>>>> temp-branch
 - Post-deploy validation
 
 ### Linting y Formateo
 - **Backend:** ESLint + Prettier configurado para CommonJS
+<<<<<<< HEAD
 - **Frontend:** ESLint + Prettier configurado para ESM
+=======
+- **frontend:** ESLint + Prettier configurado para ESM
+>>>>>>> temp-branch
 - **Pre-commit hooks:** Husky + lint-staged ejecuta automáticamente
 
 ---

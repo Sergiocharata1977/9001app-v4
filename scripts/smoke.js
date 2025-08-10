@@ -75,11 +75,19 @@ async function runSmokeTests() {
       status: 200,
       description: 'Backend test endpoint'
     },
+<<<<<<< HEAD
     // Frontend (puede estar sirviendo HTML)
     {
       url: `${BASE_URL}:${FRONTEND_PORT}/`,
       status: 200,
       description: 'Frontend home page'
+=======
+    // frontend (puede estar sirviendo HTML)
+    {
+      url: `${BASE_URL}:${FRONTEND_PORT}/`,
+      status: 200,
+      description: 'frontend home page'
+>>>>>>> temp-branch
     },
     // API endpoints críticos
     {

@@ -1,8 +1,19 @@
 # Dependencies
+<<<<<<< HEAD
+=======
+node_modules/
+>>>>>>> temp-branch
 /node_modules
 
 # Environment variables
 .env
+<<<<<<< HEAD
+=======
+.env.local
+.env.production
+.env.development
+.env.test
+>>>>>>> temp-branch
 
 # Databases
 *.db
@@ -10,9 +21,53 @@
 *.sqlite3
 
 # Logs
+<<<<<<< HEAD
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 # Misc
 .DS_Store
+=======
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Upload directories
+uploads/
+*/uploads/
+
+# Build outputs
+dist/
+build/
+
+# Coverage
+coverage/
+*.lcov
+
+# Cache
+.cache
+.eslintcache
+
+# Misc
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# PM2 files
+.pm2/
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.bak
+*.backup
+*.old
+>>>>>>> temp-branch

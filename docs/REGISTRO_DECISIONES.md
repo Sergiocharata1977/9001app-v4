@@ -68,7 +68,11 @@ Este documento registra las decisiones técnicas importantes tomadas durante el 
 
 ### **Stack Tecnológico Final**
 
+<<<<<<< HEAD
 **Frontend:**
+=======
+**frontend:**
+>>>>>>> temp-branch
 - ✅ **React 19** - Componentes modernos y hooks
 - ✅ **Vite** - Build tool rápido vs Webpack
 - ✅ **TailwindCSS** - Utility-first vs CSS modules  
@@ -94,7 +98,11 @@ Este documento registra las decisiones técnicas importantes tomadas durante el 
 
 **Decisión:** Refactorización completa del sistema
 - Migración de sistema legacy a arquitectura moderna
+<<<<<<< HEAD
 - Separación clara Frontend/Backend
+=======
+- Separación clara frontend/Backend
+>>>>>>> temp-branch
 - Implementación de mejores prácticas
 - Base de datos moderna (Turso)
 
@@ -110,7 +118,11 @@ Este documento registra las decisiones técnicas importantes tomadas durante el 
 ## 📊 Métricas y Resultados
 
 ### **Estado Actual del Sistema**
+<<<<<<< HEAD
 - ✅ **Frontend:** Funcionando en http://31.97.162.229:3000
+=======
+- ✅ **frontend:** Funcionando en http://31.97.162.229:3000
+>>>>>>> temp-branch
 - ✅ **Backend:** API REST operativa en http://31.97.162.229:5000
 - ✅ **Autenticación:** Sistema JWT completo funcionando
 - ✅ **Deploy:** Automático desde GitLab

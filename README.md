@@ -27,7 +27,11 @@ npm run dev
 
 # O ejecutar por separado:
 npm run dev:backend  # Backend en puerto 5000
+<<<<<<< HEAD
 npm run dev:frontend # Frontend en puerto 3000
+=======
+npm run dev:frontend # frontend en puerto 3000
+>>>>>>> temp-branch
 ```
 
 ### Testing
@@ -52,7 +56,11 @@ npm run smoke
 
 ## 🛠️ Tecnologías
 
+<<<<<<< HEAD
 - **Frontend:** React 19, Vite, TailwindCSS, Zustand
+=======
+- **frontend:** React 19, Vite, TailwindCSS, Zustand
+>>>>>>> temp-branch
 - **Backend:** Node.js, Express, JWT, LibSQL (Turso)
 - **Testing:** Jest, Supertest, Cypress
 - **CI/CD:** GitLab CI, PM2, Nginx
