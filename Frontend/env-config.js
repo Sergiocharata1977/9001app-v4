@@ -1,24 +1,41 @@
 // 🔧 CONFIGURACIÓN DE ENTORNO - FRONTEND
 
+/**
+ * Función helper para obtener configuración con fallback
+ */
+const getConfig = (key, defaultValue) => {
+  // Primero intentar con configuración dinámica (runtime)
+  if (window.__RUNTIME_CONFIG__ && window.__RUNTIME_CONFIG__[key] !== undefined) {
+    return window.__RUNTIME_CONFIG__[key];
+  }
+  // Luego intentar con variables de entorno de Vite
+  const viteKey = `VITE_${key}`;
+  if (import.meta.env[viteKey] !== undefined) {
+    return import.meta.env[viteKey];
+  }
+  // Valor por defecto
+  return defaultValue;
+};
+
 export const config = {
   // 🌐 URL del Backend API
-  API_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  API_URL: getConfig('API_URL', 'http://localhost:5000/api'),
   
   // 🔒 Configuración de autenticación
-  AUTH_ENABLED: import.meta.env.VITE_AUTH_ENABLED !== 'false',
-  TOKEN_KEY: import.meta.env.VITE_TOKEN_KEY || 'auth_token',
+  AUTH_ENABLED: getConfig('AUTH_ENABLED', true) !== false && getConfig('AUTH_ENABLED', true) !== 'false',
+  TOKEN_KEY: getConfig('TOKEN_KEY', 'auth_token'),
   
   // 📊 Configuración de la aplicación
-  APP_NAME: import.meta.env.VITE_APP_NAME || 'ISO Flow',
-  APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.0.0',
+  APP_NAME: getConfig('APP_NAME', 'ISO Flow'),
+  APP_VERSION: getConfig('APP_VERSION', '1.0.0'),
   
   // 🎨 Configuración de UI
-  THEME: import.meta.env.VITE_THEME || 'light',
-  LANGUAGE: import.meta.env.VITE_LANGUAGE || 'es',
+  THEME: getConfig('THEME', 'light'),
+  LANGUAGE: getConfig('LANGUAGE', 'es'),
   
   // 🔧 Configuración de desarrollo
-  IS_DEV: import.meta.env.DEV,
-  IS_PROD: import.meta.env.PROD
+  IS_DEV: import.meta.env.DEV || (window.__RUNTIME_CONFIG__?.ENV?.isDevelopment || false),
+  IS_PROD: import.meta.env.PROD || (window.__RUNTIME_CONFIG__?.ENV?.isProduction || false)
 };
 
 // Función para obtener la URL completa de la API

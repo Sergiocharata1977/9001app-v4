@@ -1,8 +1,24 @@
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
+/**
+ * Obtener la URL base de la API desde la configuración dinámica o variables de entorno
+ */
+const getApiBaseUrl = () => {
+  // Primero intentar con la configuración dinámica (runtime)
+  if (window.__RUNTIME_CONFIG__ && window.__RUNTIME_CONFIG__.API_BASE_URL) {
+    return window.__RUNTIME_CONFIG__.API_BASE_URL;
+  }
+  // Fallback a variables de entorno de Vite (para desarrollo)
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  // Valor por defecto
+  return 'http://localhost:5000/api';
+};
+
 // Servicio base para llamadas HTTP al backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = getApiBaseUrl();
 
 // Crear instancia de axios
 const apiClient = axios.create({

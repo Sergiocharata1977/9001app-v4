@@ -156,3 +156,5 @@ smoke-test:
 .fail_on_error: &fail_on_error
   after_script:
     - if [ $CI_JOB_STATUS != "success" ]; then echo "❌ Pipeline failed - blocking merge"; exit 1; fi
+
+

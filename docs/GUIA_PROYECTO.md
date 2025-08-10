@@ -228,3 +228,5 @@ curl -I http://localhost/api/health
 - **Deploy Scripts:** Automatización en `scripts/`
 
 Para más detalles técnicos, consultar el código fuente y comentarios inline.
+
+

@@ -91,3 +91,5 @@ Los hooks pre-commit ejecutan automáticamente linting y tests.
 ## 📄 Licencia
 
 ISC - Ver archivo LICENSE para detalles.
+
+

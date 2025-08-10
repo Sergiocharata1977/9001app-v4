@@ -153,3 +153,5 @@ Este documento registra las decisiones técnicas importantes tomadas durante el 
 5. **Configuración estandarizada:** PM2 + Nginx como código, no manual
 
 **Última actualización:** 2025-01-28
+
+
