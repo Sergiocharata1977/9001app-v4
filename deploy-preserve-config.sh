@@ -84,8 +84,8 @@ fi
 # ===============================================
 # PASO 4: FRONTEND - INSTALAR Y CONSTRUIR
 # ===============================================
-log "🎨 Procesando Frontend..."
-cd $FRONTEND_DIR || error "No se pudo acceder al directorio Frontend"
+log "🎨 Procesando frontend..."
+cd $FRONTEND_DIR || error "No se pudo acceder al directorio frontend"
 
 # Instalar dependencias
 log "📦 Instalando dependencias del Frontend..."
