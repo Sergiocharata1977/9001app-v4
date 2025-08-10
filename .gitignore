@@ -1,3 +1,6 @@
+# Ignorar carpeta Frontend con mayúscula
+Frontend/
+
 # Dependencies
 node_modules/
 */node_modules/
