@@ -1,0 +1,160 @@
+# GitLab CI/CD Pipeline para 9001app2
+image: node:20-alpine
+
+variables:
+  NODE_ENV: "production"
+  FRONTEND_DIR: "frontend"
+  BACKEND_DIR: "backend"
+
+# Cache para node_modules
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - frontend/node_modules/
+    - backend/node_modules/
+
+stages:
+  - validate
+  - test
+  - build
+  - deploy
+  - smoke-test
+
+# ===== STAGE: VALIDATE =====
+lint-backend:
+  stage: validate
+  before_script:
+    - cd $BACKEND_DIR
+    - npm ci --prefer-offline --no-audit
+  script:
+    - npm run lint
+  only:
+    - master
+    - merge_requests
+
+lint-frontend:
+  stage: validate
+  before_script:
+    - cd $FRONTEND_DIR
+    - npm ci --prefer-offline --no-audit
+  script:
+    - npm run lint
+  only:
+    - master
+    - merge_requests
+
+# ===== STAGE: TEST =====
+test-backend:
+  stage: test
+  before_script:
+    - cd $BACKEND_DIR
+    - npm ci --prefer-offline --no-audit
+  script:
+    - npm test
+  coverage: '/All files.*?(\d+.\d+)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/coverage/cobertura-coverage.xml
+    paths:
+      - backend/coverage/
+    expire_in: 1 week
+  only:
+    - master
+    - merge_requests
+
+test-frontend:
+  stage: test
+  before_script:
+    - cd $FRONTEND_DIR
+    - npm ci --prefer-offline --no-audit
+  script:
+    - npm run test -- --run --coverage
+  artifacts:
+    paths:
+      - frontend/coverage/
+    expire_in: 1 week
+  only:
+    - master
+    - merge_requests
+
+# ===== STAGE: BUILD =====
+build-frontend:
+  stage: build
+  before_script:
+    - cd $FRONTEND_DIR
+    - npm ci --prefer-offline --no-audit
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist/
+    expire_in: 1 week
+  only:
+    - master
+
+# ===== STAGE: DEPLOY =====
+deploy-to-server:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk update && apk add openssh-client rsync
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -p 22 $SSH_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    # Backup anterior
+    - ssh $SSH_USER@$SSH_HOST "cd /var/www && cp -r 9001app2 9001app2.backup.$(date +%Y%m%d_%H%M%S) || true"
+    
+    # Sync código
+    - rsync -avz --delete --exclude=node_modules --exclude=.git . $SSH_USER@$SSH_HOST:/var/www/9001app2/
+    
+    # Deploy backend
+    - ssh $SSH_USER@$SSH_HOST "cd /var/www/9001app2/backend && npm ci --production"
+    
+    # Deploy frontend
+    - ssh $SSH_USER@$SSH_HOST "cd /var/www/9001app2/frontend && npm ci && npm run build"
+    
+    # Restart services
+    - ssh $SSH_USER@$SSH_HOST "pm2 restart ecosystem.config.cjs || pm2 start ecosystem.config.cjs"
+    - ssh $SSH_USER@$SSH_HOST "systemctl reload nginx"
+    
+    # Cleanup old backups (mantener solo últimos 3)
+    - ssh $SSH_USER@$SSH_HOST "cd /var/www && ls -t 9001app2.backup.* | tail -n +4 | xargs rm -rf || true"
+  environment:
+    name: production
+    url: http://$SSH_HOST
+  only:
+    - master
+  when: manual
+
+# ===== STAGE: SMOKE TEST =====
+smoke-test:
+  stage: smoke-test
+  image: node:20-alpine
+  script:
+    - node scripts/smoke.js
+  environment:
+    name: production
+    url: http://$SSH_HOST
+  variables:
+    SMOKE_BASE_URL: "http://$SSH_HOST"
+    SMOKE_API_PORT: "5000"
+    SMOKE_FRONTEND_PORT: "3000"
+    SMOKE_TIMEOUT: "15000"
+  only:
+    - master
+  dependencies:
+    - deploy-to-server
+
+# ===== RULES GLOBALES =====
+# Fallar pipeline si hay errores de lint o tests
+.fail_on_error: &fail_on_error
+  after_script:
+    - if [ $CI_JOB_STATUS != "success" ]; then echo "❌ Pipeline failed - blocking merge"; exit 1; fi
+
+

@@ -1,0 +1,10 @@
+{
+  "port": 9000,
+  "hooks": [
+    {
+      "id": "deploy-9001app2",
+      "execute-command": "/root/deploy-9001app2.sh",
+      "command-working-directory": "/root"
+    }
+  ]
+}

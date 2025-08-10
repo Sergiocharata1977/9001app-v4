@@ -1,0 +1,37 @@
+const dotenv = require('dotenv');
+const { existsSync } = require('fs');
+const { join } = require('path');
+
+// 🔍 Cargar variables de entorno en orden de prioridad
+function loadEnvConfig() {
+  const envFiles = [
+    '.env.local',      // 1️⃣ Prioridad: Configuración local
+    '.env.development', // 2️⃣ Configuración de desarrollo
+    '.env'             // 3️⃣ Configuración por defecto
+  ];
+
+  // Buscar y cargar el primer archivo .env que exista
+  for (const envFile of envFiles) {
+    const envPath = join(__dirname, '..', envFile);
+    if (existsSync(envPath)) {
+      console.log(`📄 Cargando configuración desde: ${envFile}`);
+      dotenv.config({ path: envPath });
+      
+      // Verificar que tenemos las variables críticas
+      if (!process.env.DATABASE_URL || !process.env.TURSO_AUTH_TOKEN) {
+        console.warn(`⚠️  Faltan variables críticas en ${envFile}`);
+        console.log('📝 Necesitas configurar:');
+        console.log('   - DATABASE_URL');
+        console.log('   - TURSO_AUTH_TOKEN');
+      }
+      
+      return;
+    }
+  }
+
+  console.error('❌ No se encontró ningún archivo de configuración (.env.local, .env.development, .env)');
+  console.log('📝 Crea un archivo .env.local con tus credenciales de desarrollo');
+}
+
+// Exportar función para usar en otros archivos
+module.exports = { loadEnvConfig };
