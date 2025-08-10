@@ -150,6 +150,10 @@ log "📦 Publicando frontend en ${STATIC_DIR}..."
 mkdir -p "$STATIC_DIR"
 rsync -a --delete "$FRONTEND_DIR/dist/" "$STATIC_DIR/"
 
+# Copiar archivos de configuración adicionales desde public/
+log "📋 Copiando archivos de configuración..."
+cp "$FRONTEND_DIR/public/runtime-config.js" "$STATIC_DIR/" 2>/dev/null || log "⚠️ runtime-config.js no encontrado en public/"
+
 # ===============================================
 # PASO 9: RESTAURAR CONFIGURACIÓN DEL SERVIDOR
 # ===============================================
