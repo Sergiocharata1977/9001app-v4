@@ -88,22 +88,22 @@ log "🎨 Procesando frontend..."
 cd $FRONTEND_DIR || error "No se pudo acceder al directorio frontend"
 
 # Instalar dependencias
-log "📦 Instalando dependencias del Frontend..."
+log "📦 Instalando dependencias del frontend..."
 npm install --production=false
 
 if [ $? -ne 0 ]; then
-    error "Error al instalar dependencias del Frontend"
+    error "Error al instalar dependencias del frontend"
 fi
 
 # Construir para producción
-log "🏗️ Construyendo Frontend para producción..."
+log "🏗️ Construyendo frontend para producción..."
 npm run build
 
 if [ $? -ne 0 ]; then
-    error "Error al construir el Frontend"
+    error "Error al construir el frontend"
 fi
 
-log "✅ Frontend construido exitosamente"
+log "✅ frontend construido exitosamente"
 
 # ===============================================
 # PASO 5: BACKEND - INSTALAR Y CONFIGURAR
@@ -203,9 +203,9 @@ else
 fi
 
 if curl -fsS http://127.0.0.1/ >/dev/null; then
-    log "✅ Frontend servido por Nginx en puerto 80"
+    log "✅ frontend servido por Nginx en puerto 80"
 else
-    log "⚠️ Frontend podría tardar en estar disponible"
+    log "⚠️ frontend podría tardar en estar disponible"
 fi
 
 # ===============================================
@@ -232,7 +232,7 @@ find /root -name "*.log" -mtime +7 -delete 2>/dev/null
 # ===============================================
 log "🎉 DESPLIEGUE COMPLETADO EXITOSAMENTE"
 log "📊 Resumen:"
-log "   - Frontend: http://31.97.162.229/"
+log "   - frontend: http://31.97.162.229/"
 log "   - Backend: http://31.97.162.229:5000"
 log "   - Configuración preservada: ✅"
 log "   - Logs: $LOG_FILE"

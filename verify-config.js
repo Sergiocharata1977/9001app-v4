@@ -170,7 +170,7 @@ async function main() {
   if (isProduction) {
     // Verificar servicios en producción
     await checkUrl('http://31.97.162.229:5000/api/health', 'Backend API');
-    await checkUrl('http://31.97.162.229/', 'Frontend Nginx');
+    await checkUrl('http://31.97.162.229/', 'frontend Nginx');
     await checkUrl('http://31.97.162.229:5000/api/auth/login', 'Endpoint Login');
     
     // Verificar PM2
@@ -197,7 +197,7 @@ async function main() {
     }
   } else {
     // Verificar servicios en desarrollo
-    await checkUrl('http://localhost:3000', 'Frontend Dev Server');
+    await checkUrl('http://localhost:3000', 'frontend Dev Server');
     await checkUrl('http://localhost:5000/api/health', 'Backend API Local');
   }
 

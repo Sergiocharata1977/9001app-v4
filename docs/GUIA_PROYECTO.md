@@ -6,7 +6,7 @@
 - **Stack:** React + Vite + Node.js + Express + Turso DB  
 - **Estado:** ✅ MVP Funcionando en Producción  
 - **URLs Producción:**
-  - Frontend: http://31.97.162.229:3000
+  - frontend: http://31.97.162.229:3000
   - Backend: http://31.97.162.229:5000
 
 ---
@@ -14,7 +14,7 @@
 ## 🏗️ Arquitectura del Sistema
 
 ### Stack Tecnológico
-- **Frontend:** React 19 + Vite + TailwindCSS + React Router + Zustand
+- **frontend:** React 19 + Vite + TailwindCSS + React Router + Zustand
 - **Backend:** Node.js + Express + JWT Auth + CommonJS
 - **Base de Datos:** Turso (LibSQL) 
 - **CI/CD:** GitLab CI → VPS Hostinger
@@ -85,7 +85,7 @@ const controllerName = {
 };
 ```
 
-### Frontend (ESM)
+### frontend (ESM)
 ```javascript
 // ✅ CORRECTO - ES Modules para frontend
 import React, { memo } from 'react';
@@ -133,7 +133,7 @@ NODE_ENV=production
 CORS_ORIGIN=http://localhost:3000
 ```
 
-### Variables de Entorno Frontend
+### Variables de Entorno frontend
 ```bash
 # API
 VITE_API_URL=http://localhost:5000
@@ -159,12 +159,12 @@ VITE_ENABLE_RAG=true
 
 ### Smoke Tests
 - Verificación rápida de servicios en funcionamiento
-- Frontend, Backend y endpoints críticos
+- frontend, Backend y endpoints críticos
 - Post-deploy validation
 
 ### Linting y Formateo
 - **Backend:** ESLint + Prettier configurado para CommonJS
-- **Frontend:** ESLint + Prettier configurado para ESM
+- **frontend:** ESLint + Prettier configurado para ESM
 - **Pre-commit hooks:** Husky + lint-staged ejecuta automáticamente
 
 ---
