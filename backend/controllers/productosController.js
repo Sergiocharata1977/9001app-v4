@@ -307,3 +307,12 @@ const getHistorialProducto = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error al obtener historial' });
   }
 }; 
+
+module.exports = {
+  getProductos,
+  getProducto,
+  createProducto,
+  updateProducto,
+  deleteProducto,
+  getHistorialProducto
+}; 

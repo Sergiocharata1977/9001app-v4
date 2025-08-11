@@ -38,6 +38,9 @@ const SoportePage = lazy(() => import("../pages/Documentacion/funcional/SoporteP
 const ArquitecturaPage = lazy(() => import("../pages/Documentacion/ArquitecturaPage"));
 const BaseDatosPage = lazy(() => import("../pages/Documentacion/tecnica/BaseDatosPage"));
 const DesarrolloPage = lazy(() => import("../pages/Documentacion/tecnica/DesarrolloPage"));
+
+// Menu Piramidal ISO 9001
+const ProcesosISO = lazy(() => import("../pages/ProcesosISO"));
 const AdministracionPage = lazy(() => import("../pages/Documentacion/tecnica/AdministracionPage"));
 const ConfiguracionEntornos = lazy(() => import("../pages/Documentacion/ConfiguracionEntornos"));
 const ApiDocsPage = lazy(() => import("../pages/Documentacion/ApiDocsPage"));
@@ -197,6 +200,9 @@ const AppRoutes = () => {
                   <Route path="hallazgos/:id" element={<HallazgoSingle />} />
                   <Route path="acciones" element={<AccionesPage />} />
                   <Route path="acciones/:id" element={<AccionSingle />} />
+                  
+                  {/* Menu Piramidal ISO 9001 */}
+                  <Route path="procesos-iso" element={<ProcesosISO />} />
                   
                   {/* Otros */}
                   <Route path="productos" element={<ProductosPage />} />

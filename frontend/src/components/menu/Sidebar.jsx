@@ -136,10 +136,11 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
         },
         {
           type: 'submenu',
-          name: 'Desarrollo',
-          icon: GraduationCap,
+          name: 'Des. Prod/Serv',
+          icon: Package,
           id: 'desarrollo',
           items: [
+            { name: 'Productos y Servicios', path: '/app/productos', icon: Package },
             { name: 'Capacitaciones', path: '/app/capacitaciones', icon: GraduationCap },
             { name: 'Competencias', path: '/app/competencias', icon: ClipboardList },
             { name: 'Evaluaciones Individuales', path: '/app/evaluaciones-individuales', icon: User },
@@ -191,6 +192,12 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
         },
         { name: 'Usuarios', path: '/app/usuarios', icon: Users },
         { name: 'Documentos', path: '/app/documentos', icon: FileText },
+        { 
+          name: '🏛️ Procesos ISO 9001', 
+          path: '/app/procesos-iso', 
+          icon: Target,
+          show: () => true
+        },
         { name: 'Planes', path: '/app/planes', icon: Star },
         { 
           name: 'Esquema de BD', 

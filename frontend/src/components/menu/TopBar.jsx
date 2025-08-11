@@ -20,7 +20,8 @@ import {
   LogOut,
   Moon,
   Sun,
-  ChevronDown
+  ChevronDown,
+  Building
 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -92,14 +93,15 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
           </Badge>
         </Button>
 
-        {/* Login Button for Testing */}
+        {/* Menu Visual Piramidal ISO 9001 */}
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate('/login')}
-          className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+          onClick={() => navigate('/app/procesos-iso')}
+          className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 flex items-center gap-2"
         >
-          Login Test
+          <Building className="w-4 h-4" />
+          Menu Visual
         </Button>
 
         {/* User Menu */}

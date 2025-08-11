@@ -29,6 +29,7 @@ const medicionesRoutes = require('./routes/mediciones.routes.js');
 const hallazgosRoutes = require('./routes/hallazgos.js');
 const accionesRoutes = require('./routes/acciones.routes.js');
 const auditoriasRoutes = require('./routes/auditorias.routes.js');
+const productosRoutes = require('./routes/productos.routes.js');
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -77,6 +78,9 @@ app.use('/api/acciones', accionesRoutes);
 
 // Rutas de auditorías
 app.use('/api/auditorias', auditoriasRoutes);
+
+// Rutas de productos
+app.use('/api/productos', productosRoutes);
 
 // Ruta de prueba
 app.get('/api/test', (req, res) => {
