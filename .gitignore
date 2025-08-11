@@ -1,134 +1,78 @@
-# Ignorar carpeta Frontend con mayúscula
-Frontend/
-
 # Dependencies
 node_modules/
-*/node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Production builds
+frontend/dist/
+frontend/build/
 
 # Environment variables
 .env
 .env.local
 .env.production
-.env.development
+.env.staging
+backend/env-local.txt
 
-# Build outputs
-dist/
-build/
-*/dist/
-*/build/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Logs
-logs/
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-
-# Gatsby files
+# Cache
 .cache/
-public
+frontend/.vite/
+.turbo/
 
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
+# Temporary files
 tmp/
 temp/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# OS generated files
-Thumbs.db
-ehthumbs.db
-
-# Database files
+# Database
 *.db
 *.sqlite
-*.sqlite3
 
-# Upload directories
-uploads/
-*/uploads/
+# PM2
+ecosystem.config.js.backup
 
-# PM2 files
-.pm2/
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # SSL certificates
 *.pem
 *.key
 *.crt
 
-# Backup files
-*.bak
-*.backup
-*.old
-
-# Test files
-test-results/
+# Test coverage
 coverage/
-*.test.js.snap
 
-# Runtime config override (server specific)
-runtime-config.override.js
+# Misc
+.nyc_output
+.grunt
+bower_components
+*.tgz
+*.tar.gz
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
