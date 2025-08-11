@@ -378,7 +378,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       {/* Footer */}
       <div className="p-4 border-t border-slate-700">
         <div className="text-xs text-slate-400 text-center">
-          © 2024 SGC Pro v3.0.0
+          © 2024 SGC Pro v11-8
         </div>
       </div>
     </motion.div>

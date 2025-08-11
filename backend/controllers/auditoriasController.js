@@ -851,3 +851,23 @@ const getRegistrosRelacionables = async (req, res) => {
     });
   }
 };
+
+// ===============================================
+// EXPORTACIÓN DE FUNCIONES - SGC PRO
+// ===============================================
+
+module.exports = {
+  getAllAuditorias,
+  getAuditoriaById,
+  createAuditoria,
+  updateAuditoria,
+  deleteAuditoria,
+  getAspectos,
+  addAspecto,
+  updateAspecto,
+  deleteAspecto,
+  addRelacion,
+  getRelaciones,
+  deleteRelacion,
+  getRegistrosRelacionables
+};

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Building2, 
   Shield, 
@@ -14,6 +15,24 @@ import {
   Play
 } from 'lucide-react';
 import WebLayout from '../../components/layout/WebLayout';
+
+// Componente para mostrar la versión
+const VersionIndicator = () => {
+  const version = "11-8"; // Versión actualizada
+  const buildDate = new Date().toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return (
+    <div className="fixed bottom-4 right-4 bg-black/80 text-white px-3 py-1 rounded-lg text-xs font-mono z-50">
+      v{version} | {buildDate}
+    </div>
+  );
+};
 
 const WebHome = () => {
   const features = [
@@ -56,6 +75,8 @@ const WebHome = () => {
     { number: "99.9%", label: "Uptime" }
   ];
 
+  const navigate = useNavigate();
+
   return (
     <WebLayout>
       {/* Header Hero */}
@@ -95,6 +116,14 @@ const WebHome = () => {
                 className="border-2 border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg"
               >
                 Conocer Más
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/login')}
+                className="bg-slate-700 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg"
+              >
+                Iniciar Sesión
               </motion.button>
             </div>
           </motion.div>
@@ -302,6 +331,7 @@ const WebHome = () => {
           </div>
         </div>
       </footer>
+      <VersionIndicator />
     </WebLayout>
   );
 };

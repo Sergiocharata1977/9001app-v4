@@ -135,7 +135,17 @@ const HallazgosPage2 = () => {
   );
 
   if (loading) return <div className="p-8 text-center">Cargando hallazgos...</div>;
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
+  if (error) return (
+    <div className="p-8 text-center">
+      <div className="text-red-600 mb-4">{error}</div>
+      <Button 
+        onClick={() => navigate('/login')} 
+        className="bg-blue-600 hover:bg-blue-700 text-white"
+      >
+        Ir al Login
+      </Button>
+    </div>
+  );
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">

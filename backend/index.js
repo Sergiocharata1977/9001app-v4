@@ -26,6 +26,9 @@ const procesosRoutes = require('./routes/procesos.routes.js');
 const objetivosCalidadRoutes = require('./routes/objetivos-calidad.routes.js');
 const indicadoresRoutes = require('./routes/indicadores.routes.js');
 const medicionesRoutes = require('./routes/mediciones.routes.js');
+const hallazgosRoutes = require('./routes/hallazgos.js');
+const accionesRoutes = require('./routes/acciones.routes.js');
+const auditoriasRoutes = require('./routes/auditorias.routes.js');
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -65,6 +68,15 @@ app.use('/api/indicadores', indicadoresRoutes);
 
 // Rutas de mediciones
 app.use('/api/mediciones', medicionesRoutes);
+
+// Rutas de hallazgos
+app.use('/api/hallazgos', hallazgosRoutes);
+
+// Rutas de acciones
+app.use('/api/acciones', accionesRoutes);
+
+// Rutas de auditorías
+app.use('/api/auditorias', auditoriasRoutes);
 
 // Ruta de prueba
 app.get('/api/test', (req, res) => {

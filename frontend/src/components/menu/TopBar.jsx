@@ -92,6 +92,16 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
           </Badge>
         </Button>
 
+        {/* Login Button for Testing */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/login')}
+          className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+        >
+          Login Test
+        </Button>
+
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
