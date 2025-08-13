@@ -2,7 +2,7 @@ const ragService = require('./ragService.js');
 const fs = require('fs');
 const path = require('path');
 const { fileURLToPath  } = require('url');
-import 'dotenv/config';
+require('dotenv/config');
 
 
 
@@ -10,7 +10,7 @@ import 'dotenv/config';
 /**
  * Inicializa el asistente ISO y sus servicios dependientes
  */
-export async function initializeAssistant() {
+async function initializeAssistant() {
   console.log('🤖 Iniciando Asistente ISO...');
   
   try {
@@ -98,6 +98,9 @@ function ensureDirectoryExists(dirPath) {
 }
 
 // Exportamos una función que solo inicializa si se solicita
+module.exports = {
+  initializeAssistant
+};
 export default {
   initializeAssistant
 };

@@ -1,26 +1,26 @@
 const bcrypt = require('bcryptjs');
 const { db  } = require('../lib/tursoClient.js');
 
-async function createAdminUser() {
-  console.log('🔧 Iniciando creación del usuario admin...');
+async function createOrgAdminUser() {
+  console.log('🔧 Iniciando creación del usuario admin de organización...');
   
   try {
-    // Datos del usuario admin
-    const adminEmail = 'admin@demo.com';
-    const adminPassword = 'admin123';
-    const adminName = 'Administrador';
-    const adminRole = 'super_admin'; // Corregido para usar underscore
+    // Datos del usuario admin de organización
+    const adminEmail = 'orgadmin@demo.com';
+    const adminPassword = 'orgadmin123';
+    const adminName = 'Admin Organización';
+    const adminRole = 'admin'; // Admin de organización
     const organizationId = 21; // Usar la Organización Demo existente (ID 21)
     
     // Verificar si el usuario ya existe
-    console.log('🔍 Verificando si el usuario admin ya existe...');
+    console.log('🔍 Verificando si el usuario admin de organización ya existe...');
     const existingUser = await db.execute({
       sql: 'SELECT id FROM usuarios WHERE email = ?',
       args: [adminEmail]
     });
     
     if (existingUser.rows.length > 0) {
-      console.log('⚠️  El usuario admin ya existe. ID:', existingUser.rows[0].id);
+      console.log('⚠️  El usuario admin de organización ya existe. ID:', existingUser.rows[0].id);
       return;
     }
     
@@ -44,15 +44,15 @@ async function createAdminUser() {
     const hashedPassword = await bcrypt.hash(adminPassword, salt);
     console.log('✅ Hash generado correctamente');
     
-    // Crear el usuario admin
-    console.log('👤 Creando usuario admin...');
+    // Crear el usuario admin de organización
+    console.log('👤 Creando usuario admin de organización...');
     const userResult = await db.execute({
       sql: 'INSERT INTO usuarios (name, email, password_hash, role, organization_id, created_at) VALUES (?, ?, ?, ?, ?, datetime("now"))',
       args: [adminName, adminEmail, hashedPassword, adminRole, organizationId]
     });
     
     const userId = userResult.lastInsertRowid;
-    console.log('✅ Usuario admin creado exitosamente:');
+    console.log('✅ Usuario admin de organización creado exitosamente:');
     console.log('   - ID:', userId);
     console.log('   - Nombre:', adminName);
     console.log('   - Email:', adminEmail);
@@ -69,10 +69,10 @@ async function createAdminUser() {
     if (verifyUser.rows.length > 0) {
       console.log('✅ Verificación exitosa:', verifyUser.rows[0]);
       console.log('');
-      console.log('🎉 USUARIO ADMIN CREADO EXITOSAMENTE');
-      console.log('   📧 Email: admin@demo.com');
-      console.log('   🔑 Password: admin123');
-      console.log('   🎯 Role: super_admin');
+      console.log('🎉 USUARIO ADMIN DE ORGANIZACIÓN CREADO EXITOSAMENTE');
+      console.log('   📧 Email: orgadmin@demo.com');
+      console.log('   🔑 Password: orgadmin123');
+      console.log('   🎯 Role: admin');
       console.log('');
       console.log('Ya puedes iniciar sesión en el sistema!');
     } else {
@@ -80,14 +80,14 @@ async function createAdminUser() {
     }
     
   } catch (error) {
-    console.error('❌ Error al crear usuario admin:', error);
+    console.error('❌ Error al crear usuario admin de organización:', error);
     console.error('Detalles:', error.message);
   }
 }
 
 // Ejecutar si se llama directamente
 if (import.meta.url === `file://${process.argv[1]}`) {
-  createAdminUser()
+  createOrgAdminUser()
     .then(() => {
       console.log('🏁 Script completado');
       process.exit(0);
@@ -98,4 +98,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-module.exports = { createAdminUser  };
+module.exports = { createOrgAdminUser  };

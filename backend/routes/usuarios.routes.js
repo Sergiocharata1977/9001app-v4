@@ -1,5 +1,6 @@
 const express = require('express');
 const { tursoClient } = require('../lib/tursoClient.js');
+const bcrypt = require('bcryptjs');
 
 const router = express.Router();
 
@@ -127,7 +128,6 @@ router.post('/', async (req, res) => {
     }
 
     // Hash de la contraseña (simplificado por ahora)
-    const bcrypt = await import('bcrypt');
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await tursoClient.execute({

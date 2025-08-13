@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import MainLayout from "../components/layout/MainLayout";
-import ProtectedRoute, { SuperAdminRoute, OrganizationAdminRoute } from "./ProtectedRoute";
+import ProtectedRoute, { SuperAdminRoute } from "./ProtectedRoute";
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -232,16 +232,8 @@ const AppRoutes = () => {
                   {/* Administración */}
                   <Route path="usuarios" element={<UsersPage />} />
                   <Route path="usuarios-single" element={<UsuariosSingle />} />
-                  <Route path="admin/super" element={
-                    <SuperAdminRoute>
-                      <SuperAdminPage />
-                    </SuperAdminRoute>
-                  } />
-                  <Route path="admin/organization" element={
-                    <OrganizationAdminRoute>
-                      <OrganizationAdminPage />
-                    </OrganizationAdminRoute>
-                  } />
+                  <Route path="admin/super" element={<SuperAdminPage />} />
+                  <Route path="admin/organization" element={<OrganizationAdminPage />} />
 
                   {/* Documentación */}
                   <Route path="documentacion" element={<DocumentacionLayout />}>

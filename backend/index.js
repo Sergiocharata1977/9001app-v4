@@ -30,9 +30,21 @@ const hallazgosRoutes = require('./routes/hallazgos.js');
 const accionesRoutes = require('./routes/acciones.routes.js');
 const auditoriasRoutes = require('./routes/auditorias.routes.js');
 const productosRoutes = require('./routes/productos.routes.js');
+const adminRoutes = require('./routes/admin.routes.js');
+const planesRoutes = require('./routes/planes.js');
+const suscripcionesRoutes = require('./routes/suscripciones.js');
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
+
+// Rutas de administración
+app.use('/api/admin', adminRoutes);
+
+// Rutas de planes
+app.use('/api/planes', planesRoutes);
+
+// Rutas de suscripciones
+app.use('/api/suscripciones', suscripcionesRoutes);
 
 // Rutas de usuarios
 app.use('/api/usuarios', userRoutes);

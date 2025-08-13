@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { adminService } from '@/services/adminService';
+import useAuthStore from '@/store/authStore';
 
-const UserModal = ({ isOpen, onClose, user = null, organizations = [], onSuccess }) => {
+const UserModal = ({ isOpen, onClose, user = null, organizations = [], onSuccess, isOrganizationAdmin = false }) => {
+  const authStore = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,17 +34,19 @@ const UserModal = ({ isOpen, onClose, user = null, organizations = [], onSuccess
         is_active: user.is_active !== undefined ? user.is_active : true
       });
     } else {
+      // Para admin de organización, usar su organización por defecto
+      const defaultOrgId = isOrganizationAdmin ? authStore.getOrganizationId()?.toString() : '';
       setFormData({
         name: '',
         email: '',
         password: '',
         role: 'employee',
-        organization_id: '',
+        organization_id: defaultOrgId,
         is_active: true
       });
     }
     setError('');
-  }, [user, isOpen]);
+  }, [user, isOpen, isOrganizationAdmin]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -77,9 +81,24 @@ const UserModal = ({ isOpen, onClose, user = null, organizations = [], onSuccess
         if (!formData.password) {
           delete userData.password;
         }
-        await adminService.updateUser(user.id, userData);
+        
+        if (isOrganizationAdmin) {
+          // Admin de organización solo puede editar usuarios de su organización
+          const organizationId = authStore.getOrganizationId();
+          await adminService.updateOrganizationUser(organizationId, user.id, userData);
+        } else {
+          // Super admin puede editar cualquier usuario
+          await adminService.updateUser(user.id, userData);
+        }
       } else {
-        await adminService.createUser(userData);
+        if (isOrganizationAdmin) {
+          // Admin de organización solo puede crear usuarios en su organización
+          const organizationId = authStore.getOrganizationId();
+          await adminService.createOrganizationUser(organizationId, userData);
+        } else {
+          // Super admin puede crear usuarios en cualquier organización
+          await adminService.createUser(userData);
+        }
       }
 
       onSuccess();
@@ -99,6 +118,24 @@ const UserModal = ({ isOpen, onClose, user = null, organizations = [], onSuccess
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     setFormData(prev => ({ ...prev, password }));
+  };
+
+  // Roles disponibles según el tipo de admin
+  const getAvailableRoles = () => {
+    if (isOrganizationAdmin) {
+      return [
+        { value: 'admin', label: 'Administrador' },
+        { value: 'manager', label: 'Gerente' },
+        { value: 'employee', label: 'Empleado' }
+      ];
+    } else {
+      return [
+        { value: 'super_admin', label: 'Super Administrador' },
+        { value: 'admin', label: 'Administrador' },
+        { value: 'manager', label: 'Gerente' },
+        { value: 'employee', label: 'Empleado' }
+      ];
+    }
   };
 
   return (
@@ -132,21 +169,23 @@ const UserModal = ({ isOpen, onClose, user = null, organizations = [], onSuccess
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="organization">Organización *</Label>
-            <Select value={formData.organization_id} onValueChange={(value) => handleChange('organization_id', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar organización" />
-              </SelectTrigger>
-              <SelectContent>
-                {organizations.map((org) => (
-                  <SelectItem key={org.id} value={org.id.toString()}>
-                    {org.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!isOrganizationAdmin && (
+            <div className="space-y-2">
+              <Label htmlFor="organization">Organización *</Label>
+              <Select value={formData.organization_id} onValueChange={(value) => handleChange('organization_id', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar organización" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id.toString()}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -156,10 +195,11 @@ const UserModal = ({ isOpen, onClose, user = null, organizations = [], onSuccess
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="super_admin">Super Administrador</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                  <SelectItem value="manager">Gerente</SelectItem>
-                  <SelectItem value="employee">Empleado</SelectItem>
+                  {getAvailableRoles().map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

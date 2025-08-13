@@ -217,6 +217,30 @@ const useAuthStore = create(
           }
         },
 
+        // Función para obtener el ID de la organización del usuario actual
+        getOrganizationId: () => {
+          const state = get();
+          return state.user?.organization_id || null;
+        },
+
+        // Función para obtener el rol del usuario actual
+        getUserRole: () => {
+          const state = get();
+          return state.user?.role || null;
+        },
+
+        // Función para verificar si el usuario es super admin
+        isSuperAdmin: () => {
+          const state = get();
+          return state.user?.role === 'super_admin';
+        },
+
+        // Función para verificar si el usuario es admin de organización
+        isOrganizationAdmin: () => {
+          const state = get();
+          return state.user?.role === 'admin';
+        },
+
         // Utilidades
         reset: () => {
             set({
@@ -250,3 +274,6 @@ export default useAuthStore;
 
 // Exportación nombrada para uso específico
 export { useAuthStore };
+
+// Exportación nombrada para compatibilidad con código existente
+export const authStore = useAuthStore;

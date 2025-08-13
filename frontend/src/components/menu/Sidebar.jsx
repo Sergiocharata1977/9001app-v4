@@ -191,13 +191,6 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
           show: () => ['admin', 'super_admin'].includes(user?.role)
         },
         { name: 'Usuarios', path: '/app/usuarios', icon: Users },
-        { name: 'Documentos', path: '/app/documentos', icon: FileText },
-        { 
-          name: '🏛️ Procesos ISO 9001', 
-          path: '/app/procesos-iso', 
-          icon: Target,
-          show: () => true
-        },
         { name: 'Planes', path: '/app/planes', icon: Star },
         { 
           name: 'Esquema de BD', 

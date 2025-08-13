@@ -1,29 +1,23 @@
 const express = require('express');
+const { getSuscripcionActual, createSuscripcion, cancelSuscripcion } = require('../controllers/planesController.js');
 const router = express.Router();
 
-// GET - Obtener todas las suscripciones
-router.get('/', (req, res) => {
-  res.json({ message: 'Suscripciones endpoint working' });
-});
-
-// GET - Obtener una suscripción específica
-router.get('/:id', (req, res) => {
-  res.json({ message: 'Suscripción específica endpoint working', id: req.params.id });
-});
+// GET - Obtener suscripción de la organización actual
+router.get('/organizacion/actual', getSuscripcionActual);
 
 // POST - Crear nueva suscripción
-router.post('/', (req, res) => {
-  res.json({ message: 'Crear suscripción endpoint working' });
-});
+router.post('/', createSuscripcion);
 
-// PUT - Actualizar suscripción
-router.put('/:id', (req, res) => {
-  res.json({ message: 'Actualizar suscripción endpoint working', id: req.params.id });
-});
+// DELETE - Cancelar suscripción
+router.delete('/:id', cancelSuscripcion);
 
-// DELETE - Eliminar suscripción
-router.delete('/:id', (req, res) => {
-  res.json({ message: 'Eliminar suscripción endpoint working', id: req.params.id });
+// GET - Debug endpoint
+router.get('/debug', (req, res) => {
+  res.json({ 
+    message: 'Debug endpoint working',
+    timestamp: new Date().toISOString(),
+    user: req.user
+  });
 });
 
 // GET - Health check

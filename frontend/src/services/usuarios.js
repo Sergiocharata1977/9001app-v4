@@ -1,7 +1,7 @@
 // Servicio para gestionar usuarios - Sistema Multi-Tenant
 import apiService from './apiService.js';
 
-const ENDPOINT = '/api/users'; // Endpoint correcto del backend
+const ENDPOINT = '/users'; // Endpoint correcto del backend (sin /api porque apiService ya lo incluye)
 
 // Exportar el servicio de usuarios
 export const usuariosService = {

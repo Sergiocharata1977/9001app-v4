@@ -13,17 +13,19 @@ import {
   Settings, 
   Activity,
   Shield,
-  UserCheck
+  UserCheck,
+  BarChart3
 } from 'lucide-react';
 import { adminService } from '@/services/adminService';
 import OrganizationModal from './OrganizationModal';
 import UserModal from './UserModal';
+import AdminDashboard from './AdminDashboard';
 
 const SuperAdminPanel = () => {
   const [organizations, setOrganizations] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('organizations');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [showOrganizationModal, setShowOrganizationModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState(null);
@@ -139,6 +141,10 @@ const SuperAdminPanel = () => {
           </p>
         </div>
         <div className="flex space-x-2">
+          <Button variant="outline" onClick={() => setActiveTab('dashboard')}>
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Dashboard
+          </Button>
           <Button variant="outline" onClick={() => setActiveTab('organizations')}>
             <Building2 className="w-4 h-4 mr-2" />
             Organizaciones
@@ -151,12 +157,17 @@ const SuperAdminPanel = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="organizations">Organizaciones</TabsTrigger>
           <TabsTrigger value="users">Usuarios Globales</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="monitoring">Monitoreo</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard" className="space-y-4">
+          <AdminDashboard />
+        </TabsContent>
 
         <TabsContent value="organizations" className="space-y-4">
           <Card>

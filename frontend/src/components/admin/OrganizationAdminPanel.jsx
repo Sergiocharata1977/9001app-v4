@@ -12,16 +12,22 @@ import {
   Edit,
   Trash2,
   UserCheck,
-  Building2
+  Building2,
+  Save
 } from 'lucide-react';
-import { apiService } from '@/services/apiService';
-import { authStore } from '@/store/authStore';
+import { adminService } from '@/services/adminService';
+import useAuthStore from '@/store/authStore';
+import UserModal from './UserModal';
 
 const OrganizationAdminPanel = () => {
+  const authStore = useAuthStore();
   const [users, setUsers] = useState([]);
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('users');
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [organizationForm, setOrganizationForm] = useState({});
 
   useEffect(() => {
     loadData();
@@ -33,16 +39,61 @@ const OrganizationAdminPanel = () => {
       const organizationId = authStore.getOrganizationId();
       
       const [usersResponse, orgResponse] = await Promise.all([
-        apiService.get(`/api/admin/organization/${organizationId}/users`),
-        apiService.get(`/api/admin/organization/${organizationId}`)
+        adminService.getOrganizationUsers(organizationId),
+        adminService.getOrganizationById(organizationId)
       ]);
       
-      setUsers(usersResponse.data);
-      setOrganization(orgResponse.data);
+      setUsers(usersResponse.data.data || []);
+      setOrganization(orgResponse.data.data || {});
+      setOrganizationForm({
+        name: orgResponse.data.data?.name || '',
+        email: orgResponse.data.data?.email || '',
+        phone: orgResponse.data.data?.phone || '',
+        plan: orgResponse.data.data?.plan || 'basic'
+      });
     } catch (error) {
       console.error('Error cargando datos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateUser = () => {
+    setSelectedUser(null);
+    setShowUserModal(true);
+  };
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setShowUserModal(true);
+  };
+
+  const handleUserSuccess = () => {
+    loadData();
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      try {
+        const organizationId = authStore.getOrganizationId();
+        await adminService.deleteOrganizationUser(organizationId, userId);
+        loadData();
+      } catch (error) {
+        console.error('Error eliminando usuario:', error);
+        alert('Error al eliminar usuario');
+      }
+    }
+  };
+
+  const handleUpdateOrganization = async () => {
+    try {
+      const organizationId = authStore.getOrganizationId();
+      await adminService.updateOrganization(organizationId, organizationForm);
+      loadData();
+      alert('Organización actualizada exitosamente');
+    } catch (error) {
+      console.error('Error actualizando organización:', error);
+      alert('Error al actualizar organización');
     }
   };
 
@@ -106,7 +157,7 @@ const OrganizationAdminPanel = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Usuarios de la Organización ({users.length})</CardTitle>
-              <Button>
+              <Button onClick={handleCreateUser}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nuevo Usuario
               </Button>
@@ -132,15 +183,28 @@ const OrganizationAdminPanel = () => {
                       <Button variant="outline" size="sm">
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditUser(user)}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
                 ))}
+                {users.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No hay usuarios en esta organización
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -159,7 +223,8 @@ const OrganizationAdminPanel = () => {
                     <input 
                       type="text" 
                       className="w-full p-2 border rounded-md"
-                      defaultValue={organization?.name}
+                      value={organizationForm.name}
+                      onChange={(e) => setOrganizationForm(prev => ({ ...prev, name: e.target.value }))}
                     />
                   </div>
                   <div>
@@ -167,7 +232,8 @@ const OrganizationAdminPanel = () => {
                     <input 
                       type="email" 
                       className="w-full p-2 border rounded-md"
-                      defaultValue={organization?.email}
+                      value={organizationForm.email}
+                      onChange={(e) => setOrganizationForm(prev => ({ ...prev, email: e.target.value }))}
                     />
                   </div>
                   <div>
@@ -175,19 +241,27 @@ const OrganizationAdminPanel = () => {
                     <input 
                       type="tel" 
                       className="w-full p-2 border rounded-md"
-                      defaultValue={organization?.phone}
+                      value={organizationForm.phone}
+                      onChange={(e) => setOrganizationForm(prev => ({ ...prev, phone: e.target.value }))}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Plan</label>
-                    <select className="w-full p-2 border rounded-md">
-                      <option value="basic" selected={organization?.plan === 'basic'}>Básico</option>
-                      <option value="premium" selected={organization?.plan === 'premium'}>Premium</option>
-                      <option value="enterprise" selected={organization?.plan === 'enterprise'}>Empresarial</option>
+                    <select 
+                      className="w-full p-2 border rounded-md"
+                      value={organizationForm.plan}
+                      onChange={(e) => setOrganizationForm(prev => ({ ...prev, plan: e.target.value }))}
+                    >
+                      <option value="basic">Básico</option>
+                      <option value="premium">Premium</option>
+                      <option value="enterprise">Empresarial</option>
                     </select>
                   </div>
                 </div>
-                <Button className="w-full">Guardar Cambios</Button>
+                <Button onClick={handleUpdateOrganization} className="w-full">
+                  <Save className="w-4 h-4 mr-2" />
+                  Guardar Cambios
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -223,6 +297,16 @@ const OrganizationAdminPanel = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modal para crear/editar usuarios */}
+      <UserModal
+        isOpen={showUserModal}
+        onClose={() => setShowUserModal(false)}
+        user={selectedUser}
+        organizations={[organization]}
+        onSuccess={handleUserSuccess}
+        isOrganizationAdmin={true}
+      />
     </div>
   );
 };

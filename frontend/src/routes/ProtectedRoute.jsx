@@ -28,5 +28,22 @@ const SuperAdminRoute = ({ children }) => {
   return children;
 };
 
-export { SuperAdminRoute };
+// Componente para rutas que solo pueden acceder admin de organización
+const OrganizationAdminRoute = ({ children }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Permitir acceso a super_admin y admin
+  if (user?.role !== 'super_admin' && user?.role !== 'admin') {
+    return <Navigate to="/documentacion" replace />;
+  }
+
+  return children;
+};
+
+export { SuperAdminRoute, OrganizationAdminRoute };
 export default ProtectedRoute;

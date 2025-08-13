@@ -1,10 +1,14 @@
-import React from 'react';
-import { Settings, Shield, Users, Database, Activity, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings, Shield, Users, Database, Activity, AlertTriangle, Building2, Key, Lock, Eye, Code, Terminal, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 
 const AdministracionPage = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+
   const rolesSistema = [
     {
       rol: 'super_admin',
@@ -14,21 +18,27 @@ const AdministracionPage = () => {
         'Crear y gestionar organizaciones',
         'Configuración global del sistema',
         'Acceso a logs y métricas',
-        'Gestión de planes y suscripciones'
+        'Gestión de planes y suscripciones',
+        'Crear super admins y admins',
+        'Monitoreo global del sistema'
       ],
-      color: 'bg-red-500'
+      color: 'bg-red-500',
+      icon: Shield
     },
     {
       rol: 'admin',
       descripcion: 'Administrador de una organización',
       permisos: [
         'Gestión completa de su organización',
-        'Crear y gestionar usuarios',
+        'Crear y gestionar usuarios (admin, manager, employee)',
         'Configurar departamentos y puestos',
-        'Acceso a todos los módulos',
-        'Generar reportes ejecutivos'
+        'Acceso a todos los módulos de su organización',
+        'Generar reportes ejecutivos',
+        'Configuración local de la organización',
+        'Monitoreo de usuarios de su organización'
       ],
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
+      icon: Building2
     },
     {
       rol: 'manager',
@@ -38,9 +48,11 @@ const AdministracionPage = () => {
         'Gestionar personal asignado',
         'Aprobar acciones y hallazgos',
         'Generar reportes de área',
-        'Configurar indicadores'
+        'Configurar indicadores',
+        'Acceso a módulos específicos de su área'
       ],
-      color: 'bg-green-500'
+      color: 'bg-green-500',
+      icon: Users
     },
     {
       rol: 'employee',
@@ -50,313 +62,443 @@ const AdministracionPage = () => {
         'Crear y gestionar registros',
         'Ver reportes de su área',
         'Participar en auditorías',
-        'Actualizar información personal'
+        'Actualizar información personal',
+        'Acceso limitado según permisos'
       ],
-      color: 'bg-gray-500'
+      color: 'bg-gray-500',
+      icon: Users
     }
   ];
 
   const configuracionesSistema = [
     {
-      categoria: 'Seguridad',
-      items: [
-        { nombre: 'Autenticación JWT', descripcion: 'Tokens de sesión seguros' },
-        { nombre: 'Roles y Permisos', descripcion: 'Control granular de acceso' },
-        { nombre: 'Encriptación', descripcion: 'Datos sensibles encriptados' },
-        { nombre: 'Auditoría', descripcion: 'Log de todas las operaciones' }
+      categoria: 'Autenticación y Seguridad',
+      configuraciones: [
+        { nombre: 'JWT_SECRET', descripcion: 'Clave secreta para tokens JWT', tipo: 'string', requerido: true },
+        { nombre: 'JWT_REFRESH_SECRET', descripcion: 'Clave para refresh tokens', tipo: 'string', requerido: true },
+        { nombre: 'JWT_EXPIRES_IN', descripcion: 'Tiempo de expiración del token', tipo: 'string', requerido: true },
+        { nombre: 'JWT_REFRESH_EXPIRES_IN', descripcion: 'Tiempo de expiración del refresh token', tipo: 'string', requerido: true }
       ]
     },
     {
-      categoria: 'Multi-Tenant',
-      items: [
-        { nombre: 'Aislamiento de Datos', descripcion: 'Separación por organización' },
-        { nombre: 'Middleware Tenant', descripcion: 'Filtros automáticos' },
-        { nombre: 'Configuración por Org', descripcion: 'Personalización por tenant' },
-        { nombre: 'Límites de Plan', descripcion: 'Control de recursos por plan' }
+      categoria: 'Base de Datos',
+      configuraciones: [
+        { nombre: 'DATABASE_URL', descripcion: 'URL de conexión a Turso DB', tipo: 'string', requerido: true },
+        { nombre: 'DATABASE_AUTH_TOKEN', descripcion: 'Token de autenticación Turso', tipo: 'string', requerido: true }
       ]
     },
     {
-      categoria: 'Rendimiento',
-      items: [
-        { nombre: 'Caché', descripcion: 'Optimización de consultas' },
-        { nombre: 'Índices BD', descripcion: 'Consultas optimizadas' },
-        { nombre: 'Lazy Loading', descripcion: 'Carga bajo demanda' },
-        { nombre: 'Compresión', descripcion: 'Reducción de tamaño de datos' }
+      categoria: 'Servidor',
+      configuraciones: [
+        { nombre: 'PORT', descripcion: 'Puerto del servidor backend', tipo: 'number', requerido: true },
+        { nombre: 'NODE_ENV', descripcion: 'Entorno de ejecución', tipo: 'string', requerido: true },
+        { nombre: 'CORS_ORIGIN', descripcion: 'Origen permitido para CORS', tipo: 'string', requerido: true }
       ]
     }
   ];
 
-  const tareasMantenimiento = [
+  const endpointsAPI = [
     {
-      titulo: 'Backup Diario',
-      descripcion: 'Respaldo automático de base de datos',
-      frecuencia: 'Diario',
-      duracion: '5 minutos',
-      icon: Database
+      categoria: 'Autenticación',
+      endpoints: [
+        { metodo: 'POST', ruta: '/api/auth/login', descripcion: 'Iniciar sesión', rol: 'Todos' },
+        { metodo: 'POST', ruta: '/api/auth/register', descripcion: 'Registrar usuario', rol: 'Todos' },
+        { metodo: 'GET', ruta: '/api/auth/verify', descripcion: 'Verificar token', rol: 'Autenticados' },
+        { metodo: 'POST', ruta: '/api/auth/refresh', descripcion: 'Refrescar token', rol: 'Autenticados' }
+      ]
     },
     {
-      titulo: 'Limpieza de Logs',
-      descripcion: 'Eliminar logs antiguos del sistema',
-      frecuencia: 'Semanal',
-      duracion: '10 minutos',
-      icon: Activity
+      categoria: 'Super Administrador',
+      endpoints: [
+        { metodo: 'GET', ruta: '/api/admin/organizations', descripcion: 'Listar organizaciones', rol: 'super_admin' },
+        { metodo: 'POST', ruta: '/api/admin/organizations', descripcion: 'Crear organización', rol: 'super_admin' },
+        { metodo: 'PUT', ruta: '/api/admin/organizations/:id', descripcion: 'Actualizar organización', rol: 'super_admin' },
+        { metodo: 'GET', ruta: '/api/admin/users', descripcion: 'Listar usuarios globales', rol: 'super_admin' },
+        { metodo: 'POST', ruta: '/api/admin/users', descripcion: 'Crear usuario global', rol: 'super_admin' },
+        { metodo: 'PUT', ruta: '/api/admin/users/:id', descripcion: 'Actualizar usuario global', rol: 'super_admin' },
+        { metodo: 'DELETE', ruta: '/api/admin/users/:id', descripcion: 'Eliminar usuario global', rol: 'super_admin' }
+      ]
     },
     {
-      titulo: 'Verificación de Seguridad',
-      descripcion: 'Revisar accesos y permisos',
-      frecuencia: 'Mensual',
-      duracion: '30 minutos',
-      icon: Shield
-    },
-    {
-      titulo: 'Actualización de Sistema',
-      descripcion: 'Instalar actualizaciones de seguridad',
-      frecuencia: 'Mensual',
-      duracion: '1 hora',
-      icon: Settings
+      categoria: 'Administrador de Organización',
+      endpoints: [
+        { metodo: 'GET', ruta: '/api/admin/organization/:id/users', descripcion: 'Listar usuarios de organización', rol: 'admin' },
+        { metodo: 'POST', ruta: '/api/admin/organization/:id/users', descripcion: 'Crear usuario en organización', rol: 'admin' },
+        { metodo: 'PUT', ruta: '/api/admin/organization/:id/users/:userId', descripcion: 'Actualizar usuario de organización', rol: 'admin' },
+        { metodo: 'DELETE', ruta: '/api/admin/organization/:id/users/:userId', descripcion: 'Eliminar usuario de organización', rol: 'admin' }
+      ]
     }
   ];
 
-  const monitoreo = [
+  const comandosUtil = [
     {
-      metrica: 'Uptime del Sistema',
-      valor: '99.9%',
-      estado: 'excelente',
-      descripcion: 'Tiempo de actividad del sistema'
+      categoria: 'Configuración Inicial',
+      comandos: [
+        { comando: 'node backend/scripts/setup-admin-users.js', descripcion: 'Crear usuarios administrativos iniciales' },
+        { comando: 'node backend/scripts/create-admin-user.js', descripcion: 'Crear solo super administrador' },
+        { comando: 'node backend/scripts/create-org-admin-user.js', descripcion: 'Crear solo admin de organización' }
+      ]
     },
     {
-      metrica: 'Usuarios Activos',
-      valor: '150+',
-      estado: 'bueno',
-      descripcion: 'Usuarios concurrentes promedio'
+      categoria: 'Testing y Validación',
+      comandos: [
+        { comando: 'node scripts/test-admin-system.js', descripcion: 'Probar sistema administrativo completo' },
+        { comando: 'npm run smoke', descripcion: 'Ejecutar smoke tests' },
+        { comando: 'curl -X GET http://localhost:5000/api/health', descripcion: 'Verificar salud del servidor' }
+      ]
     },
     {
-      metrica: 'Tiempo de Respuesta',
-      valor: '< 2s',
-      estado: 'excelente',
-      descripcion: 'Tiempo promedio de respuesta API'
-    },
-    {
-      metrica: 'Espacio en Disco',
-      valor: '75%',
-      estado: 'advertencia',
-      descripcion: 'Uso de almacenamiento'
+      categoria: 'Gestión de Procesos',
+      comandos: [
+        { comando: 'pm2 status', descripcion: 'Ver estado de procesos PM2' },
+        { comando: 'pm2 logs 9001app2-backend', descripcion: 'Ver logs del backend' },
+        { comando: 'pm2 restart 9001app2-backend', descripcion: 'Reiniciar backend' },
+        { comando: 'systemctl status nginx', descripcion: 'Ver estado de nginx' }
+      ]
     }
   ];
 
-  const getEstadoColor = (estado) => {
-    switch (estado) {
-      case 'excelente': return 'text-green-600 bg-green-100';
-      case 'bueno': return 'text-blue-600 bg-blue-100';
-      case 'advertencia': return 'text-yellow-600 bg-yellow-100';
-      case 'critico': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
+  const getMethodColor = (method) => {
+    const colors = {
+      GET: 'bg-green-100 text-green-800',
+      POST: 'bg-blue-100 text-blue-800',
+      PUT: 'bg-yellow-100 text-yellow-800',
+      DELETE: 'bg-red-100 text-red-800'
+    };
+    return colors[method] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      'super_admin': 'bg-red-100 text-red-800',
+      'admin': 'bg-blue-100 text-blue-800',
+      'manager': 'bg-green-100 text-green-800',
+      'employee': 'bg-gray-100 text-gray-800',
+      'Todos': 'bg-purple-100 text-purple-800',
+      'Autenticados': 'bg-orange-100 text-orange-800'
+    };
+    return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 bg-gray-500 rounded-lg flex items-center justify-center">
-            <Settings className="w-8 h-8 text-white" />
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-800">Administración del Sistema</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Configuración, mantenimiento, seguridad y monitoreo del sistema ISOFlow3. 
-          Guías para administradores y super administradores.
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          🏛️ Sistema Administrativo - Documentación Técnica
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-gray-400">
+          Documentación completa del sistema de administración multi-tenant de ISOFlow4
         </p>
       </div>
 
-      {/* Roles y Permisos */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">👥 Roles y Permisos</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {rolesSistema.map((rol, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 ${rol.color} rounded-lg flex items-center justify-center`}>
-                    <Users className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-semibold text-gray-800">
-                      {rol.rol.replace('_', ' ').toUpperCase()}
-                    </CardTitle>
-                    <p className="text-sm text-gray-600">{rol.descripcion}</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-800">Permisos:</h4>
-                  <ul className="space-y-1">
-                    {rol.permisos.map((permiso, permisoIndex) => (
-                      <li key={permisoIndex} className="text-sm text-gray-700 flex items-start space-x-2">
-                        <span className="text-blue-500">•</span>
-                        <span>{permiso}</span>
-                      </li>
-                    ))}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="overview">Vista General</TabsTrigger>
+          <TabsTrigger value="roles">Roles y Permisos</TabsTrigger>
+          <TabsTrigger value="config">Configuración</TabsTrigger>
+          <TabsTrigger value="api">API Endpoints</TabsTrigger>
+          <TabsTrigger value="commands">Comandos</TabsTrigger>
+          <TabsTrigger value="troubleshooting">Troubleshooting</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Arquitectura del Sistema
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold mb-2">Backend (Node.js + Express)</h3>
+                  <ul className="space-y-1 text-sm text-gray-600">
+                    <li>• Controladores modulares para cada funcionalidad</li>
+                    <li>• Middleware de autenticación y autorización</li>
+                    <li>• Base de datos Turso (LibSQL)</li>
+                    <li>• Validación de datos con Joi</li>
+                    <li>• Logging estructurado</li>
                   </ul>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Frontend (React + Vite)</h3>
+                  <ul className="space-y-1 text-sm text-gray-600">
+                    <li>• Componentes reutilizables</li>
+                    <li>• Gestión de estado con Zustand</li>
+                    <li>• Protección de rutas por rol</li>
+                    <li>• UI moderna con shadcn/ui</li>
+                    <li>• Responsive design</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Configuraciones */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">⚙️ Configuraciones del Sistema</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {configuracionesSistema.map((config, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-800">
-                  {config.categoria}
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-red-500" />
+                  Super Admin
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {config.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="p-3 bg-gray-50 rounded-lg">
-                      <div className="font-semibold text-gray-800">{item.nombre}</div>
-                      <div className="text-sm text-gray-600">{item.descripcion}</div>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                  Gestión global del sistema multi-tenant
+                </p>
+                <Badge className="bg-red-100 text-red-800">Acceso Completo</Badge>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </div>
 
-      {/* Tareas de Mantenimiento */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">🔧 Tareas de Mantenimiento</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tareasMantenimiento.map((tarea, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
+            <Card>
               <CardHeader>
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <tarea.icon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-semibold text-gray-800">
-                      {tarea.titulo}
-                    </CardTitle>
-                    <p className="text-sm text-gray-600">{tarea.descripcion}</p>
-                  </div>
-                </div>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-blue-500" />
+                  Admin Organización
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="text-sm text-gray-600">Frecuencia: {tarea.frecuencia}</div>
-                    <div className="text-sm text-gray-600">Duración: {tarea.duracion}</div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Programar
-                  </Button>
-                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                  Gestión local de su organización
+                </p>
+                <Badge className="bg-blue-100 text-blue-800">Acceso Local</Badge>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </div>
 
-      {/* Monitoreo */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">📊 Monitoreo del Sistema</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {monitoreo.map((item, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-semibold text-gray-800">
-                    {item.metrica}
-                  </CardTitle>
-                  <Badge className={getEstadoColor(item.estado)}>
-                    {item.estado.toUpperCase()}
-                  </Badge>
-                </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-5 h-5 text-green-500" />
+                  Base de Datos
+                </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-2xl font-bold text-gray-800 mb-2">
-                  {item.valor}
-                </div>
-                <p className="text-sm text-gray-600">{item.descripcion}</p>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-3">
+                  Turso DB con soporte multi-tenant
+                </p>
+                <Badge className="bg-green-100 text-green-800">Multi-Tenant</Badge>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </div>
+          </div>
+        </TabsContent>
 
-      {/* Alertas y Notificaciones */}
-      <div className="bg-yellow-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">⚠️ Alertas y Notificaciones</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-semibold text-yellow-800 mb-2">Alertas Automáticas</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• Uso de disco &gt; 80%</li>
-              <li>• Tiempo de respuesta &gt; 5s</li>
-              <li>• Errores de autenticación</li>
-              <li>• Intentos de acceso no autorizado</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-yellow-800 mb-2">Notificaciones</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• Backup completado exitosamente</li>
-              <li>• Nuevos usuarios registrados</li>
-              <li>• Auditorías programadas</li>
-              <li>• Actualizaciones del sistema</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+        <TabsContent value="roles" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Sistema de Roles y Permisos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {rolesSistema.map((rol) => {
+                  const Icon = rol.icon;
+                  return (
+                    <Card key={rol.rol} className="border-l-4 border-l-blue-500">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Icon className="w-5 h-5" />
+                          {rol.rol.replace('_', ' ').toUpperCase()}
+                        </CardTitle>
+                        <p className="text-sm text-gray-600">{rol.descripcion}</p>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-1 text-sm">
+                          {rol.permisos.map((permiso, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <span className="text-green-500 mt-1">•</span>
+                              {permiso}
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Acciones de Emergencia */}
-      <div className="bg-red-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">🚨 Acciones de Emergencia</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <h4 className="font-semibold text-red-800 mb-2">Sistema Caído</h4>
-            <ol className="text-sm text-gray-700 space-y-1">
-              <li>1. Verificar logs del servidor</li>
-              <li>2. Reiniciar servicios críticos</li>
-              <li>3. Restaurar desde backup</li>
-              <li>4. Notificar a usuarios</li>
-            </ol>
-          </div>
-          <div>
-            <h4 className="font-semibold text-red-800 mb-2">Brecha de Seguridad</h4>
-            <ol className="text-sm text-gray-700 space-y-1">
-              <li>1. Bloquear acceso sospechoso</li>
-              <li>2. Cambiar credenciales críticas</li>
-              <li>3. Revisar logs de acceso</li>
-              <li>4. Notificar a administradores</li>
-            </ol>
-          </div>
-          <div>
-            <h4 className="font-semibold text-red-800 mb-2">Pérdida de Datos</h4>
-            <ol className="text-sm text-gray-700 space-y-1">
-              <li>1. Detener escrituras en BD</li>
-              <li>2. Restaurar último backup</li>
-              <li>3. Verificar integridad</li>
-              <li>4. Replicar datos perdidos</li>
-            </ol>
-          </div>
-        </div>
-      </div>
+        <TabsContent value="config" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Configuración del Sistema
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {configuracionesSistema.map((categoria) => (
+                  <div key={categoria.categoria}>
+                    <h3 className="font-semibold mb-3 text-lg">{categoria.categoria}</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      {categoria.configuraciones.map((config) => (
+                        <div key={config.nombre} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <div className="font-mono text-sm font-semibold">{config.nombre}</div>
+                            <div className="text-sm text-gray-600">{config.descripcion}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{config.tipo}</Badge>
+                            {config.requerido && (
+                              <Badge className="bg-red-100 text-red-800">Requerido</Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="api" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="w-5 h-5" />
+                API Endpoints
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {endpointsAPI.map((categoria) => (
+                  <div key={categoria.categoria}>
+                    <h3 className="font-semibold mb-3 text-lg">{categoria.categoria}</h3>
+                    <div className="space-y-2">
+                      {categoria.endpoints.map((endpoint) => (
+                        <div key={endpoint.ruta} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Badge className={getMethodColor(endpoint.metodo)}>
+                              {endpoint.metodo}
+                            </Badge>
+                            <code className="font-mono text-sm">{endpoint.ruta}</code>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">{endpoint.descripcion}</span>
+                            <Badge className={getRoleColor(endpoint.rol)}>
+                              {endpoint.rol}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="commands" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Terminal className="w-5 h-5" />
+                Comandos Útiles
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {comandosUtil.map((categoria) => (
+                  <div key={categoria.categoria}>
+                    <h3 className="font-semibold mb-3 text-lg">{categoria.categoria}</h3>
+                    <div className="space-y-2">
+                      {categoria.comandos.map((comando) => (
+                        <div key={comando.comando} className="p-3 bg-gray-50 rounded-lg">
+                          <div className="font-mono text-sm bg-gray-100 p-2 rounded mb-2">
+                            {comando.comando}
+                          </div>
+                          <div className="text-sm text-gray-600">{comando.descripcion}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="troubleshooting" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" />
+                Troubleshooting
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-3 text-lg">Problemas Comunes</h3>
+                  <div className="space-y-4">
+                    <div className="p-4 border-l-4 border-l-red-500 bg-red-50">
+                      <h4 className="font-semibold text-red-800">Error 403 - Acceso Denegado</h4>
+                      <p className="text-sm text-red-700 mt-1">
+                        Verificar que el usuario tenga el rol correcto y el token sea válido.
+                      </p>
+                      <code className="text-xs mt-2 block">
+                        console.log(authStore.getUserRole());
+                      </code>
+                    </div>
+
+                    <div className="p-4 border-l-4 border-l-yellow-500 bg-yellow-50">
+                      <h4 className="font-semibold text-yellow-800">Error de Conexión a Base de Datos</h4>
+                      <p className="text-sm text-yellow-700 mt-1">
+                        Verificar variables de entorno DATABASE_URL y DATABASE_AUTH_TOKEN.
+                      </p>
+                      <code className="text-xs mt-2 block">
+                        node backend/scripts/test-db-connection.js
+                      </code>
+                    </div>
+
+                    <div className="p-4 border-l-4 border-l-blue-500 bg-blue-50">
+                      <h4 className="font-semibold text-blue-800">Error al Crear Usuario</h4>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Verificar que el email no exista y la organización sea válida.
+                      </p>
+                      <code className="text-xs mt-2 block">
+                        SELECT * FROM usuarios WHERE email = 'email@ejemplo.com';
+                      </code>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-semibold mb-3 text-lg">Logs y Debugging</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3 bg-gray-50 rounded">
+                      <h4 className="font-semibold text-sm">Backend Logs</h4>
+                      <code className="text-xs">pm2 logs 9001app2-backend</code>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded">
+                      <h4 className="font-semibold text-sm">Estado de Servicios</h4>
+                      <code className="text-xs">pm2 status</code>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded">
+                      <h4 className="font-semibold text-sm">Nginx Status</h4>
+                      <code className="text-xs">systemctl status nginx</code>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded">
+                      <h4 className="font-semibold text-sm">Test del Sistema</h4>
+                      <code className="text-xs">node scripts/test-admin-system.js</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

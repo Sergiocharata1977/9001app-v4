@@ -623,3 +623,27 @@ const updateOrganizationFeatures = async (req, res) => {
     });
   }
 }; 
+
+// ===== EXPORTACIONES =====
+
+module.exports = {
+  // Super Admin Functions
+  getAllOrganizations,
+  getOrganizationById,
+  createOrganization,
+  updateOrganization,
+  getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  
+  // Organization Admin Functions
+  getOrganizationUsers,
+  createOrganizationUser,
+  updateOrganizationUser,
+  deleteOrganizationUser,
+  
+  // Features Management
+  getOrganizationFeatures,
+  updateOrganizationFeatures
+}; 
