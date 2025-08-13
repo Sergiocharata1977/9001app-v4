@@ -18,6 +18,7 @@ import {
 import { adminService } from '@/services/adminService';
 import useAuthStore from '@/store/authStore';
 import UserModal from './UserModal';
+import { debugAuth, testApiCall } from '../../utils/debug-auth.js';
 
 const OrganizationAdminPanel = () => {
   const authStore = useAuthStore();
@@ -30,6 +31,13 @@ const OrganizationAdminPanel = () => {
   const [organizationForm, setOrganizationForm] = useState({});
 
   useEffect(() => {
+    // Debug de autenticación
+    console.log('🔍 DEBUG: OrganizationAdminPanel cargando...');
+    debugAuth();
+    
+    // Probar llamada a API
+    testApiCall('/admin/organizations');
+    
     loadData();
   }, []);
 

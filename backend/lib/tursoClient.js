@@ -19,7 +19,36 @@ const tursoClient = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN
 });
 
+// Función wrapper para ejecutar consultas con validación
+const executeQuery = async (queryObj) => {
+  try {
+    const { sql, args = [] } = queryObj;
+    
+    // Validar que sql no sea undefined o null
+    if (!sql || typeof sql !== 'string') {
+      throw new Error('SQL query is required and must be a string');
+    }
+    
+    // Validar que args sea un array
+    if (!Array.isArray(args)) {
+      args = [];
+    }
+    
+    console.log('🔍 Ejecutando query:', sql.substring(0, 50) + '...');
+    
+    const result = await tursoClient.execute({
+      sql: sql,
+      args: args
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('❌ Error ejecutando query:', error);
+    throw error;
+  }
+};
+
 console.log('🌐 Conectado a Turso:', process.env.DATABASE_URL);
 console.log('🔧 Entorno:', process.env.NODE_ENV || 'development');
 
-module.exports = { tursoClient };
+module.exports = { tursoClient, executeQuery };

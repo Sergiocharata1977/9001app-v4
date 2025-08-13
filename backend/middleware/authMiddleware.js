@@ -20,12 +20,15 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     // Log para depuración
-    console.log('Decoded JWT:', decoded);
+    console.log('🔓 Decoded JWT:', decoded);
+    
     // Aceptar tanto 'id' como 'userId' en el token
     const userId = decoded.id || decoded.userId;
     if (!userId || (typeof userId !== 'string' && typeof userId !== 'number')) {
       return res.status(401).json({ message: 'Token sin ID de usuario válido.' });
     }
+    
+    console.log('👤 User ID from token:', userId);
     
     // Obtener usuario actual de la base de datos
     const userResult = await tursoClient.execute({
@@ -39,8 +42,11 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Usuario no válido o inactivo.' });
     }
 
+    const user = userResult.rows[0];
+    console.log('👤 User from DB:', user);
+
     // Agregar usuario al request para uso en controladores
-    req.user = userResult.rows[0];
+    req.user = user;
     next();
 
   } catch (error) {

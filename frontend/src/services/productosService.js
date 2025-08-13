@@ -11,7 +11,15 @@ export const productosService = {
   async getAll() {
     try {
       const response = await apiService.get('/productos');
-      return response.data;
+      // Asegurar que devolvemos un array
+      if (response.data && response.data.data) {
+        return response.data.data; // Si el backend devuelve { success: true, data: [...] }
+      } else if (Array.isArray(response.data)) {
+        return response.data; // Si el backend devuelve directamente el array
+      } else {
+        console.warn('Respuesta inesperada del backend:', response.data);
+        return []; // Devolver array vacío si la respuesta no es la esperada
+      }
     } catch (error) {
       console.error('Error al obtener productos:', error);
       throw error;

@@ -1,4 +1,4 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const { executeQuery } = require('../lib/tursoClient.js');
 const bcrypt = require('bcrypt');
 const { randomUUID  } = require('crypto');
 
@@ -7,28 +7,37 @@ const { randomUUID  } = require('crypto');
 const getAllOrganizations = async (req, res) => {
   try {
     console.log('🔍 Super Admin: Obteniendo todas las organizaciones...');
+    console.log('👤 req.user:', req.user);
+    console.log('🔑 req.headers:', req.headers);
     
-    const result = await tursoClient.execute({
+    // Consulta simplificada - solo obtener organizaciones básicas
+    const orgResult = await executeQuery({
       sql: `
-        SELECT 
-          o.*,
-          COUNT(u.id) as total_users,
-          COUNT(CASE WHEN u.is_active = 1 THEN 1 END) as active_users
-        FROM organizations o
-        LEFT JOIN usuarios u ON o.id = u.organization_id
-        GROUP BY o.id
-        ORDER BY o.created_at DESC
+        SELECT * FROM organizations 
+        ORDER BY created_at DESC
       `
     });
 
-    console.log(`✅ ${result.rows.length} organizaciones encontradas`);
+    console.log(`✅ ${orgResult.rows.length} organizaciones encontradas`);
+    console.log('📊 Datos de organizaciones:', orgResult.rows);
+
+    // Por ahora, devolver solo las organizaciones sin estadísticas
+    const organizations = orgResult.rows.map(org => ({
+      ...org,
+      total_users: 0, // Placeholder
+      active_users: 0  // Placeholder
+    }));
+
+    console.log('📊 Organizaciones procesadas:', organizations);
+
     res.json({
       success: true,
-      data: result.rows,
-      total: result.rows.length
+      data: organizations,
+      total: organizations.length
     });
   } catch (error) {
     console.error('❌ Error obteniendo organizaciones:', error);
+    console.error('❌ Stack trace:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Error al obtener organizaciones',
@@ -42,7 +51,7 @@ const getOrganizationById = async (req, res) => {
     const { id } = req.params;
     console.log(`🔍 Super Admin: Obteniendo organización ${id}...`);
     
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         SELECT 
           o.*,
@@ -92,7 +101,7 @@ const createOrganization = async (req, res) => {
     }
 
     // Verificar si ya existe una organización con ese nombre
-    const existingOrg = await tursoClient.execute({
+    const existingOrg = await executeQuery({
       sql: 'SELECT id FROM organizations WHERE name = ?',
       args: [name]
     });
@@ -104,7 +113,7 @@ const createOrganization = async (req, res) => {
       });
     }
 
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         INSERT INTO organizations (name, email, phone, plan, is_active, created_at, updated_at)
         VALUES (?, ?, ?, ?, 1, datetime('now'), datetime('now'))
@@ -135,7 +144,7 @@ const updateOrganization = async (req, res) => {
     const { name, email, phone, plan, is_active } = req.body;
     console.log(`🔍 Super Admin: Actualizando organización ${id}...`);
     
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         UPDATE organizations 
         SET name = ?, email = ?, phone = ?, plan = ?, is_active = ?, updated_at = datetime('now')
@@ -172,7 +181,7 @@ const getAllUsers = async (req, res) => {
   try {
     console.log('🔍 Super Admin: Obteniendo todos los usuarios...');
     
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         SELECT 
           u.*,
@@ -213,7 +222,7 @@ const createUser = async (req, res) => {
     }
 
     // Verificar si ya existe un usuario con ese email
-    const existingUser = await tursoClient.execute({
+    const existingUser = await executeQuery({
       sql: 'SELECT id FROM usuarios WHERE email = ?',
       args: [email]
     });
@@ -229,7 +238,7 @@ const createUser = async (req, res) => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         INSERT INTO usuarios (name, email, password_hash, role, organization_id, is_active, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
@@ -261,7 +270,7 @@ const updateUser = async (req, res) => {
     console.log(`🔍 Super Admin: Actualizando usuario ${id}...`);
     
     // Verificar si el usuario existe
-    const existingUser = await tursoClient.execute({
+    const existingUser = await executeQuery({
       sql: 'SELECT id FROM usuarios WHERE id = ?',
       args: [id]
     });
@@ -275,7 +284,7 @@ const updateUser = async (req, res) => {
 
     // Si se proporciona un nuevo email, verificar que no exista
     if (email) {
-      const emailCheck = await tursoClient.execute({
+      const emailCheck = await executeQuery({
         sql: 'SELECT id FROM usuarios WHERE email = ? AND id != ?',
         args: [email, id]
       });
@@ -324,7 +333,7 @@ const updateUser = async (req, res) => {
     sql += updates.join(', ') + ' WHERE id = ? RETURNING *';
     args.push(id);
 
-    const result = await tursoClient.execute({ sql, args });
+    const result = await executeQuery({ sql, args });
 
     console.log(`✅ Usuario ${id} actualizado`);
     res.json({
@@ -348,7 +357,7 @@ const deleteUser = async (req, res) => {
     console.log(`🔍 Super Admin: Eliminando usuario ${id}...`);
     
     // Verificar si el usuario existe
-    const existingUser = await tursoClient.execute({
+    const existingUser = await executeQuery({
       sql: 'SELECT id, role FROM usuarios WHERE id = ?',
       args: [id]
     });
@@ -368,7 +377,7 @@ const deleteUser = async (req, res) => {
       });
     }
 
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: 'DELETE FROM usuarios WHERE id = ? RETURNING id',
       args: [id]
     });
@@ -395,7 +404,7 @@ const getOrganizationUsers = async (req, res) => {
     const { organizationId } = req.params;
     console.log(`🔍 Admin: Obteniendo usuarios de organización ${organizationId}...`);
     
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         SELECT 
           u.id, u.name, u.email, u.role, u.is_active, u.created_at,
@@ -448,7 +457,7 @@ const createOrganizationUser = async (req, res) => {
     }
 
     // Verificar si ya existe un usuario con ese email en la organización
-    const existingUser = await tursoClient.execute({
+    const existingUser = await executeQuery({
       sql: 'SELECT id FROM usuarios WHERE email = ? AND organization_id = ?',
       args: [email, organizationId]
     });
@@ -464,7 +473,7 @@ const createOrganizationUser = async (req, res) => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         INSERT INTO usuarios (name, email, password_hash, role, organization_id, is_active, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
@@ -495,7 +504,7 @@ const updateOrganizationUser = async (req, res) => {
     const { name, email, role, is_active } = req.body;
     console.log(`🔍 Admin: Actualizando usuario ${userId} en organización ${organizationId}...`);
     
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         UPDATE usuarios 
         SET name = ?, email = ?, role = ?, is_active = ?, updated_at = datetime('now')
@@ -533,7 +542,7 @@ const deleteOrganizationUser = async (req, res) => {
     const { organizationId, userId } = req.params;
     console.log(`🔍 Admin: Eliminando usuario ${userId} de organización ${organizationId}...`);
     
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: 'DELETE FROM usuarios WHERE id = ? AND organization_id = ?',
       args: [userId, organizationId]
     });
@@ -567,7 +576,7 @@ const getOrganizationFeatures = async (req, res) => {
     const { organizationId } = req.params;
     console.log(`🔍 Obteniendo features de organización ${organizationId}...`);
     
-    const result = await tursoClient.execute({
+    const result = await executeQuery({
       sql: `
         SELECT feature_name, is_enabled
         FROM organization_features
@@ -600,7 +609,7 @@ const updateOrganizationFeatures = async (req, res) => {
     
     // Actualizar cada feature
     for (const feature of features) {
-      await tursoClient.execute({
+      await executeQuery({
         sql: `
           INSERT OR REPLACE INTO organization_features (organization_id, feature_name, is_enabled, created_at)
           VALUES (?, ?, ?, datetime('now'))

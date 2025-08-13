@@ -38,10 +38,12 @@ function ProductosListing() {
     setError(null);
     try {
       const data = await productosService.getProductos();
-      setProductos(data || []);
+      // Asegurar que siempre sea un array
+      setProductos(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error al cargar productos:", err);
       setError('No se pudo conectar con el servidor. Intenta de nuevo más tarde.');
+      setProductos([]); // Asegurar que sea array vacío en caso de error
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +149,7 @@ function ProductosListing() {
     );
   };
 
-  const filteredProductos = productos.filter(p =>
+  const filteredProductos = (Array.isArray(productos) ? productos : []).filter(p =>
     p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (p.codigo && p.codigo.toLowerCase().includes(searchTerm.toLowerCase()))
   );

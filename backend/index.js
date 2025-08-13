@@ -3,6 +3,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 
+// Importar middleware de autenticación
+const authMiddleware = require('./middleware/authMiddleware.js');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -37,8 +40,8 @@ const suscripcionesRoutes = require('./routes/suscripciones.js');
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
 
-// Rutas de administración
-app.use('/api/admin', adminRoutes);
+// Rutas de administración (requieren autenticación)
+app.use('/api/admin', authMiddleware, adminRoutes);
 
 // Rutas de planes
 app.use('/api/planes', planesRoutes);
@@ -46,8 +49,8 @@ app.use('/api/planes', planesRoutes);
 // Rutas de suscripciones
 app.use('/api/suscripciones', suscripcionesRoutes);
 
-// Rutas de usuarios
-app.use('/api/usuarios', userRoutes);
+// Rutas de usuarios (requieren autenticación)
+app.use('/api/usuarios', authMiddleware, userRoutes);
 
 // Rutas de departamentos
 app.use('/api/departamentos', departamentosRoutes);
@@ -91,8 +94,8 @@ app.use('/api/acciones', accionesRoutes);
 // Rutas de auditorías
 app.use('/api/auditorias', auditoriasRoutes);
 
-// Rutas de productos
-app.use('/api/productos', productosRoutes);
+// Rutas de productos (requieren autenticación)
+app.use('/api/productos', authMiddleware, productosRoutes);
 
 // Ruta de prueba
 app.get('/api/test', (req, res) => {

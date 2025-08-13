@@ -9,7 +9,11 @@
     "test": "jest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check-db": "node scripts/check-database-tables.js",
+    "verify-db": "node scripts/verificar-base-datos-completa.js",
+    "verify-db-continuo": "node scripts/verificar-base-datos-completa.js --continuo",
+    "diagnostico": "node scripts/diagnostico-turso-simple.js"
   },
   "keywords": [
     "isoflow4",

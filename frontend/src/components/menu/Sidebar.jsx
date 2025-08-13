@@ -112,7 +112,6 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       color: 'blue',
       items: [
         { name: 'Auditorías Internas', path: '/app/auditorias', icon: BarChart3 },
-        { name: 'Productos', path: '/app/productos', icon: Package },
       ]
     },
     {
