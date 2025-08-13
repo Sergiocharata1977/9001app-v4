@@ -102,6 +102,14 @@ fix-nginx-spa.sh
 pre-deploy-check.sh
 setup-onvue.sh
 
+# Scripts de despliegue optimizados (mantener estos)
+!deploy-automated.sh
+!deploy-windows.ps1
+!deploy-quick.bat
+!setup-server.sh
+!PM2_ecosystem.config.cjs
+!webhook-config.json
+
 # Runtime data
 pids
 *.pid

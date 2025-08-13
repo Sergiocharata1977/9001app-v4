@@ -1,20 +1,23 @@
 #!/bin/bash
+set -euo pipefail
 
 # ===============================================
-# SCRIPT DE CONFIGURACIÓN INICIAL DEL SERVIDOR
+# SCRIPT DE CONFIGURACIÓN RÁPIDA DEL SERVIDOR
+# 9001APP2 - Hostinger VPS
 # ===============================================
 
-echo "🔧 Configurando servidor para ISO Flow..."
+echo "🔧 Configurando servidor para 9001APP2..."
 echo "📅 Fecha: $(date)"
+echo "🌐 Servidor: 31.97.162.229"
 echo "=============================================="
 
 # Variables
 PROJECT_DIR="/root/9001app2"
-LOG_FILE="/root/setup.log"
+STATIC_ROOT="/var/www/9001app2"
 
 # Función de logging
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a $LOG_FILE
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
 # Función de error
@@ -23,128 +26,170 @@ error() {
     exit 1
 }
 
-# 1. INSTALAR DEPENDENCIAS DEL SISTEMA
-log "📦 Instalando dependencias del sistema..."
-apt update
-apt install -y curl wget git nginx
+# Función de éxito
+success() {
+    log "✅ $1"
+}
 
-# 2. INSTALAR NODE.JS (si no está instalado)
-if ! command -v node &> /dev/null; then
-    log "📦 Instalando Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt-get install -y nodejs
-else
-    log "✅ Node.js ya está instalado"
-fi
+# 1. ACTUALIZAR SISTEMA
+log "🔄 Actualizando sistema..."
+apt update && apt upgrade -y
+success "Sistema actualizado"
 
-# 3. INSTALAR PM2
-if ! command -v pm2 &> /dev/null; then
-    log "📦 Instalando PM2..."
-    npm install -g pm2
-else
-    log "✅ PM2 ya está instalado"
-fi
+# 2. INSTALAR DEPENDENCIAS
+log "📦 Instalando dependencias..."
+apt install -y curl wget git nginx nodejs npm pm2 rsync
 
-# 4. INSTALAR SERVE PARA FRONTEND
-log "📦 Instalando serve para frontend..."
-npm install -g serve
+# Verificar versiones
+log "📋 Verificando versiones instaladas..."
+node --version
+npm --version
+pm2 --version
+nginx -v
 
-# 5. CONFIGURAR PERMISOS
-log "🔐 Configurando permisos..."
-chmod +x $PROJECT_DIR/deploy-server.sh
+success "Dependencias instaladas"
 
-# 6. CREAR DIRECTORIO DE LOGS
-log "📁 Creando directorio de logs..."
-mkdir -p /root/logs
-
-# 7. CONFIGURAR NGINX (opcional)
+# 3. CONFIGURAR NGINX
 log "🌐 Configurando Nginx..."
-cat > /etc/nginx/sites-available/isoflow << EOF
+
+# Crear directorio para archivos estáticos
+mkdir -p $STATIC_ROOT
+
+# Crear configuración de Nginx
+cat > /etc/nginx/sites-available/9001app2 << 'EOF'
 server {
     listen 80;
     server_name 31.97.162.229;
     
+    # Frontend estático
     location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
+        root /var/www/9001app2/dist;
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
     }
     
-    location /api {
-        proxy_pass http://localhost:5000;
+    # API Backend
+    location /api/ {
+        proxy_pass http://127.0.0.1:5000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
     }
+    
+    # Health check
+    location /health {
+        proxy_pass http://127.0.0.1:5000/api/health;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+    
+    # Configuración de seguridad
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
 }
 EOF
 
 # Habilitar sitio
-ln -sf /etc/nginx/sites-available/isoflow /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/9001app2 /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 
-# Reiniciar nginx
+# Verificar configuración
+nginx -t
 systemctl restart nginx
+systemctl enable nginx
 
-# 8. CONFIGURAR FIREWALL
+success "Nginx configurado"
+
+# 4. CONFIGURAR PM2
+log "⚙️ Configurando PM2..."
+pm2 startup
+pm2 install pm2-logrotate
+
+# Configurar logrotate
+pm2 set pm2-logrotate:max_size 10M
+pm2 set pm2-logrotate:retain 7
+pm2 set pm2-logrotate:compress true
+
+success "PM2 configurado"
+
+# 5. CONFIGURAR DIRECTORIOS
+log "📁 Configurando directorios..."
+mkdir -p /var/log/pm2
+mkdir -p $STATIC_ROOT/dist
+chown -R www-data:www-data $STATIC_ROOT
+chmod -R 755 $STATIC_ROOT
+
+success "Directorios configurados"
+
+# 6. CONFIGURAR FIREWALL (opcional)
 log "🔥 Configurando firewall..."
-ufw allow 22
-ufw allow 80
-ufw allow 443
-ufw allow 3000
-ufw allow 5000
+ufw allow ssh
+ufw allow 'Nginx Full'
 ufw --force enable
 
-# 9. CONFIGURAR CRON PARA AUTO-DESPLIEGUE
-log "⏰ Configurando cron para auto-despliegue..."
-echo "*/5 * * * * cd $PROJECT_DIR && git fetch origin && git reset --hard origin/master && ./deploy-server.sh" | crontab -
+success "Firewall configurado"
 
-# 10. VERIFICAR INSTALACIÓN
-log "🔍 Verificando instalación..."
-
-# Verificar Node.js
-if command -v node &> /dev/null; then
-    log "✅ Node.js: $(node --version)"
+# 7. CLONAR REPOSITORIO (si no existe)
+if [ ! -d "$PROJECT_DIR" ]; then
+    log "📥 Clonando repositorio..."
+    cd /root
+    git clone https://github.com/Sergiocharata1977/9001app.git 9001app2
+    success "Repositorio clonado"
 else
-    error "❌ Node.js no está instalado"
+    log "📁 Repositorio ya existe"
 fi
 
-# Verificar npm
-if command -v npm &> /dev/null; then
-    log "✅ npm: $(npm --version)"
-else
-    error "❌ npm no está instalado"
+# 8. CONFIGURAR VARIABLES DE ENTORNO
+log "🔧 Configurando variables de entorno..."
+if [ -f "$PROJECT_DIR/backend/.env.example" ]; then
+    cp "$PROJECT_DIR/backend/.env.example" "$PROJECT_DIR/backend/.env"
+    log "⚠️ Archivo .env creado desde ejemplo. Configura las variables necesarias."
 fi
 
-# Verificar PM2
-if command -v pm2 &> /dev/null; then
-    log "✅ PM2: $(pm2 --version)"
-else
-    error "❌ PM2 no está instalado"
-fi
+# 9. INSTALAR DEPENDENCIAS DEL PROYECTO
+log "📦 Instalando dependencias del proyecto..."
 
-# Verificar git
-if command -v git &> /dev/null; then
-    log "✅ Git: $(git --version)"
-else
-    error "❌ Git no está instalado"
-fi
+# Frontend
+cd "$PROJECT_DIR/frontend"
+npm install --production=false
+
+# Backend
+cd "$PROJECT_DIR/backend"
+npm install --production=false
+
+success "Dependencias del proyecto instaladas"
+
+# 10. CONFIGURAR LOGS
+log "📝 Configurando logs..."
+mkdir -p /var/log/9001app2
+touch /var/log/9001app2/app.log
+chmod 644 /var/log/9001app2/app.log
 
 # 11. RESUMEN FINAL
-log "🎉 CONFIGURACIÓN COMPLETADA EXITOSAMENTE"
-log "📊 Resumen de configuración:"
-log "   - Node.js: Instalado"
-log "   - PM2: Instalado"
-log "   - Nginx: Configurado"
-log "   - Firewall: Configurado"
-log "   - Cron: Configurado para auto-despliegue"
-log "   - Scripts: Permisos configurados"
-log "=============================================="
+echo ""
+echo "=============================================="
+success "CONFIGURACIÓN DEL SERVIDOR COMPLETADA"
+echo "📊 Resumen de la configuración:"
+echo "   - Nginx: Configurado y funcionando"
+echo "   - PM2: Instalado y configurado"
+echo "   - Node.js: $(node --version)"
+echo "   - NPM: $(npm --version)"
+echo "   - Directorio proyecto: $PROJECT_DIR"
+echo "   - Directorio estático: $STATIC_ROOT"
+echo "   - Logs: /var/log/9001app2/"
+echo ""
+echo "🔧 Próximos pasos:"
+echo "   1. Configurar variables de entorno en $PROJECT_DIR/backend/.env"
+echo "   2. Ejecutar: ./deploy-automated.sh"
+echo "   3. Verificar: http://31.97.162.229/"
+echo "=============================================="
 
-echo "✅ Configuración completada en $(date)"
-echo "🚀 El servidor está listo para recibir despliegues automáticos" 
+success "Configuración completada en $(date)" 

@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: '9001app2-backend',
-      script: 'backend/index.js',
-      cwd: '/var/www/9001app2',
+      script: 'index.js',
+      cwd: '/root/9001app2/backend',
       instances: 1,
       exec_mode: 'fork',
       watch: false, // No watch en producción
@@ -19,7 +19,12 @@ module.exports = {
       autorestart: true,
       max_restarts: 10,
       min_uptime: '10s',
-      restart_delay: 4000
+      restart_delay: 4000,
+      // Configuración adicional para estabilidad
+      kill_timeout: 5000,
+      listen_timeout: 3000,
+      max_restarts: 5,
+      min_uptime: '10s'
     }
   ]
 };
