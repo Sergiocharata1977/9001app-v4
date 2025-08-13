@@ -66,6 +66,10 @@ bower_components
 *.tgz
 *.tar.gz
 
+# Documentation files (Markdown)
+*.md
+docs/*.md
+
 # Runtime data
 pids
 *.pid
