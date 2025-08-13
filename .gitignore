@@ -70,6 +70,38 @@ bower_components
 *.md
 docs/*.md
 
+# Evidence and log files
+evidence-*.txt
+tatus
+*.log
+
+# Local configuration files
+ssh-config.txt
+mcp-config.json
+unity-config.js
+webpack-config.js
+drizzle-orm
+nginx.conf.template
+
+# PowerShell scripts
+*.pcl
+
+# Binary and executable files
+*.exe
+plink.exe
+
+# Temporary files
+e-reiniciado-automaticamenteG
+
+# Deploy scripts (keep only main ones)
+deploy-onver.sh
+deploy-preserve-config.sh
+deploy-to-server.sh
+diagnostico-servidor.sh
+fix-nginx-spa.sh
+pre-deploy-check.sh
+setup-onvue.sh
+
 # Runtime data
 pids
 *.pid
