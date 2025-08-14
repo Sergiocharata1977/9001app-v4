@@ -120,3 +120,34 @@ pids
 
 # Optional REPL history
 .node_repl_history
+
+# ===============================================
+# SISTEMA AUTO-PLANNER (AGENTES DE IA)
+# ===============================================
+
+# Carpeta principal del sistema auto-planner (TODO organizado aquí)
+sistema-auto-planner-completo/
+
+# Sistema auto-agent portable (NO pertenece al proyecto)
+auto-agent-system/
+
+# Scripts del auto-planner (mover a carpeta organizada)
+scripts/auto-planner*.js
+scripts/auto-planner*.json
+scripts/run-amfe-agent.js
+scripts/run-auto-planner.js
+scripts/create-portable-agent.js
+scripts/setup-dashboard.js
+scripts/README-AUTO-PLANNER.md
+
+# Agentes especializados (mover a carpeta organizada)
+scripts/agents/
+scripts/dashboard/
+
+# Reportes y logs del auto-planner
+auto-planner-report*.json
+auto-planner-logs*.txt
+
+# Archivos de prueba y desarrollo del auto-planner
+test-auto-planner*.js
+debug-auto-planner*.js

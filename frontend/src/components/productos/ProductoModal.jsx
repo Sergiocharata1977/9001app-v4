@@ -26,20 +26,30 @@ const ProductoModal = ({ isOpen, onClose, onSave, producto }) => {
     nombre: '',
     descripcion: '',
     codigo: '',
-    estado: 'Borrador',
+    estado: 'planificacion',
     tipo: 'Producto',
+    categoria: '',
     responsable: '',
     fecha_creacion: new Date().toISOString().split('T')[0],
-    version: '1.0'
+    fecha_revision: '',
+    version: '1.0',
+    especificaciones: '',
+    requisitos_calidad: '',
+    proceso_aprobacion: '',
+    documentos_asociados: '',
+    observaciones: ''
   });
 
-  // Estados ISO 9001 simplificados
+  // Estados ISO 9001:8.3 - Proceso de Diseño y Desarrollo
   const estadosISO = [
-    { value: 'Borrador', label: 'Borrador', color: 'bg-gray-100 text-gray-800' },
-    { value: 'En Revisión', label: 'En Revisión', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'Aprobado', label: 'Aprobado', color: 'bg-green-100 text-green-800' },
-    { value: 'Activo', label: 'Activo', color: 'bg-blue-100 text-blue-800' },
-    { value: 'Descontinuado', label: 'Descontinuado', color: 'bg-red-100 text-red-800' }
+    { value: 'planificacion', label: 'Planificación', color: 'bg-blue-100 text-blue-800' },
+    { value: 'entrada', label: 'Entradas', color: 'bg-purple-100 text-purple-800' },
+    { value: 'diseno', label: 'Diseño', color: 'bg-orange-100 text-orange-800' },
+    { value: 'verificacion', label: 'Verificación', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'validacion', label: 'Validación', color: 'bg-indigo-100 text-indigo-800' },
+    { value: 'aprobado', label: 'Aprobado', color: 'bg-green-100 text-green-800' },
+    { value: 'produccion', label: 'En Producción', color: 'bg-emerald-100 text-emerald-800' },
+    { value: 'obsoleto', label: 'Obsoleto', color: 'bg-red-100 text-red-800' }
   ];
 
   const tiposProducto = [
@@ -56,22 +66,36 @@ const ProductoModal = ({ isOpen, onClose, onSave, producto }) => {
         nombre: producto.nombre || '',
         descripcion: producto.descripcion || '',
         codigo: producto.codigo || '',
-        estado: producto.estado || 'Borrador',
+        estado: producto.estado || 'planificacion',
         tipo: producto.tipo || 'Producto',
+        categoria: producto.categoria || '',
         responsable: producto.responsable || '',
         fecha_creacion: producto.fecha_creacion || new Date().toISOString().split('T')[0],
-        version: producto.version || '1.0'
+        fecha_revision: producto.fecha_revision || '',
+        version: producto.version || '1.0',
+        especificaciones: producto.especificaciones || '',
+        requisitos_calidad: producto.requisitos_calidad || '',
+        proceso_aprobacion: producto.proceso_aprobacion || '',
+        documentos_asociados: producto.documentos_asociados || '',
+        observaciones: producto.observaciones || ''
       });
     } else {
       setFormData({
         nombre: '',
         descripcion: '',
         codigo: '',
-        estado: 'Borrador',
+        estado: 'planificacion',
         tipo: 'Producto',
+        categoria: '',
         responsable: '',
         fecha_creacion: new Date().toISOString().split('T')[0],
-        version: '1.0'
+        fecha_revision: '',
+        version: '1.0',
+        especificaciones: '',
+        requisitos_calidad: '',
+        proceso_aprobacion: '',
+        documentos_asociados: '',
+        observaciones: ''
       });
     }
   }, [producto]);
@@ -94,10 +118,10 @@ const ProductoModal = ({ isOpen, onClose, onSave, producto }) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5 text-emerald-600" />
-            {producto ? 'Editar Producto' : 'Nuevo Producto'}
+            {producto ? 'Editar Proyecto de Diseño' : 'Nuevo Proyecto de Diseño'}
           </DialogTitle>
           <DialogDescription>
-            {producto ? 'Modifica la información del producto' : 'Crea un nuevo producto o servicio para tu organización'}
+            {producto ? 'Modifica la información del proyecto de diseño y desarrollo' : 'Crea un nuevo proyecto de diseño y desarrollo según ISO 9001:8.3'}
           </DialogDescription>
         </DialogHeader>
 
@@ -134,6 +158,16 @@ const ProductoModal = ({ isOpen, onClose, onSave, producto }) => {
               onChange={(e) => handleInputChange('descripcion', e.target.value)}
               placeholder="Describe el producto o servicio..."
               rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="categoria">Categoría</Label>
+            <Input
+              id="categoria"
+              value={formData.categoria}
+              onChange={(e) => handleInputChange('categoria', e.target.value)}
+              placeholder="Ej: Software, Hardware, Servicio, Documento"
             />
           </div>
 
@@ -215,12 +249,101 @@ const ProductoModal = ({ isOpen, onClose, onSave, producto }) => {
             </div>
           </div>
 
+          {/* ISO 9001:8.3 - Campos Específicos */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">ISO 9001:8.3 - Proceso de Diseño y Desarrollo</h3>
+            
+            {/* 8.3.3 - Entradas del Diseño */}
+            <div className="space-y-4 mb-6">
+              <h4 className="text-md font-medium text-gray-700">8.3.3 - Entradas del Diseño</h4>
+              
+              <div className="space-y-2">
+                <Label htmlFor="especificaciones">Especificaciones Técnicas (Requisitos Funcionales)</Label>
+                <Textarea
+                  id="especificaciones"
+                  value={formData.especificaciones}
+                  onChange={(e) => handleInputChange('especificaciones', e.target.value)}
+                  placeholder="Define los requisitos funcionales y de desempeño del producto/servicio..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="requisitos_calidad">Requisitos de Calidad y Legales</Label>
+                <Textarea
+                  id="requisitos_calidad"
+                  value={formData.requisitos_calidad}
+                  onChange={(e) => handleInputChange('requisitos_calidad', e.target.value)}
+                  placeholder="Normas ISO aplicables, requisitos legales y reglamentarios..."
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* 8.3.4 - Controles del Diseño */}
+            <div className="space-y-4 mb-6">
+              <h4 className="text-md font-medium text-gray-700">8.3.4 - Controles del Diseño</h4>
+              
+              <div className="space-y-2">
+                <Label htmlFor="proceso_aprobacion">Proceso de Aprobación (Verificación y Validación)</Label>
+                <Textarea
+                  id="proceso_aprobacion"
+                  value={formData.proceso_aprobacion}
+                  onChange={(e) => handleInputChange('proceso_aprobacion', e.target.value)}
+                  placeholder="Actividades de verificación y validación programadas..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fecha_revision">Fecha de Última Revisión</Label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="fecha_revision"
+                    type="date"
+                    value={formData.fecha_revision}
+                    onChange={(e) => handleInputChange('fecha_revision', e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 8.3.2 - Planificación y 8.3.6 - Cambios */}
+            <div className="space-y-4 mb-6">
+              <h4 className="text-md font-medium text-gray-700">8.3.2 - Planificación y 8.3.6 - Control de Cambios</h4>
+              
+              <div className="space-y-2">
+                <Label htmlFor="documentos_asociados">Documentos Asociados (Planificación y Evidencias)</Label>
+                <Textarea
+                  id="documentos_asociados"
+                  value={formData.documentos_asociados}
+                  onChange={(e) => handleInputChange('documentos_asociados', e.target.value)}
+                  placeholder="Documentos de planificación, evidencias de revisiones, autorizaciones..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="observaciones">Observaciones (Registros de Cambios y Revisiones)</Label>
+                <Textarea
+                  id="observaciones"
+                  value={formData.observaciones}
+                  onChange={(e) => handleInputChange('observaciones', e.target.value)}
+                  placeholder="Registros de revisiones, cambios realizados, autorizaciones..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
             <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
-              {producto ? 'Actualizar' : 'Crear'} Producto
+              {producto ? 'Actualizar' : 'Crear'} Proyecto de Diseño
             </Button>
           </DialogFooter>
         </form>

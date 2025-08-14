@@ -59,6 +59,7 @@ const ObjetivosMetasPage = lazy(() => import("../pages/ObjetivosMetasPage"));
 const MinutasPage = lazy(() => import("../pages/MinutasPage"));
 const TratamientosPage = lazy(() => import("../pages/TratamientosPage"));
 const VerificacionesPage = lazy(() => import("../pages/VerificacionesPage"));
+const AMFEPage = lazy(() => import("../pages/AMFE/AMFEPage"));
 
 // Gestión de Usuarios (desde pages)
 const UsersPage = lazy(() => import("../pages/UsersPage"));
@@ -82,7 +83,7 @@ const NormaSingleView = lazy(() => import("../components/normas/NormaSingleView"
 const ObjetivosCalidadPage = lazy(() => import("../components/procesos/ObjetivosListing"));
 const IndicadoresPage = lazy(() => import("../components/procesos/IndicadoresListing"));
 const IndicadorSingle = lazy(() => import("../components/procesos/IndicadorSingle"));
-const CapacitacionesPage = lazy(() => import('../components/capacitaciones/CapacitacionesListing'));
+const CapacitacionesPage = lazy(() => import('../components/capacitaciones/CapacitacionesListingNEW.jsx'));
 const ProductosPage = lazy(() => import("../components/productos/ProductosListing"));
 // NUEVO: Componente con TypeScript y DataTable genérico
 const ProductosListingNEW = lazy(() => import("../components/productos/ProductosListingNEW"));
@@ -94,7 +95,7 @@ const AuditoriaSinglePage = lazy(() => import("../pages/Auditorias/AuditoriaSing
 const AuditoriaFormPage = lazy(() => import("../pages/Auditorias/AuditoriaFormPage"));
 
 // Páginas de Mejora
-const HallazgosPage = lazy(() => import("../pages/Hallazgos/HallazgosPage2"));
+const HallazgosPage = lazy(() => import("../components/hallazgos/HallazgosListingNEW"));
 const HallazgoSingle = lazy(() => import('../components/hallazgos/HallazgoSingle'));
 const AccionesPage = lazy(() => import("../pages/Acciones/AccionesPage2"));
 const AccionSingle = lazy(() => import('../components/acciones/AccionSingle'));
@@ -196,6 +197,9 @@ const AppRoutes = () => {
                   <Route path="objetivos-calidad" element={<ObjetivosCalidadPage />} />
                   <Route path="indicadores" element={<IndicadoresPage />} />
                   <Route path="indicadores/:id" element={<IndicadorSingle />} />
+
+                   {/* AMFE */}
+                   <Route path="amfe" element={<AMFEPage />} />
                   
                   {/* Mejora */}
                   <Route path="hallazgos" element={<HallazgosPage />} />

@@ -11,7 +11,7 @@ Write-Host "==============================================" -ForegroundColor Cya
 $SERVER_IP = "31.97.162.229"
 $SERVER_USER = "root"
 $SSH_KEY_PATH = "C:\Users\Usuario\.ssh\9001app2"
-$PROJECT_DIR = "/root/9001app2"
+$PROJECT_DIR = "/root/9001app"
 
 # Función de logging
 function Write-Log {
@@ -54,7 +54,7 @@ $serverScript = @'
 set -euo pipefail
 
 # Variables del servidor
-PROJECT_DIR="/root/9001app2"
+PROJECT_DIR="/root/9001app"
 FRONTEND_DIR="$PROJECT_DIR/frontend"
 BACKEND_DIR="$PROJECT_DIR/backend"
 STATIC_ROOT="/var/www/9001app2"

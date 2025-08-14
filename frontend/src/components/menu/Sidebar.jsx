@@ -15,6 +15,7 @@ import {
   ClipboardList,
   FileText,
   BarChart3,
+  ActivitySquare,
   Bell,
   TrendingUp,
   Calendar,
@@ -167,6 +168,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       items: [
         { name: 'Hallazgos', path: '/app/hallazgos', icon: ClipboardCheck },
         { name: 'Acciones', path: '/app/acciones', icon: Briefcase },
+        { name: 'AMFE', path: '/app/amfe', icon: ActivitySquare },
       ]
     },
     {

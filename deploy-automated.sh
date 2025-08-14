@@ -12,7 +12,7 @@ echo "🌐 Servidor: 31.97.162.229"
 echo "=============================================="
 
 # Variables de configuración
-PROJECT_DIR="/root/9001app2"
+PROJECT_DIR="/root/9001app"
 FRONTEND_DIR="$PROJECT_DIR/frontend"
 BACKEND_DIR="$PROJECT_DIR/backend"
 STATIC_ROOT="/var/www/9001app2"

@@ -7,27 +7,28 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "build": "npm run check-config && npm run build:frontend",
-    "build:frontend": "cd frontend && npm run build",
-    "check-config": "node scripts/check-config.js",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend && npm test",
-    "test:frontend": "cd frontend && npm run test",
-    "lint": "npm run lint:backend && npm run lint:frontend",
-    "lint:backend": "cd backend && npm run lint",
-    "lint:frontend": "cd frontend && npm run lint",
-    "format": "npm run format:backend && npm run format:frontend",
-    "format:backend": "cd backend && npm run format",
-    "format:frontend": "cd frontend && npm run format",
-    "smoke": "node scripts/smoke.js",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "auto-planner": "node scripts/run-auto-planner.js",
+    "auto-planner:help": "node scripts/run-auto-planner.js --help",
+    "auto-planner:dry-run": "node scripts/run-auto-planner.js --dry-run --verbose",
+    "auto-planner:refactor": "node scripts/run-auto-planner.js --phase refactor",
+    "auto-planner:typescript": "node scripts/run-auto-planner.js --phase typescript",
+    "auto-planner:hallazgos": "node scripts/run-auto-planner.js --modules hallazgos",
+    "auto-planner:acciones": "node scripts/run-auto-planner.js --modules acciones",
+    "dashboard": "node scripts/auto-planner-dashboard.js",
+    "dashboard:install": "npm install express socket.io open",
+    "dashboard:setup": "node scripts/setup-dashboard.js",
+    "create-portable": "node scripts/create-portable-agent.js"
   },
   "dependencies": {
     "axios": "^1.11.0",
-    "bcryptjs": "^3.0.2"
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "open": "^10.2.0",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "concurrently": "^8.0.0"

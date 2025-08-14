@@ -13,13 +13,18 @@ interface Producto {
   nombre: string;
   codigo: string;
   descripcion: string;
-  estado: 'activo' | 'inactivo' | 'desarrollo';
+  estado: 'planificacion' | 'entrada' | 'diseno' | 'verificacion' | 'validacion' | 'aprobado' | 'produccion' | 'obsoleto';
   tipo: 'producto' | 'servicio';
   categoria: string;
   responsable: string;
   fecha_creacion: string;
   fecha_revision: string;
   version: string;
+  especificaciones: string;
+  requisitos_calidad: string;
+  proceso_aprobacion: string;
+  documentos_asociados: string;
+  observaciones: string;
   created_at: string;
   updated_at: string;
 }
@@ -81,18 +86,63 @@ export function ProductosListingNEW() {
       key: 'estado',
       label: 'Estado',
       sortable: true,
-      width: '120px',
+      width: '140px',
       render: (value) => {
         const config = {
-          activo: { variant: 'default' as const, icon: CheckCircle, label: 'Activo' },
-          inactivo: { variant: 'secondary' as const, icon: XCircle, label: 'Inactivo' },
-          desarrollo: { variant: 'outline' as const, icon: FileText, label: 'Desarrollo' }
+          planificacion: { 
+            variant: 'outline' as const, 
+            icon: FileText, 
+            label: 'Planificación',
+            color: 'text-blue-600 bg-blue-50 border-blue-200'
+          },
+          entrada: { 
+            variant: 'outline' as const, 
+            icon: FileText, 
+            label: 'Entradas',
+            color: 'text-purple-600 bg-purple-50 border-purple-200'
+          },
+          diseno: { 
+            variant: 'outline' as const, 
+            icon: FileText, 
+            label: 'Diseño',
+            color: 'text-orange-600 bg-orange-50 border-orange-200'
+          },
+          verificacion: { 
+            variant: 'outline' as const, 
+            icon: CheckCircle, 
+            label: 'Verificación',
+            color: 'text-yellow-600 bg-yellow-50 border-yellow-200'
+          },
+          validacion: { 
+            variant: 'outline' as const, 
+            icon: CheckCircle, 
+            label: 'Validación',
+            color: 'text-indigo-600 bg-indigo-50 border-indigo-200'
+          },
+          aprobado: { 
+            variant: 'default' as const, 
+            icon: CheckCircle, 
+            label: 'Aprobado',
+            color: 'text-green-600 bg-green-50 border-green-200'
+          },
+          produccion: { 
+            variant: 'default' as const, 
+            icon: CheckCircle, 
+            label: 'En Producción',
+            color: 'text-emerald-600 bg-emerald-50 border-emerald-200'
+          },
+          obsoleto: { 
+            variant: 'secondary' as const, 
+            icon: XCircle, 
+            label: 'Obsoleto',
+            color: 'text-gray-600 bg-gray-50 border-gray-200'
+          }
         };
         
-        const { variant, icon: Icon, label } = config[value as keyof typeof config] || config.inactivo;
+        const { variant, icon: Icon, label, color } = config[value as keyof typeof config] || config.planificacion;
         
         return (
-          <Badge variant={variant} className="gap-1">
+          <Badge variant={variant} className={`gap-1 ${color}`}>
             <Icon className="h-3 w-3" />
             {label}
           </Badge>
@@ -131,25 +181,49 @@ export function ProductosListingNEW() {
     }
   ];
 
-  // Definir columnas Kanban
+  // Definir columnas Kanban para ISO 9001:8.3
   const kanbanColumns: KanbanColumn<Producto>[] = [
     {
-      key: 'activo',
-      label: 'Activos',
-      color: 'bg-green-600',
-      filter: (producto) => producto.estado === 'activo'
-    },
-    {
-      key: 'desarrollo',
-      label: 'En Desarrollo',
+      key: 'planificacion',
+      label: 'Planificación',
       color: 'bg-blue-600',
-      filter: (producto) => producto.estado === 'desarrollo'
+      filter: (producto) => producto.estado === 'planificacion'
     },
     {
-      key: 'inactivo',
-      label: 'Inactivos',
-      color: 'bg-gray-600',
-      filter: (producto) => producto.estado === 'inactivo'
+      key: 'entrada',
+      label: 'Entradas',
+      color: 'bg-purple-600',
+      filter: (producto) => producto.estado === 'entrada'
+    },
+    {
+      key: 'diseno',
+      label: 'Diseño',
+      color: 'bg-orange-600',
+      filter: (producto) => producto.estado === 'diseno'
+    },
+    {
+      key: 'verificacion',
+      label: 'Verificación',
+      color: 'bg-yellow-600',
+      filter: (producto) => producto.estado === 'verificacion'
+    },
+    {
+      key: 'validacion',
+      label: 'Validación',
+      color: 'bg-indigo-600',
+      filter: (producto) => producto.estado === 'validacion'
+    },
+    {
+      key: 'aprobado',
+      label: 'Aprobado',
+      color: 'bg-green-600',
+      filter: (producto) => producto.estado === 'aprobado'
+    },
+    {
+      key: 'produccion',
+      label: 'En Producción',
+      color: 'bg-emerald-600',
+      filter: (producto) => producto.estado === 'produccion'
     }
   ];
 
@@ -185,7 +259,7 @@ export function ProductosListingNEW() {
         }
       },
       variant: 'ghost',
-      show: (row) => row.estado !== 'activo' // Solo mostrar si no está activo
+      show: (row) => ['planificacion', 'entrada', 'diseno'].includes(row.estado) // Solo mostrar en estados tempranos
     }
   ];
 
@@ -267,9 +341,9 @@ export function ProductosListingNEW() {
         onSelectionChange={handleSelectionChange}
         exportable
         onExport={handleExport}
-        title="Gestión de Productos y Servicios"
-        description="Administra el catálogo de productos y servicios de tu organización"
-        emptyMessage="No hay productos registrados. Haz clic en 'Nuevo' para agregar uno."
+        title="Diseño y Desarrollo de Productos y Servicios"
+        description="Gestiona el proceso de diseño y desarrollo según la cláusula 8.3 de ISO 9001"
+        emptyMessage="No hay productos en proceso de diseño. Haz clic en 'Nuevo' para iniciar un proyecto."
         striped
         className="shadow-sm"
         // Configuración de vistas múltiples

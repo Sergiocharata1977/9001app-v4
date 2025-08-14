@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import AuditoriasListing2 from '../../components/auditorias/AuditoriasListing2.jsx';
+import AuditoriasListingNEW from '../../components/auditorias/AuditoriasListingNEW.jsx';
 
 // ===============================================
 // PÁGINA PRINCIPAL DE AUDITORÍAS - SGC PRO
@@ -29,7 +29,7 @@ const AuditoriasPage = () => {
             </Button>
           </div>
         </div>
-        <AuditoriasListing2 />
+        <AuditoriasListingNEW />
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ Write-Host "==============================================" -ForegroundColor Cya
 $SERVER_IP = "31.97.162.229"
 $SERVER_USER = "root"
 $SSH_KEY_PATH = "C:\Users\Usuario\.ssh\9001app2"
-$PROJECT_DIR = "/root/9001app2"
+$PROJECT_DIR = "/root/9001app"
 $DEPLOY_SCRIPT = "deploy-automated.sh"
 
 # Función de logging
