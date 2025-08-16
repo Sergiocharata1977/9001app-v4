@@ -125,8 +125,27 @@ const MinutasList = () => {
                 <p className="text-sm text-gray-600 mb-3">{minuta.descripcion}</p>
                 <div className="space-y-2 mb-4">
                   <Badge variant="outline" className="w-full justify-start">
-                    Responsable: {minuta.responsable}
+                    Responsable: {minuta.organizador_nombre || minuta.responsable}
                   </Badge>
+                  
+                  {/* Contadores SGC */}
+                  <div className="grid grid-cols-3 gap-1 text-xs">
+                    <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                      👥 {minuta.total_participantes || 0}
+                    </div>
+                    <div className="bg-green-50 text-green-700 px-2 py-1 rounded">
+                      📎 {minuta.total_documentos || 0}
+                    </div>
+                    <div className="bg-purple-50 text-purple-700 px-2 py-1 rounded">
+                      📋 {minuta.total_normas || 0}
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Tipo: {minuta.tipo || 'reunion'}</span>
+                    <span>Estado: {minuta.estado || 'borrador'}</span>
+                  </div>
+                  
                   <p className="text-xs text-gray-500">
                     Creado: {new Date(minuta.created_at).toLocaleDateString()}
                   </p>

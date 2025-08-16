@@ -287,6 +287,54 @@ export const productos = sqliteTable('productos', {
   updated_by: integer('updated_by')
 });
 
+// 📋 MINUTAS
+export const minutas = sqliteTable('minutas', {
+  id: text('id').primaryKey(),
+  organization_id: integer('organization_id').notNull(),
+  titulo: text('titulo').notNull(),
+  fecha: text('fecha').notNull(),
+  hora_inicio: text('hora_inicio').notNull(),
+  hora_fin: text('hora_fin'),
+  lugar: text('lugar'),
+  tipo: text('tipo').notNull(),
+  organizador_id: integer('organizador_id').notNull(),
+  agenda: text('agenda'),
+  conclusiones: text('conclusiones'),
+  acuerdos: text('acuerdos'),
+  proxima_reunion: text('proxima_reunion'),
+  estado: text('estado').default('borrador'),
+  created_at: text('created_at').default('CURRENT_TIMESTAMP'),
+  updated_at: text('updated_at').default('CURRENT_TIMESTAMP'),
+  created_by: integer('created_by'),
+  updated_by: integer('updated_by'),
+  is_active: integer('is_active', { mode: 'boolean' }).default(true)
+});
+
+// 👥 PARTICIPANTES EN MINUTAS
+export const minutas_participantes = sqliteTable('minutas_participantes', {
+  id: text('id').primaryKey(),
+  minuta_id: text('minuta_id').notNull(),
+  personal_id: text('personal_id').notNull(),  // Cambiar de user_id a personal_id
+  rol: text('rol').default('participante'),
+  asistio: integer('asistio', { mode: 'boolean' }).default(false),
+  justificacion_ausencia: text('justificacion_ausencia'),
+  created_at: text('created_at').default('CURRENT_TIMESTAMP'),
+  updated_at: text('updated_at').default('CURRENT_TIMESTAMP')
+});
+
+// 📎 DOCUMENTOS ADJUNTOS A MINUTAS
+export const minutas_documentos = sqliteTable('minutas_documentos', {
+  id: text('id').primaryKey(),
+  minuta_id: text('minuta_id').notNull(),
+  documento_id: integer('documento_id').notNull(),
+  tipo_adjunto: text('tipo_adjunto').default('adjunto'),
+  descripcion: text('descripcion'),
+  created_at: text('created_at').default('CURRENT_TIMESTAMP'),
+  updated_at: text('updated_at').default('CURRENT_TIMESTAMP'),
+  created_by: integer('created_by'),
+  updated_by: integer('updated_by')
+});
+
 // ===============================================
 // RELACIONES ENTRE TABLAS
 // ===============================================
@@ -307,7 +355,8 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   capacitaciones: many(capacitaciones),
   evaluaciones: many(evaluaciones),
   objetivos: many(objetivos),
-  productos: many(productos)
+  productos: many(productos),
+  minutas: many(minutas)
 }));
 
 // Relaciones de Users
@@ -454,6 +503,44 @@ export const productosRelations = relations(productos, ({ one }) => ({
   })
 }));
 
+// Relaciones de Minutas
+export const minutasRelations = relations(minutas, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [minutas.organization_id],
+    references: [organizations.id]
+  }),
+  organizador: one(users, {
+    fields: [minutas.organizador_id],
+    references: [users.id]
+  }),
+  participantes: many(minutas_participantes),
+  documentos: many(minutas_documentos)
+}));
+
+// Relaciones de Minutas Participantes
+export const minutasParticipantesRelations = relations(minutas_participantes, ({ one }) => ({
+  minuta: one(minutas, {
+    fields: [minutas_participantes.minuta_id],
+    references: [minutas.id]
+  }),
+  personal: one(personal, {
+    fields: [minutas_participantes.personal_id],
+    references: [personal.id]
+  })
+}));
+
+// Relaciones de Minutas Documentos
+export const minutasDocumentosRelations = relations(minutas_documentos, ({ one }) => ({
+  minuta: one(minutas, {
+    fields: [minutas_documentos.minuta_id],
+    references: [minutas.id]
+  }),
+  documento: one(documentos, {
+    fields: [minutas_documentos.documento_id],
+    references: [documentos.id]
+  })
+}));
+
 // ===============================================
 // TIPOS DE DATOS PARA TYPESCRIPT
 // ===============================================
@@ -474,7 +561,10 @@ export const schema = {
   capacitaciones,
   evaluaciones,
   objetivos,
-  productos
+  productos,
+  minutas,
+  minutas_participantes,
+  minutas_documentos
 };
 
 export const schemaRelations = {
@@ -493,5 +583,8 @@ export const schemaRelations = {
   capacitacionesRelations,
   evaluacionesRelations,
   objetivosRelations,
-  productosRelations
+  productosRelations,
+  minutasRelations,
+  minutasParticipantesRelations,
+  minutasDocumentosRelations
 }; 

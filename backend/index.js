@@ -29,10 +29,15 @@ const procesosRoutes = require('./routes/procesos.routes.js');
 const objetivosCalidadRoutes = require('./routes/objetivos-calidad.routes.js');
 const indicadoresRoutes = require('./routes/indicadores.routes.js');
 const medicionesRoutes = require('./routes/mediciones.routes.js');
-const hallazgosRoutes = require('./routes/hallazgos.js');
+const hallazgosRoutes = require('./routes/hallazgos.routes.js');
 const accionesRoutes = require('./routes/acciones.routes.js');
 const auditoriasRoutes = require('./routes/auditorias.routes.js');
 const productosRoutes = require('./routes/productos.routes.js');
+const minutasRoutes = require('./routes/minutas.routes.js');
+const politicaCalidadRoutes = require('./routes/politica-calidad.routes.js');
+const eventsRoutes = require('./routes/events.routes.js');
+// const evaluacionesRoutes = require('./routes/evaluaciones.routes.js');
+// const evaluacionesSgcRoutes = require('./routes/evaluaciones-sgc.routes.js');
 const adminRoutes = require('./routes/admin.routes.js');
 const planesRoutes = require('./routes/planes.js');
 const suscripcionesRoutes = require('./routes/suscripciones.js');
@@ -93,6 +98,21 @@ app.use('/api/acciones', accionesRoutes);
 
 // Rutas de auditorías
 app.use('/api/auditorias', auditoriasRoutes);
+
+// Rutas de minutas
+app.use('/api/minutas', minutasRoutes);
+
+// Rutas de políticas de calidad
+app.use('/api/politica-calidad', politicaCalidadRoutes);
+
+// Rutas de events (básico)
+app.use('/api/events', eventsRoutes);
+
+// Rutas de evaluaciones (SGC estandarizado) - TEMPORALMENTE DESHABILITADAS
+// app.use('/api/evaluaciones', evaluacionesRoutes);
+
+// Rutas de evaluaciones SGC (específicas) - TEMPORALMENTE DESHABILITADAS
+// app.use('/api/evaluaciones-sgc', evaluacionesSgcRoutes);
 
 // Rutas de productos (requieren autenticación)
 app.use('/api/productos', authMiddleware, productosRoutes);

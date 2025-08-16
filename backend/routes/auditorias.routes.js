@@ -1,9 +1,21 @@
 const express = require('express');
-const { getAllAuditorias,
+const { 
+  // Funciones principales
+  getAllAuditorias,
   getAuditoriaById,
   createAuditoria,
   updateAuditoria,
   deleteAuditoria,
+  
+  // Funciones SGC
+  getParticipantesSGC,
+  addParticipanteSGC,
+  getDocumentosSGC,
+  addDocumentoSGC,
+  getNormasSGC,
+  addNormaSGC,
+  
+  // Funciones legacy
   getAspectos,
   addAspecto,
   updateAspecto,
@@ -40,5 +52,21 @@ router.delete('/relaciones/:relacionId', deleteRelacion);
 
 // Ruta para obtener registros relacionables
 router.get('/registros-relacionables/:tipo', getRegistrosRelacionables);
+
+// ===============================================
+// RUTAS SGC - PARTICIPANTES, DOCUMENTOS Y NORMAS
+// ===============================================
+
+// Rutas de participantes SGC
+router.get('/:auditoriaId/sgc/participantes', getParticipantesSGC);
+router.post('/:auditoriaId/sgc/participantes', addParticipanteSGC);
+
+// Rutas de documentos SGC
+router.get('/:auditoriaId/sgc/documentos', getDocumentosSGC);
+router.post('/:auditoriaId/sgc/documentos', addDocumentoSGC);
+
+// Rutas de normas SGC
+router.get('/:auditoriaId/sgc/normas', getNormasSGC);
+router.post('/:auditoriaId/sgc/normas', addNormaSGC);
 
 module.exports = router; 

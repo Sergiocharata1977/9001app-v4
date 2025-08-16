@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import hallazgosService from '@/services/hallazgosService';
 import accionesService from '@/services/accionesService';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users, FileText, BookOpen, Activity } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import HallazgoWorkflowManager from './HallazgoWorkflowManager';
+import HallazgoParticipantes from './HallazgoParticipantes';
+import HallazgoDocumentos from './HallazgoDocumentos';
+import HallazgoNormas from './HallazgoNormas';
 import { hallazgoWorkflow } from '@/config/hallazgoWorkflow';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -121,10 +124,31 @@ const HallazgoSingle = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="proceso" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="proceso">Flujo de Proceso</TabsTrigger>
-          <TabsTrigger value="detalles">Detalles</TabsTrigger>
-          <TabsTrigger value="acciones">Plan de Acciones</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="proceso" className="flex items-center">
+            <Activity className="h-4 w-4 mr-1" />
+            Proceso
+          </TabsTrigger>
+          <TabsTrigger value="detalles" className="flex items-center">
+            <FileText className="h-4 w-4 mr-1" />
+            Detalles
+          </TabsTrigger>
+          <TabsTrigger value="participantes" className="flex items-center">
+            <Users className="h-4 w-4 mr-1" />
+            Participantes
+          </TabsTrigger>
+          <TabsTrigger value="documentos" className="flex items-center">
+            <FileText className="h-4 w-4 mr-1" />
+            Documentos
+          </TabsTrigger>
+          <TabsTrigger value="normas" className="flex items-center">
+            <BookOpen className="h-4 w-4 mr-1" />
+            Normas
+          </TabsTrigger>
+          <TabsTrigger value="acciones" className="flex items-center">
+            <Activity className="h-4 w-4 mr-1" />
+            Acciones
+          </TabsTrigger>
         </TabsList>
 
         {hallazgo && (
@@ -166,6 +190,27 @@ const HallazgoSingle = () => {
                     <p><span className="font-semibold">Fecha de Detección:</span> {new Date(hallazgo.fecha_deteccion).toLocaleDateString()}</p>
                 </div>
             </div>
+        </TabsContent>
+
+        <TabsContent value="participantes" className="mt-4">
+          <HallazgoParticipantes 
+            hallazgoId={id} 
+            organizationId={hallazgo?.organization_id || 1}
+          />
+        </TabsContent>
+
+        <TabsContent value="documentos" className="mt-4">
+          <HallazgoDocumentos 
+            hallazgoId={id} 
+            organizationId={hallazgo?.organization_id || 1}
+          />
+        </TabsContent>
+
+        <TabsContent value="normas" className="mt-4">
+          <HallazgoNormas 
+            hallazgoId={id} 
+            organizationId={hallazgo?.organization_id || 1}
+          />
         </TabsContent>
 
         <TabsContent value="acciones" className="mt-4">

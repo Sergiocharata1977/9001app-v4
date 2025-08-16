@@ -414,7 +414,291 @@ const deleteAuditoria = async (req, res) => {
 };
 
 // ===============================================
-// GESTIÓN DE ASPECTOS
+// GESTIÓN SGC - PARTICIPANTES, DOCUMENTOS Y NORMAS
+// ===============================================
+
+// Obtener participantes SGC de una auditoría
+const getParticipantesSGC = async (req, res) => {
+  try {
+    const { auditoriaId } = req.params;
+    console.log(`👥 Obteniendo participantes SGC de auditoría ${auditoriaId}...`);
+    
+    const result = await tursoClient.execute({
+      sql: `
+        SELECT 
+          sp.*,
+          p.nombres || ' ' || p.apellidos as participante_nombre,
+          p.email as participante_email,
+          d.nombre as departamento_nombre
+        FROM sgc_participantes sp
+        INNER JOIN personal p ON sp.personal_id = p.id
+        LEFT JOIN departamentos d ON p.departamento_id = d.id
+        WHERE sp.entidad_tipo = 'auditoria' 
+        AND sp.entidad_id = ? 
+        AND sp.is_active = 1
+        ORDER BY sp.rol, sp.created_at ASC
+      `,
+      args: [auditoriaId]
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Error obteniendo participantes SGC:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener participantes SGC',
+      error: error.message
+    });
+  }
+};
+
+// Agregar participante SGC a auditoría
+const addParticipanteSGC = async (req, res) => {
+  try {
+    const { auditoriaId } = req.params;
+    const { personal_id, rol = 'participante', observaciones } = req.body;
+
+    if (!personal_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'El ID del personal es obligatorio'
+      });
+    }
+
+    const participanteId = randomUUID();
+    const timestamp = new Date().toISOString();
+
+    await tursoClient.execute({
+      sql: `
+        INSERT INTO sgc_participantes (
+          id, organization_id, entidad_tipo, entidad_id,
+          personal_id, rol, observaciones, created_at, updated_at, is_active
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        participanteId,
+        req.user?.organization_id || 2,
+        'auditoria',
+        auditoriaId,
+        personal_id,
+        rol,
+        observaciones || null,
+        timestamp,
+        timestamp,
+        1
+      ]
+    });
+
+    res.status(201).json({
+      success: true,
+      data: { id: participanteId, personal_id, rol },
+      message: 'Participante SGC agregado exitosamente'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error agregando participante SGC:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al agregar participante SGC',
+      error: error.message
+    });
+  }
+};
+
+// Obtener documentos SGC de una auditoría
+const getDocumentosSGC = async (req, res) => {
+  try {
+    const { auditoriaId } = req.params;
+    
+    const result = await tursoClient.execute({
+      sql: `
+        SELECT 
+          sdr.*,
+          d.titulo as documento_titulo,
+          d.tipo as documento_tipo
+        FROM sgc_documentos_relacionados sdr
+        INNER JOIN documentos d ON sdr.documento_id = d.id
+        WHERE sdr.entidad_tipo = 'auditoria' 
+        AND sdr.entidad_id = ? 
+        AND sdr.is_active = 1
+        ORDER BY sdr.tipo_relacion, sdr.created_at ASC
+      `,
+      args: [auditoriaId]
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Error obteniendo documentos SGC:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener documentos SGC',
+      error: error.message
+    });
+  }
+};
+
+// Agregar documento SGC a auditoría
+const addDocumentoSGC = async (req, res) => {
+  try {
+    const { auditoriaId } = req.params;
+    const { documento_id, tipo_relacion = 'adjunto', descripcion } = req.body;
+
+    if (!documento_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'El ID del documento es obligatorio'
+      });
+    }
+
+    const relacionId = randomUUID();
+    const timestamp = new Date().toISOString();
+
+    await tursoClient.execute({
+      sql: `
+        INSERT INTO sgc_documentos_relacionados (
+          id, organization_id, entidad_tipo, entidad_id,
+          documento_id, tipo_relacion, descripcion,
+          created_at, updated_at, is_active
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        relacionId,
+        req.user?.organization_id || 2,
+        'auditoria',
+        auditoriaId,
+        documento_id,
+        tipo_relacion,
+        descripcion || null,
+        timestamp,
+        timestamp,
+        1
+      ]
+    });
+
+    res.status(201).json({
+      success: true,
+      data: { id: relacionId, documento_id, tipo_relacion },
+      message: 'Documento SGC agregado exitosamente'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error agregando documento SGC:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al agregar documento SGC',
+      error: error.message
+    });
+  }
+};
+
+// Obtener normas SGC de una auditoría
+const getNormasSGC = async (req, res) => {
+  try {
+    const { auditoriaId } = req.params;
+    
+    const result = await tursoClient.execute({
+      sql: `
+        SELECT 
+          snr.*,
+          n.nombre as norma_nombre
+        FROM sgc_normas_relacionadas snr
+        INNER JOIN normas n ON snr.norma_id = n.id
+        WHERE snr.entidad_tipo = 'auditoria' 
+        AND snr.entidad_id = ? 
+        AND snr.is_active = 1
+        ORDER BY snr.punto_norma ASC
+      `,
+      args: [auditoriaId]
+    });
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Error obteniendo normas SGC:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener normas SGC',
+      error: error.message
+    });
+  }
+};
+
+// Agregar norma SGC a auditoría
+const addNormaSGC = async (req, res) => {
+  try {
+    const { auditoriaId } = req.params;
+    const { 
+      norma_id = 1, 
+      punto_norma, 
+      nivel_cumplimiento = 'pendiente', 
+      observaciones 
+    } = req.body;
+
+    if (!punto_norma) {
+      return res.status(400).json({
+        success: false,
+        message: 'El punto de la norma es obligatorio'
+      });
+    }
+
+    const normaRelacionId = randomUUID();
+    const timestamp = new Date().toISOString();
+
+    await tursoClient.execute({
+      sql: `
+        INSERT INTO sgc_normas_relacionadas (
+          id, organization_id, entidad_tipo, entidad_id,
+          norma_id, punto_norma, nivel_cumplimiento, observaciones,
+          created_at, updated_at, is_active
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        normaRelacionId,
+        req.user?.organization_id || 2,
+        'auditoria',
+        auditoriaId,
+        norma_id,
+        punto_norma,
+        nivel_cumplimiento,
+        observaciones || null,
+        timestamp,
+        timestamp,
+        1
+      ]
+    });
+
+    res.status(201).json({
+      success: true,
+      data: { id: normaRelacionId, punto_norma, nivel_cumplimiento },
+      message: 'Norma SGC agregada exitosamente'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error agregando norma SGC:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al agregar norma SGC',
+      error: error.message
+    });
+  }
+};
+
+// ===============================================
+// GESTIÓN DE ASPECTOS (LEGACY - MANTENER COMPATIBILIDAD)
 // ===============================================
 
 // Obtener aspectos de una auditoría
@@ -857,11 +1141,26 @@ const getRegistrosRelacionables = async (req, res) => {
 // ===============================================
 
 module.exports = {
+  // Funciones principales de auditorías
   getAllAuditorias,
   getAuditoriaById,
   createAuditoria,
   updateAuditoria,
   deleteAuditoria,
+  
+  // Funciones SGC - Participantes
+  getParticipantesSGC,
+  addParticipanteSGC,
+  
+  // Funciones SGC - Documentos
+  getDocumentosSGC,
+  addDocumentoSGC,
+  
+  // Funciones SGC - Normas
+  getNormasSGC,
+  addNormaSGC,
+  
+  // Funciones legacy (mantener compatibilidad)
   getAspectos,
   addAspecto,
   updateAspecto,

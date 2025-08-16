@@ -12,7 +12,9 @@ const { getAllOrganizations,
   updateOrganizationUser,
   deleteOrganizationUser,
   getOrganizationFeatures,
-  updateOrganizationFeatures
+  updateOrganizationFeatures,
+  assignUserFeaturePermissions,
+  getUserFeaturePermissions
  } = require('../controllers/adminController.js');
 
 const router = express.Router();
@@ -67,5 +69,9 @@ router.delete('/organization/:organizationId/users/:userId', requireAdmin, delet
 // Gestión de Features de la Organización
 router.get('/organization/:organizationId/features', requireAdmin, getOrganizationFeatures);
 router.put('/organization/:organizationId/features', requireAdmin, updateOrganizationFeatures);
+
+// Gestión de Permisos de Usuarios por Feature
+router.get('/organization/:organizationId/feature-permissions', requireAdmin, getUserFeaturePermissions);
+router.post('/organization/:organizationId/feature-permissions', requireAdmin, assignUserFeaturePermissions);
 
 module.exports = router; 

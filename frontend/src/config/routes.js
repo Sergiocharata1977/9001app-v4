@@ -4,7 +4,8 @@ export const ROUTES = {
   WEB: {
     HOME: '/web',
     FEATURES: '/web/caracteristicas',
-    CONTACT: '/web/contacto'
+    CONTACT: '/web/contacto',
+    DATABASE_DOCS: '/web/database-docs'
   },
   
   // Rutas de la aplicación
@@ -72,8 +73,8 @@ export const ROUTES = {
 // Función helper para construir rutas dinámicas
 export const buildRoute = (baseRoute, params = {}) => {
   let route = baseRoute;
-  Object.entries(params).forEach(([key, value]) => {
-    route = route.replace(`:${key}`, value);
+  Object.keys(params).forEach(key => {
+    route = route.replace(`:${key}`, params[key]);
   });
   return route;
 };

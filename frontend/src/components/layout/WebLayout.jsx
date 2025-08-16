@@ -5,7 +5,8 @@ import {
   Menu, 
   X, 
   Building2,
-  ArrowRight
+  ArrowRight,
+  Database
 } from 'lucide-react';
 
 const WebLayout = ({ children }) => {
@@ -15,7 +16,8 @@ const WebLayout = ({ children }) => {
   const navigation = [
     { name: 'Inicio', href: '/' },
     { name: 'Características', href: '/caracteristicas' },
-    { name: 'Contacto', href: '/contacto' }
+    { name: 'Contacto', href: '/contacto' },
+    { name: 'Base de Datos', href: '/database-docs', icon: Database }
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -47,21 +49,22 @@ const WebLayout = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                     isActive(item.href)
                       ? 'text-emerald-600 bg-emerald-50 border border-emerald-200'
                       : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
                   }`}
                 >
-                  {item.name}
+                  {item.icon && <item.icon className="w-4 h-4" />}
+                  <span>{item.name}</span>
                 </Link>
               ))}
               
               <Link
                 to="/login"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300 shadow-lg"
               >
-                Acceder al Sistema
+                <span>Acceder al Sistema</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -97,13 +100,14 @@ const WebLayout = ({ children }) => {
                     key={item.name}
                     to={item.href}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
                       isActive(item.href)
                         ? 'text-emerald-600 bg-emerald-50 border border-emerald-200'
                         : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
                     }`}
                   >
-                    {item.name}
+                    {item.icon && <item.icon className="w-4 h-4" />}
+                    <span>{item.name}</span>
                   </Link>
                 ))}
                 

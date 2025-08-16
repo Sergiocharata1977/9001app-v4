@@ -576,20 +576,58 @@ const getOrganizationFeatures = async (req, res) => {
     const { organizationId } = req.params;
     console.log(`🔍 Obteniendo features de organización ${organizationId}...`);
     
-    const result = await executeQuery({
+    // Obtener todas las features disponibles
+    const allFeatures = await executeQuery({
       sql: `
-        SELECT feature_name, is_enabled
-        FROM organization_features
+        SELECT DISTINCT feature_name 
+        FROM organization_feature 
         WHERE organization_id = ?
         ORDER BY feature_name
       `,
       args: [organizationId]
     });
 
-    console.log(`✅ ${result.rows.length} features encontradas para organización ${organizationId}`);
+    // Obtener el estado de cada feature para la organización
+    const featuresWithStatus = await Promise.all(
+      allFeatures.rows.map(async (feature) => {
+        const statusResult = await executeQuery({
+          sql: `
+            SELECT is_enabled, created_at, updated_at
+            FROM organization_feature 
+            WHERE organization_id = ? AND feature_name = ?
+          `,
+          args: [organizationId, feature.feature_name]
+        });
+
+        // Obtener usuarios que tienen acceso a esta feature
+        const usersResult = await executeQuery({
+          sql: `
+            SELECT u.id, u.name, u.email, u.role
+            FROM usuarios u
+            WHERE u.organization_id = ? 
+            AND u.is_active = 1
+            ORDER BY u.name
+          `,
+          args: [organizationId]
+        });
+
+        return {
+          feature_name: feature.feature_name,
+          is_enabled: statusResult.rows[0]?.is_enabled || 0,
+          created_at: statusResult.rows[0]?.created_at,
+          updated_at: statusResult.rows[0]?.updated_at,
+          available_users: usersResult.rows,
+          total_users: usersResult.rows.length
+        };
+      })
+    );
+
+    console.log(`✅ Features obtenidas para organización ${organizationId}:`, featuresWithStatus.length);
     res.json({
       success: true,
-      data: result.rows
+      data: featuresWithStatus,
+      total: featuresWithStatus.length,
+      message: `${featuresWithStatus.length} features encontradas para la organización`
     });
   } catch (error) {
     console.error('❌ Error obteniendo features de organización:', error);
@@ -611,7 +649,7 @@ const updateOrganizationFeatures = async (req, res) => {
     for (const feature of features) {
       await executeQuery({
         sql: `
-          INSERT OR REPLACE INTO organization_features (organization_id, feature_name, is_enabled, created_at)
+          INSERT OR REPLACE INTO organization_feature (organization_id, feature_name, is_enabled, created_at)
           VALUES (?, ?, ?, datetime('now'))
         `,
         args: [organizationId, feature.feature_name, feature.is_enabled]
@@ -632,6 +670,115 @@ const updateOrganizationFeatures = async (req, res) => {
     });
   }
 }; 
+
+const assignUserFeaturePermissions = async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    const { feature_name, user_ids } = req.body; // user_ids es un array de IDs de usuarios
+    
+    console.log(`🔐 Asignando permisos de feature '${feature_name}' a usuarios en organización ${organizationId}...`);
+    
+    // Verificar que la feature existe para la organización
+    const featureExists = await executeQuery({
+      sql: `
+        SELECT is_enabled FROM organization_feature 
+        WHERE organization_id = ? AND feature_name = ?
+      `,
+      args: [organizationId, feature_name]
+    });
+
+    if (featureExists.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Feature '${feature_name}' no encontrada para esta organización`
+      });
+    }
+
+    // Limpiar permisos existentes para esta feature
+    await executeQuery({
+      sql: `
+        DELETE FROM user_feature_permissions 
+        WHERE organization_id = ? AND feature_name = ?
+      `,
+      args: [organizationId, feature_name]
+    });
+
+    // Asignar nuevos permisos
+    if (user_ids && user_ids.length > 0) {
+      for (const userId of user_ids) {
+        await executeQuery({
+          sql: `
+            INSERT INTO user_feature_permissions 
+            (organization_id, user_id, feature_name, granted_at, granted_by)
+            VALUES (?, ?, ?, datetime('now'), ?)
+          `,
+          args: [organizationId, userId, feature_name, req.user?.id || 'system']
+        });
+      }
+    }
+
+    console.log(`✅ Permisos asignados para feature '${feature_name}'`);
+    res.json({
+      success: true,
+      message: `Permisos asignados exitosamente para ${user_ids?.length || 0} usuarios`
+    });
+  } catch (error) {
+    console.error('❌ Error asignando permisos de feature:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al asignar permisos de feature',
+      error: error.message
+    });
+  }
+};
+
+const getUserFeaturePermissions = async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    const { feature_name } = req.query;
+    
+    console.log(`🔍 Obteniendo permisos de usuarios para feature '${feature_name}' en organización ${organizationId}...`);
+    
+    let sql = `
+      SELECT 
+        ufp.user_id,
+        u.name,
+        u.email,
+        u.role,
+        ufp.granted_at,
+        ufp.granted_by
+      FROM user_feature_permissions ufp
+      JOIN usuarios u ON ufp.user_id = u.id
+      WHERE ufp.organization_id = ?
+    `;
+    
+    const args = [organizationId];
+    
+    if (feature_name) {
+      sql += ` AND ufp.feature_name = ?`;
+      args.push(feature_name);
+    }
+    
+    sql += ` ORDER BY u.name`;
+    
+    const result = await executeQuery({ sql, args });
+    
+    console.log(`✅ Permisos obtenidos: ${result.rows.length} registros`);
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length,
+      message: `${result.rows.length} permisos encontrados`
+    });
+  } catch (error) {
+    console.error('❌ Error obteniendo permisos de usuarios:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener permisos de usuarios',
+      error: error.message
+    });
+  }
+};
 
 // ===== EXPORTACIONES =====
 
@@ -654,5 +801,7 @@ module.exports = {
   
   // Features Management
   getOrganizationFeatures,
-  updateOrganizationFeatures
+  updateOrganizationFeatures,
+  assignUserFeaturePermissions,
+  getUserFeaturePermissions
 }; 

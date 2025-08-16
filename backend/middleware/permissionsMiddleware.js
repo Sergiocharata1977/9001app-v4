@@ -48,10 +48,10 @@ const authenticate = async (req, res, next) => {
 };
 
 /**
- * Middleware simplificado para verificar que el usuario está autenticado
- * Por ahora no hay restricciones de plan o rol
+ * Middleware para verificar permisos por feature
+ * Verifica si el usuario tiene acceso a una feature específica
  */
-const checkPermissions = (requiredFeature = null, requiredAction = 'read') => {
+const checkFeatureAccess = (requiredFeature) => {
   return async (req, res, next) => {
     try {
       const user = req.user;
@@ -60,8 +60,9 @@ const checkPermissions = (requiredFeature = null, requiredAction = 'read') => {
         return res.status(401).json({ message: 'Usuario no autenticado' });
       }
 
-      console.log('🔐 Usuario autenticado:', { 
+      console.log('🔐 Verificando acceso a feature:', { 
         user: user.email, 
+        feature: requiredFeature,
         role: user.role, 
         organization_id: user.organization_id
       });
@@ -72,23 +73,57 @@ const checkPermissions = (requiredFeature = null, requiredAction = 'read') => {
         return next();
       }
 
-      // Por ahora, todos los usuarios autenticados pueden acceder a todos los módulos
-      // Solo verificamos que tengan una organización válida
+      // Verificar que el usuario tenga una organización válida
       if (!user.organization_id) {
         return res.status(403).json({ message: 'Usuario no asignado a una organización' });
       }
 
-      console.log('✅ Acceso permitido para usuario de organización:', user.organization_id);
+      // Verificar si la feature está habilitada para la organización
+      const { tursoClient } = require('../lib/tursoClient.js');
       
-      // Agregar información básica al request
-      req.permissions = {
-        organizationId: user.organization_id,
-        userRole: user.role
-      };
+      const featureEnabled = await tursoClient.execute({
+        sql: `
+          SELECT is_enabled FROM organization_feature 
+          WHERE organization_id = ? AND feature_name = ? AND is_enabled = 1
+        `,
+        args: [user.organization_id, requiredFeature]
+      });
 
+      if (featureEnabled.rows.length === 0) {
+        console.log('❌ Feature no habilitada para la organización:', requiredFeature);
+        return res.status(403).json({ 
+          message: `Feature '${requiredFeature}' no está habilitada para esta organización` 
+        });
+      }
+
+      // Verificar si el usuario tiene permiso específico para esta feature
+      const userPermission = await tursoClient.execute({
+        sql: `
+          SELECT 1 FROM user_feature_permissions 
+          WHERE organization_id = ? AND user_id = ? AND feature_name = ? AND is_active = 1
+        `,
+        args: [user.organization_id, user.id, requiredFeature]
+      });
+
+      // Si no hay permisos específicos, verificar por rol
+      if (userPermission.rows.length === 0) {
+        // Admin de organización tiene acceso a todas las features habilitadas
+        if (user.role === 'admin') {
+          console.log('✅ Admin de organización - acceso permitido');
+          return next();
+        }
+        
+        // Para otros roles, verificar permisos específicos
+        console.log('❌ Usuario sin permisos para feature:', requiredFeature);
+        return res.status(403).json({ 
+          message: `No tienes permisos para acceder a '${requiredFeature}'` 
+        });
+      }
+
+      console.log('✅ Usuario con permisos específicos - acceso permitido');
       next();
     } catch (error) {
-      console.error('💥 Error en middleware de permisos:', error);
+      console.error('💥 Error en middleware de permisos por feature:', error);
       res.status(500).json({ message: 'Error interno del servidor' });
     }
   };
@@ -146,7 +181,7 @@ const autoCheckPermissions = (req, res, next) => {
 
 export default {
   authenticate,
-  checkPermissions,
+  checkPermissions: checkFeatureAccess, // Renombrado para reflejar el nuevo middleware
   checkUserLimits,
   autoCheckPermissions
 };

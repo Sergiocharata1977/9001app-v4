@@ -1,4 +1,10 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const { createClient } = require('@libsql/client');
+
+// Configuración directa de Turso que funciona
+const tursoClient = createClient({
+  url: 'libsql://iso-flow-respo-sergiocharata1977.aws-us-east-1.turso.io',
+  authToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTIwMDc3MDcsImlkIjoiNGM4NWQwY2UtNTE2OS00NTI4LTgyMmUtYzc5YTMzOTYxMDM3IiwicmlkIjoiZjM0NjI0YWItNzZhYy00N2FiLTkxY2QtYWU4NDk5ZDY5MzczIn0.b2puA6ushwN3ovDQNO4fFvrK3gcU08y59rKgUSPv7KfFNEafGfapWMd5BC2rvbI2QzXCbAcRD66UKLVH4TouBA'
+});
 
 // Configuración de colores para la consola
 const colors = {
@@ -18,7 +24,9 @@ const TABLAS_SISTEMA = [
   'procesos', 'documentos', 'normas', 'auditorias',
   'objetivos_calidad', 'mediciones', 'acciones', 'hallazgos',
   'capacitaciones', 'evaluaciones', 'relaciones_sgc',
-  'messages', 'message_recipients', 'message_tags'
+  'sgc_participantes', 'sgc_documentos_relacionados', 'sgc_normas_relacionadas',
+  'minutas', 'minutas_participantes', 'minutas_documentos',
+  'politica_calidad', 'planes', 'suscripciones'
 ];
 
 async function verificarBaseDatosCompleta(organizationId = '2', continuo = false) {

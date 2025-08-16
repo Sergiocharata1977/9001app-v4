@@ -26,6 +26,34 @@ const minutasService = {
     return await apiService.delete(`/minutas/${id}`);
   },
 
+  // ===============================================
+  // PARTICIPANTES SGC
+  // ===============================================
+  
+  // Obtener participantes de una minuta
+  async getParticipantes(minutaId) {
+    return await apiService.get(`/minutas/${minutaId}/participantes`);
+  },
+
+  // Agregar participante a minuta
+  async addParticipante(minutaId, participanteData) {
+    return await apiService.post(`/minutas/${minutaId}/participantes`, participanteData);
+  },
+
+  // Actualizar participante de minuta
+  async updateParticipante(minutaId, participanteId, participanteData) {
+    return await apiService.put(`/minutas/${minutaId}/participantes/${participanteId}`, participanteData);
+  },
+
+  // Eliminar participante de minuta
+  async removeParticipante(minutaId, participanteId) {
+    return await apiService.delete(`/minutas/${minutaId}/participantes/${participanteId}`);
+  },
+
+  // ===============================================
+  // DOCUMENTOS SGC
+  // ===============================================
+
   // Obtener documentos de una minuta
   async getDocumentos(minutaId) {
     return await apiService.get(`/minutas/${minutaId}/documentos`);
@@ -39,6 +67,30 @@ const minutasService = {
   // Eliminar documento de minuta
   async removeDocument(minutaId, documentId) {
     return await apiService.delete(`/minutas/${minutaId}/documentos/${documentId}`);
+  },
+
+  // ===============================================
+  // NORMAS ISO SGC
+  // ===============================================
+
+  // Obtener normas ISO de una minuta
+  async getNormas(minutaId) {
+    return await apiService.get(`/minutas/${minutaId}/normas`);
+  },
+
+  // Agregar norma ISO a minuta
+  async addNorma(minutaId, normaData) {
+    return await apiService.post(`/minutas/${minutaId}/normas`, normaData);
+  },
+
+  // Actualizar norma ISO de minuta
+  async updateNorma(minutaId, normaId, normaData) {
+    return await apiService.put(`/minutas/${minutaId}/normas/${normaId}`, normaData);
+  },
+
+  // Eliminar norma ISO de minuta
+  async removeNorma(minutaId, normaId) {
+    return await apiService.delete(`/minutas/${minutaId}/normas/${normaId}`);
   },
 
   // Obtener historial de cambios de una minuta
@@ -88,6 +140,30 @@ const minutasService = {
     return await apiService.get(`/minutas/export?format=${format}`, {
       responseType: 'blob',
     });
+  },
+
+  // ===============================================
+  // NUEVAS RUTAS SGC
+  // ===============================================
+
+  // Obtener dashboard SGC
+  async getDashboardSGC() {
+    return await apiService.get('/minutas/dashboard/sgc');
+  },
+
+  // Obtener lista de personal disponible
+  async getPersonalDisponible() {
+    return await apiService.get('/minutas/util/personal');
+  },
+
+  // Obtener lista de documentos disponibles
+  async getDocumentosDisponibles() {
+    return await apiService.get('/minutas/util/documentos');
+  },
+
+  // Obtener lista de normas disponibles
+  async getNormasDisponibles() {
+    return await apiService.get('/minutas/util/normas');
   }
 };
 

@@ -37,7 +37,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
-  const [expandedSections, setExpandedSections] = useState(['recursos-humanos']);
+  const [expandedSections, setExpandedSections] = useState(['recursos-humanos', 'procesos']);
   const [expandedSubmenus, setExpandedSubmenus] = useState({});
 
   const toggleSection = (sectionId) => {
@@ -94,7 +94,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
   const departmentModules = [
     {
       id: 'planificacion-revision',
-      name: 'Planificación y Revisión',
+      name: '1-PLAN - Planificación y Revisión',
       icon: Target,
       color: 'orange',
       items: [
@@ -107,62 +107,47 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       ]
     },
     {
-      id: 'auditorias',
-      name: 'Auditorías',
-      icon: BarChart3,
-      color: 'blue',
-      items: [
-        { name: 'Auditorías Internas', path: '/app/auditorias', icon: BarChart3 },
-      ]
-    },
-    {
       id: 'recursos-humanos',
-      name: 'Recursos Humanos',
+      name: '2-RH - Recursos Humanos',
       icon: Users,
       color: 'emerald',
       items: [
-        { name: 'Puntos de la Norma', path: '/app/normas', icon: ListChecks },
-        { name: 'Documentos', path: '/app/documentos', icon: FileText },
-        {
-          type: 'submenu',
-          name: 'Organización',
-          icon: Building,
-          id: 'organizacion',
-          items: [
-            { name: 'Departamentos', path: '/app/departamentos', icon: Building },
-            { name: 'Puestos', path: '/app/puestos', icon: Briefcase },
-            { name: 'Personal', path: '/app/personal', icon: User },
-          ]
-        },
-        {
-          type: 'submenu',
-          name: 'Des. Prod/Serv',
-          icon: Package,
-          id: 'desarrollo',
-          items: [
-            { name: 'Productos y Servicios', path: '/app/productos', icon: Package },
-            { name: 'Capacitaciones', path: '/app/capacitaciones', icon: GraduationCap },
-            { name: 'Competencias', path: '/app/competencias', icon: ClipboardList },
-            { name: 'Evaluaciones Individuales', path: '/app/evaluaciones-individuales', icon: User },
-          ]
-        },
+        { name: 'Personal', path: '/app/personal', icon: Users },
+        { name: 'Departamentos', path: '/app/departamentos', icon: Building },
+        { name: 'Puestos', path: '/app/puestos', icon: Briefcase },
+        { name: 'Capacitaciones', path: '/app/capacitaciones', icon: GraduationCap },
+        { name: 'Competencias', path: '/app/competencias', icon: Award },
+        { name: 'Evaluación de Competencias', path: '/app/evaluacion-competencias', icon: ClipboardCheck },
       ]
     },
-        {
-          id: 'procesos',
-          name: 'Procesos',
-          icon: ClipboardCheck,
-          color: 'blue',
-          items: [
-            { name: 'Procesos', path: '/app/procesos', icon: ClipboardCheck },
-            { name: 'Objetivos de calidad', path: '/app/objetivos-calidad', icon: Briefcase },
-            { name: 'Indicadores de calidad', path: '/app/indicadores', icon: GraduationCap },
-            { name: 'Mediciones', path: '/app/mediciones', icon: Users },
-          ]
-        },
+    {
+      id: 'procesos',
+      name: 'Procesos',
+      icon: ClipboardCheck,
+      color: 'blue',
+      items: [
+        { name: 'Procesos', path: '/app/procesos', icon: ClipboardCheck },
+        { name: 'Objetivos de Calidad', path: '/app/objetivos-calidad', icon: Target },
+        { name: 'Indicadores', path: '/app/indicadores', icon: BarChart3 },
+        { name: 'Mediciones', path: '/app/mediciones', icon: TrendingUp },
+      ]
+    },
+    { name: '2-DOC - Documentos', path: '/app/documentos', icon: FileText, single: true },
+    { name: 'Puntos de la Norma', path: '/app/normas', icon: ListChecks, single: true },
+    { name: '2-CO - Compras', path: '/app/compras', icon: Package, single: true },
+    {
+      id: 'comercial',
+      name: '3-COM - Comercial',
+      icon: TrendingUp,
+      color: 'green',
+      items: [
+        { name: 'Productos', path: '/app/productos', icon: Package },
+        { name: 'Ventas', path: '/app/ventas', icon: TrendingUp },
+      ]
+    },
     {
       id: 'mejora',
-      name: 'Mejora',
+      name: '4-ME - Mejora',
       icon: GraduationCap,
       color: 'purple',
       items: [
@@ -171,6 +156,8 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
         { name: 'AMFE', path: '/app/amfe', icon: ActivitySquare },
       ]
     },
+    { name: '4-AUD - Auditorías Internas', path: '/app/auditorias', icon: BarChart3, single: true },
+    { name: '4-SAT - Satisfacción del Cliente', path: '/app/satisfaccion-cliente', icon: Award, single: true },
     {
       id: 'administracion',
       name: 'Administración',
@@ -225,9 +212,9 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
 
   return (
     <motion.div
-      initial={{ x: -304 }}
+      initial={{ x: -320 }}
       animate={{ x: 0 }}
-      className="h-full w-76 bg-slate-800 text-white flex flex-col shadow-lg"
+      className="h-full w-80 bg-slate-800 text-white flex flex-col shadow-lg"
     >
       {/* Header */}
       <div className="p-4 border-b border-slate-700">
@@ -261,9 +248,29 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto">
         <nav className="px-4 space-y-2">
-          {departmentModules.map((module) => {
+          {departmentModules.map((module, index) => {
+            // Si es un elemento único (single), renderizar directamente
+            if (module.single) {
+              const isActive = location.pathname === module.path;
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleNavigation(module.path)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-emerald-700 text-white border-l-4 border-emerald-500'
+                      : 'hover:bg-slate-700 text-slate-300'
+                  }`}
+                >
+                  <module.icon className="w-4 h-4" />
+                  <span>{module.name}</span>
+                </button>
+              );
+            }
+
+            // Para elementos con subelementos (desplegables)
             const isExpanded = expandedSections.includes(module.id);
-            const isActive = location.pathname.startsWith(module.items[0]?.path || '');
+            const isActive = location.pathname.startsWith(module.items?.[0]?.path || '');
 
             return (
               <div key={module.id} className="space-y-1">
@@ -277,7 +284,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-slate-600 text-slate-200">
-                      {module.items.length}
+                      {module.items?.length || 0}
                     </Badge>
                     {isExpanded ? (
                       <ChevronDown className="w-4 h-4" />
