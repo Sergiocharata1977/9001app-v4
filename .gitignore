@@ -66,9 +66,43 @@ bower_components
 *.tgz
 *.tar.gz
 
-# Documentation files (Markdown)
+# ===============================================
+# ARCHIVOS MARKDOWN (IGNORAR TODOS EXCEPTO LOS IMPORTANTES)
+# ===============================================
 *.md
-docs/*.md
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+!CONTRIBUTING.md
+!docs/README.md
+!docs/API.md
+!docs/DEPLOYMENT.md
+
+# ===============================================
+# SCRIPTS Y SQL (IGNORAR TODOS EXCEPTO LOS IMPORTANTES)
+# ===============================================
+
+# Scripts de desarrollo y pruebas
+scripts/*.js
+scripts/*.bat
+scripts/*.sh
+!scripts/deploy-*.sh
+!scripts/setup-*.sh
+!scripts/start-*.sh
+
+# Scripts de base de datos
+*.sql
+!backend/database/migrations/*.sql
+!backend/database/schema/*.sql
+
+# Scripts de backend
+backend/scripts/*.js
+!backend/scripts/migrations/*.js
+!backend/scripts/setup/*.js
+
+# Scripts de frontend
+frontend/scripts/*.js
+frontend/scripts/*.ts
 
 # Evidence and log files
 evidence-*.txt
@@ -151,3 +185,30 @@ auto-planner-logs*.txt
 # Archivos de prueba y desarrollo del auto-planner
 test-auto-planner*.js
 debug-auto-planner*.js
+
+# ===============================================
+# ARCHIVOS ESPECÍFICOS A IGNORAR
+# ===============================================
+
+# Archivos de migración específicos
+MIGRACION-*.sql
+migracion-*.sql
+corregir-*.sql
+renombrar-*.sql
+ejecutar-*.js
+
+# Archivos de planificación
+PLAN-*.md
+plan-*.md
+
+# Archivos de coordinación
+COORDINACION-*.md
+coordinacion-*.md
+
+# Archivos de prueba y desarrollo
+test-*.js
+debug-*.js
+verificar-*.js
+diagnose-*.js
+fix-*.js
+insertar-*.js
