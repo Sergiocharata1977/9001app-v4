@@ -35,8 +35,8 @@ const getEvaluaciones = async (req, res) => {
               p.apellidos as empleado_apellido,
               ev.nombres as evaluador_nombre,
               ev.apellidos as evaluador_apellido
-            FROM sgc_participantes sp_evaluado
-            LEFT JOIN sgc_participantes sp_evaluador ON (
+            FROM sgc_personal_relaciones sp_evaluado
+            LEFT JOIN sgc_personal_relaciones sp_evaluador ON (
               sp_evaluado.entidad_tipo = sp_evaluador.entidad_tipo 
               AND sp_evaluado.entidad_id = sp_evaluador.entidad_id
               AND sp_evaluador.rol = 'evaluador'
@@ -105,7 +105,7 @@ const createEvaluacion = async (req, res) => {
     try {
       // 1. Insertar participante evaluado
       await tursoClient.execute({
-        sql: `INSERT INTO sgc_participantes 
+        sql: `INSERT INTO sgc_personal_relaciones 
               (id, organization_id, entidad_tipo, entidad_id, personal_id, rol, asistio, observaciones, datos_adicionales, created_at, updated_at) 
               VALUES (?, ?, 'evaluacion', ?, ?, 'evaluado', 1, ?, ?, datetime('now'), datetime('now'))`,
         args: [
@@ -124,7 +124,7 @@ const createEvaluacion = async (req, res) => {
 
       // 2. Insertar participante evaluador
       await tursoClient.execute({
-        sql: `INSERT INTO sgc_participantes 
+        sql: `INSERT INTO sgc_personal_relaciones 
               (id, organization_id, entidad_tipo, entidad_id, personal_id, rol, asistio, observaciones, datos_adicionales, created_at, updated_at) 
               VALUES (?, ?, 'evaluacion', ?, ?, 'evaluador', 1, 'Evaluador responsable', ?, datetime('now'), datetime('now'))`,
         args: [
@@ -216,7 +216,7 @@ const getEvaluacionById = async (req, res) => {
       });
     }
 
-    // Obtener la evaluación principal desde sgc_participantes
+    // Obtener la evaluación principal desde sgc_personal_relaciones
     const evaluacionResult = await tursoClient.execute({
       sql: `SELECT 
               sp_evaluado.entidad_id as id,
@@ -232,8 +232,8 @@ const getEvaluacionById = async (req, res) => {
               p.apellidos as empleado_apellido,
               ev.nombres as evaluador_nombre,
               ev.apellidos as evaluador_apellido
-            FROM sgc_participantes sp_evaluado
-            LEFT JOIN sgc_participantes sp_evaluador ON (
+            FROM sgc_personal_relaciones sp_evaluado
+            LEFT JOIN sgc_personal_relaciones sp_evaluador ON (
               sp_evaluado.entidad_tipo = sp_evaluador.entidad_tipo 
               AND sp_evaluado.entidad_id = sp_evaluador.entidad_id
               AND sp_evaluador.rol = 'evaluador'
@@ -304,10 +304,10 @@ const getEstadisticasEvaluaciones = async (req, res) => {
       });
     }
 
-    // Total de evaluaciones desde sgc_participantes
+    // Total de evaluaciones desde sgc_personal_relaciones
     const totalResult = await tursoClient.execute({
       sql: `SELECT COUNT(DISTINCT entidad_id) as total 
-            FROM sgc_participantes 
+            FROM sgc_personal_relaciones 
             WHERE entidad_tipo = 'evaluacion' 
               AND rol = 'evaluado' 
               AND organization_id = ?`,
@@ -319,7 +319,7 @@ const getEstadisticasEvaluaciones = async (req, res) => {
       sql: `SELECT 
               strftime('%Y-%m', JSON_EXTRACT(datos_adicionales, '$.fecha_evaluacion')) as mes,
               COUNT(DISTINCT entidad_id) as cantidad
-            FROM sgc_participantes 
+            FROM sgc_personal_relaciones 
             WHERE entidad_tipo = 'evaluacion' 
               AND rol = 'evaluado'
               AND organization_id = ? 
@@ -383,7 +383,7 @@ const getParticipantesEvaluacion = async (req, res) => {
               p.nombres,
               p.apellidos,
               p.cargo
-            FROM sgc_participantes sp
+            FROM sgc_personal_relaciones sp
             LEFT JOIN personal p ON sp.personal_id = CAST(p.id as TEXT)
             WHERE sp.entidad_tipo = 'evaluacion' 
               AND sp.entidad_id = ?

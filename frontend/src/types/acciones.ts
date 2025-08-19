@@ -1,5 +1,4 @@
-import { User, Department } from './common';
-import { FileUpload } from './api';
+import type { FileUpload } from './api';
 
 // Estados de acciones según el workflow
 export const ACCION_ESTADOS = {

@@ -29,7 +29,9 @@ import {
   Database,
   Star,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  Crown,
+  ArrowRight
 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 
@@ -59,33 +61,34 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
     }
   };
 
+  const handleSuperAdminAccess = () => {
+    navigate('/super-admin/dashboard');
+  };
+
   // Colores para los módulos
   const getColorClasses = (color, isActive = false) => {
     const colors = {
-      emerald: {
-        bg: isActive ? 'bg-emerald-700' : 'hover:bg-emerald-800',
-        text: isActive ? 'text-white' : 'text-slate-200',
-        icon: isActive ? 'text-white' : 'text-emerald-400',
-        border: isActive ? 'border-l-4 border-emerald-500' : ''
-      },
-      blue: {
-        bg: isActive ? 'bg-blue-700' : 'hover:bg-blue-800',
-        text: isActive ? 'text-white' : 'text-slate-200',
-        icon: isActive ? 'text-white' : 'text-blue-400',
-        border: isActive ? 'border-l-4 border-blue-500' : ''
-      },
-      purple: {
-        bg: isActive ? 'bg-purple-700' : 'hover:bg-purple-800',
-        text: isActive ? 'text-white' : 'text-slate-200',
-        icon: isActive ? 'text-white' : 'text-purple-400',
-        border: isActive ? 'border-l-4 border-purple-500' : ''
-      },
-      orange: {
-        bg: isActive ? 'bg-orange-700' : 'hover:bg-orange-800',
-        text: isActive ? 'text-white' : 'text-slate-200',
-        icon: isActive ? 'text-white' : 'text-orange-400',
-        border: isActive ? 'border-l-4 border-orange-500' : ''
-      }
+      emerald: isActive ? 'bg-emerald-600 text-white' : 'text-emerald-600 hover:bg-emerald-50',
+      blue: isActive ? 'bg-blue-600 text-white' : 'text-blue-600 hover:bg-blue-50',
+      purple: isActive ? 'bg-purple-600 text-white' : 'text-purple-600 hover:bg-purple-50',
+      orange: isActive ? 'bg-orange-600 text-white' : 'text-orange-600 hover:bg-orange-50',
+      red: isActive ? 'bg-red-600 text-white' : 'text-red-600 hover:bg-red-50',
+      yellow: isActive ? 'bg-yellow-600 text-white' : 'text-yellow-600 hover:bg-yellow-50',
+      pink: isActive ? 'bg-pink-600 text-white' : 'text-pink-600 hover:bg-pink-50',
+      indigo: isActive ? 'bg-indigo-600 text-white' : 'text-indigo-600 hover:bg-indigo-50',
+      teal: isActive ? 'bg-teal-600 text-white' : 'text-teal-600 hover:bg-teal-50',
+      cyan: isActive ? 'bg-cyan-600 text-white' : 'text-cyan-600 hover:bg-cyan-50',
+      lime: isActive ? 'bg-lime-600 text-white' : 'text-lime-600 hover:bg-lime-50',
+      amber: isActive ? 'bg-amber-600 text-white' : 'text-amber-600 hover:bg-amber-50',
+      rose: isActive ? 'bg-rose-600 text-white' : 'text-rose-600 hover:bg-rose-50',
+      violet: isActive ? 'bg-violet-600 text-white' : 'text-violet-600 hover:bg-violet-50',
+      fuchsia: isActive ? 'bg-fuchsia-600 text-white' : 'text-fuchsia-600 hover:bg-fuchsia-50',
+      sky: isActive ? 'bg-sky-600 text-white' : 'text-sky-600 hover:bg-sky-50',
+      slate: isActive ? 'bg-slate-600 text-white' : 'text-slate-600 hover:bg-slate-50',
+      gray: isActive ? 'bg-gray-600 text-white' : 'text-gray-600 hover:bg-gray-50',
+      zinc: isActive ? 'bg-zinc-600 text-white' : 'text-zinc-600 hover:bg-zinc-50',
+      neutral: isActive ? 'bg-neutral-600 text-white' : 'text-neutral-600 hover:bg-neutral-50',
+      stone: isActive ? 'bg-stone-600 text-white' : 'text-stone-600 hover:bg-stone-50'
     };
     return colors[color] || colors.emerald;
   };
@@ -134,29 +137,9 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
     },
     { name: '2-DOC - Documentos', path: '/app/documentos', icon: FileText, single: true },
     { name: 'Puntos de la Norma', path: '/app/normas', icon: ListChecks, single: true },
-    { name: '2-CO - Compras', path: '/app/compras', icon: Package, single: true },
-    {
-      id: 'comercial',
-      name: '3-COM - Comercial',
-      icon: TrendingUp,
-      color: 'green',
-      items: [
-        { name: 'Productos', path: '/app/productos', icon: Package },
-        { name: 'Ventas', path: '/app/ventas', icon: TrendingUp },
-      ]
-    },
-    {
-      id: 'mejora',
-      name: '4-ME - Mejora',
-      icon: GraduationCap,
-      color: 'purple',
-      items: [
-        { name: 'Hallazgos', path: '/app/hallazgos', icon: ClipboardCheck },
-        { name: 'Acciones', path: '/app/acciones', icon: Briefcase },
-        { name: 'AMFE', path: '/app/amfe', icon: ActivitySquare },
-      ]
-    },
-    { name: '4-AUD - Auditorías Internas', path: '/app/auditorias', icon: BarChart3, single: true },
+    { name: '3-AUD - Auditorías', path: '/app/auditorias', icon: ClipboardCheck, single: true },
+    { name: 'Hallazgos', path: '/app/hallazgos', icon: ActivitySquare, single: true },
+    { name: 'Acciones', path: '/app/acciones', icon: Activity, single: true },
     { name: '4-SAT - Satisfacción del Cliente', path: '/app/satisfaccion-cliente', icon: Award, single: true },
     {
       id: 'administracion',
@@ -164,13 +147,6 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       icon: Settings,
       color: 'orange',
       items: [
-        { 
-          name: 'Super Administrador', 
-          path: '/app/admin/super', 
-          icon: Settings, 
-          role: 'super_admin',
-          show: () => user?.role === 'super_admin'
-        },
         { 
           name: 'Admin de Organización', 
           path: '/app/admin/organization', 
@@ -180,13 +156,6 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
         },
         { name: 'Usuarios', path: '/app/usuarios', icon: Users },
         { name: 'Planes', path: '/app/planes', icon: Star },
-        { 
-          name: 'Esquema de BD', 
-          path: '/app/database-schema', 
-          icon: Database,
-          role: 'super_admin',
-          show: () => user?.role === 'super_admin'
-        },
         { 
           name: 'Manual del Sistema', 
           path: '/documentacion', 
@@ -198,13 +167,6 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
           path: '/app/ayuda', 
           icon: HelpCircle,
           show: () => true
-        },
-        { 
-          name: 'Documentación Técnica', 
-          path: '/app/documentacion/arquitectura', 
-          icon: Database,
-          role: 'super_admin',
-          show: () => user?.role === 'super_admin'
         },
       ]
     },
@@ -228,6 +190,23 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
           </div>
         </div>
       </div>
+
+      {/* Super Admin Button - Solo mostrar si es super admin */}
+      {user?.role === 'super_admin' && (
+        <div className="p-4 border-b border-purple-700/50">
+          <Button
+            onClick={handleSuperAdminAccess}
+            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-300"
+          >
+            <Crown className="w-5 h-5 mr-2" />
+            <span>Panel Super Admin</span>
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+          <div className="text-xs text-purple-300 mt-2 text-center">
+            Acceso al panel de control global
+          </div>
+        </div>
+      )}
 
       {/* Search */}
       <div className="p-4">
@@ -258,40 +237,37 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                   onClick={() => handleNavigation(module.path)}
                   className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-emerald-700 text-white border-l-4 border-emerald-500'
-                      : 'hover:bg-slate-700 text-slate-300'
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-slate-300 hover:bg-slate-700'
                   }`}
                 >
-                  <module.icon className="w-4 h-4" />
+                  <module.icon className="w-5 h-5" />
                   <span>{module.name}</span>
                 </button>
               );
             }
 
-            // Para elementos con subelementos (desplegables)
+            // Si es un módulo con submenús
             const isExpanded = expandedSections.includes(module.id);
-            const isActive = location.pathname.startsWith(module.items?.[0]?.path || '');
-
             return (
               <div key={module.id} className="space-y-1">
                 <button
                   onClick={() => toggleSection(module.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${getColorClasses(module.color, isActive).bg} ${getColorClasses(module.color, isActive).text} ${getColorClasses(module.color, isActive).border}`}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isExpanded
+                      ? 'bg-slate-700 text-white'
+                      : 'text-slate-300 hover:bg-slate-700'
+                  }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <module.icon className={`w-4 h-4 ${getColorClasses(module.color, isActive).icon}`} />
+                    <module.icon className="w-5 h-5" />
                     <span>{module.name}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-slate-600 text-slate-200">
-                      {module.items?.length || 0}
-                    </Badge>
-                    {isExpanded ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
-                  </div>
+                  {isExpanded ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
                 </button>
 
                 <AnimatePresence>
@@ -300,73 +276,18 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="ml-6 space-y-1"
+                      className="space-y-1 ml-8"
                     >
-                      {module.items.map((item, index) => {
-                        if (item.type === 'submenu') {
-                          const isSubmenuExpanded = expandedSubmenus[item.id];
-                          return (
-                            <div key={item.id} className="space-y-1">
-                              <button
-                                onClick={() => toggleSubmenu(item.id)}
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-slate-700 text-slate-300`}
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <item.icon className="w-4 h-4 text-slate-400" />
-                                  <span>{item.name}</span>
-                                </div>
-                                {isSubmenuExpanded ? (
-                                  <ChevronDown className="w-4 h-4" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4" />
-                                )}
-                              </button>
-
-                              <AnimatePresence>
-                                {isSubmenuExpanded && (
-                                  <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="ml-6 space-y-1"
-                                  >
-                                    {item.items.map((subItem) => {
-                                      const isSubItemActive = location.pathname === subItem.path;
-                                      return (
-                                        <button
-                                          key={subItem.path}
-                                          onClick={() => handleNavigation(subItem.path)}
-                                          className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                            isSubItemActive
-                                              ? 'bg-emerald-700 text-white border-l-4 border-emerald-500'
-                                              : 'hover:bg-slate-700 text-slate-300'
-                                          }`}
-                                        >
-                                          <subItem.icon className="w-4 h-4" />
-                                          <span>{subItem.name}</span>
-                                        </button>
-                                      );
-                                    })}
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-                          );
-                        }
-
-                        const isItemActive = location.pathname === item.path;
-                        const shouldShow = item.show ? item.show() : true;
-
-                        if (!shouldShow) return null;
-
+                      {module.items.map((item) => {
+                        const isActive = location.pathname === item.path;
                         return (
                           <button
                             key={item.path}
                             onClick={() => handleNavigation(item.path)}
                             className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              isItemActive
-                                ? 'bg-emerald-700 text-white border-l-4 border-emerald-500'
-                                : 'hover:bg-slate-700 text-slate-300'
+                              isActive
+                                ? 'bg-emerald-600 text-white'
+                                : 'text-slate-400 hover:bg-slate-700 hover:text-white'
                             }`}
                           >
                             <item.icon className="w-4 h-4" />
@@ -385,8 +306,13 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-700">
-        <div className="text-xs text-slate-400 text-center">
-          © 2024 SGC Pro v11-8
+        <div className="text-center">
+          <div className="text-xs text-slate-400 mb-2">
+            Sistema de Gestión de Calidad
+          </div>
+          <div className="text-xs text-slate-500">
+            © 2024 SGC Pro v11-8
+          </div>
         </div>
       </div>
     </motion.div>

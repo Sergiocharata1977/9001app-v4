@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AlertDialog, AlertDialogContent, DialogTrigger, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Users, Plus, Trash2, Edit2, User, Shield, Eye, UserCheck } from 'lucide-react';
 
-// Componente principal para gestionar participantes SGC de un proceso
+// Componente principal para gestionar personal relaciones SGC de un proceso
 export default function ProcesoParticipantes({ procesoId, participantes = [], onParticipantesChange }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -186,7 +186,7 @@ export default function ProcesoParticipantes({ procesoId, participantes = [], on
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-blue-500" />
-          <h3 className="text-lg font-semibold">Participantes SGC</h3>
+          <h3 className="text-lg font-semibold">Personal Relaciones SGC</h3>
           <Badge variant="secondary">{participantes.length}</Badge>
         </div>
         
@@ -206,7 +206,7 @@ export default function ProcesoParticipantes({ procesoId, participantes = [], on
           <CardContent className="flex flex-col items-center justify-center py-8">
             <Users className="h-12 w-12 text-gray-400 mb-4" />
             <h4 className="text-lg font-medium text-gray-600 mb-2">No hay participantes</h4>
-            <p className="text-sm text-gray-500 mb-4">Agrega participantes SGC a este proceso</p>
+            <p className="text-sm text-gray-500 mb-4">Agrega personal relaciones SGC a este proceso</p>
             <Button 
               onClick={handleAddParticipante}
               variant="outline"

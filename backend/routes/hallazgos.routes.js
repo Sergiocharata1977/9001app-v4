@@ -28,8 +28,8 @@ router.get('/search', async (req, res) => {
         COALESCE(documentos.total, 0) as total_documentos,
         COALESCE(documentos.evidencias, 0) as total_evidencias,
         COALESCE(normas.total, 0) as total_normas,
-        resp.nombre_completo as responsable_nombre,
-        aud.nombre_completo as auditor_nombre
+        (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
+        (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
       FROM hallazgos h
       LEFT JOIN (
         SELECT 
@@ -37,7 +37,7 @@ router.get('/search', async (req, res) => {
           COUNT(*) as total,
           COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
           COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
-        FROM sgc_participantes 
+        FROM sgc_personal_relaciones 
         WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
         GROUP BY entidad_id
       ) participantes ON h.id = participantes.entidad_id
@@ -132,14 +132,14 @@ router.get('/recent', async (req, res) => {
         COALESCE(participantes.responsables, 0) as total_responsables,
         COALESCE(documentos.total, 0) as total_documentos,
         COALESCE(normas.total, 0) as total_normas,
-        resp.nombre_completo as responsable_nombre
+        (resp.nombres || ' ' || resp.apellidos) as responsable_nombre
       FROM hallazgos h
       LEFT JOIN (
         SELECT 
           entidad_id, 
           COUNT(*) as total,
           COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables
-        FROM sgc_participantes 
+        FROM sgc_personal_relaciones 
         WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
         GROUP BY entidad_id
       ) participantes ON h.id = participantes.entidad_id
@@ -189,7 +189,7 @@ router.get('/export', async (req, res) => {
         h.origen,
         h.punto_norma_afectado,
         h.fecha_deteccion,
-        resp.nombre_completo as responsable_nombre,
+        (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
         participantes.total as total_participantes,
         documentos.total as total_documentos,
         normas.total as total_normas
@@ -237,8 +237,8 @@ router.get('/', async (req, res) => {
         COALESCE(documentos.total, 0) as total_documentos,
         COALESCE(documentos.evidencias, 0) as total_evidencias,
         COALESCE(normas.total, 0) as total_normas,
-        resp.nombre_completo as responsable_nombre,
-        aud.nombre_completo as auditor_nombre
+        (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
+        (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
       FROM hallazgos h
       LEFT JOIN (
         SELECT 
@@ -246,7 +246,7 @@ router.get('/', async (req, res) => {
           COUNT(*) as total,
           COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
           COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
-        FROM sgc_participantes 
+        FROM sgc_personal_relaciones 
         WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
         GROUP BY entidad_id
       ) participantes ON h.id = participantes.entidad_id
@@ -303,8 +303,8 @@ router.get('/:id', async (req, res) => {
           COALESCE(documentos.total, 0) as total_documentos,
           COALESCE(documentos.evidencias, 0) as total_evidencias,
           COALESCE(normas.total, 0) as total_normas,
-          resp.nombre_completo as responsable_nombre,
-          aud.nombre_completo as auditor_nombre
+          (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
+          (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
         FROM hallazgos h
         LEFT JOIN (
           SELECT 
@@ -312,7 +312,7 @@ router.get('/:id', async (req, res) => {
             COUNT(*) as total,
             COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
             COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
-          FROM sgc_participantes 
+          FROM sgc_personal_relaciones 
           WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
           GROUP BY entidad_id
         ) participantes ON h.id = participantes.entidad_id
@@ -418,7 +418,7 @@ router.post('/', async (req, res) => {
     if (responsable_id) {
       await tursoClient.execute({
         sql: `
-          INSERT INTO sgc_participantes (
+          INSERT INTO sgc_personal_relaciones (
             id, organization_id, entidad_tipo, entidad_id, personal_id, rol,
             observaciones, created_at, updated_at, is_active
           ) VALUES (?, ?, 'hallazgo', ?, ?, 'responsable', 'Responsable principal del hallazgo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
@@ -431,7 +431,7 @@ router.post('/', async (req, res) => {
     if (auditor_id) {
       await tursoClient.execute({
         sql: `
-          INSERT INTO sgc_participantes (
+          INSERT INTO sgc_personal_relaciones (
             id, organization_id, entidad_tipo, entidad_id, personal_id, rol,
             observaciones, created_at, updated_at, is_active
           ) VALUES (?, ?, 'hallazgo', ?, ?, 'auditor', 'Auditor que detectó el hallazgo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
@@ -463,7 +463,7 @@ router.post('/', async (req, res) => {
     // Obtener el hallazgo creado con datos SGC
     const newHallazgo = await tursoClient.execute({
       sql: `
-        SELECT h.*, resp.nombre_completo as responsable_nombre
+        SELECT h.*, (resp.nombres || ' ' || resp.apellidos) as responsable_nombre
         FROM hallazgos h
         LEFT JOIN personal resp ON h.responsable_id = resp.id
         WHERE h.id = ?
@@ -545,7 +545,7 @@ router.put('/:id', async (req, res) => {
       // Eliminar participante anterior
       await tursoClient.execute({
         sql: `
-          UPDATE sgc_participantes 
+          UPDATE sgc_personal_relaciones 
           SET is_active = 0 
           WHERE entidad_tipo = 'hallazgo' AND entidad_id = ? AND rol = 'responsable'
         `,
@@ -556,7 +556,7 @@ router.put('/:id', async (req, res) => {
       if (updateData.responsable_id) {
         await tursoClient.execute({
           sql: `
-            INSERT OR REPLACE INTO sgc_participantes (
+            INSERT OR REPLACE INTO sgc_personal_relaciones (
               id, organization_id, entidad_tipo, entidad_id, personal_id, rol,
               observaciones, created_at, updated_at, is_active
             ) VALUES (?, 1, 'hallazgo', ?, ?, 'responsable', 'Responsable principal del hallazgo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
@@ -569,7 +569,7 @@ router.put('/:id', async (req, res) => {
     // Obtener hallazgo actualizado
     const updatedHallazgo = await tursoClient.execute({
       sql: `
-        SELECT h.*, resp.nombre_completo as responsable_nombre
+        SELECT h.*, (resp.nombres || ' ' || resp.apellidos) as responsable_nombre
         FROM hallazgos h
         LEFT JOIN personal resp ON h.responsable_id = resp.id
         WHERE h.id = ?
@@ -672,7 +672,7 @@ router.delete('/:id', async (req, res) => {
     // Soft delete de datos SGC relacionados
     await tursoClient.execute({
       sql: `
-        UPDATE sgc_participantes 
+        UPDATE sgc_personal_relaciones 
         SET is_active = 0, updated_at = CURRENT_TIMESTAMP 
         WHERE entidad_tipo = 'hallazgo' AND entidad_id = ?
       `,
@@ -724,14 +724,14 @@ router.get('/:id/participantes', async (req, res) => {
       sql: `
         SELECT 
           p.*,
-          per.nombre_completo,
+          (per.nombres || ' ' || per.apellidos),
           per.email,
           per.telefono,
           per.departamento_id
-        FROM sgc_participantes p
+        FROM sgc_personal_relaciones p
         LEFT JOIN personal per ON p.personal_id = per.id
         WHERE p.entidad_tipo = 'hallazgo' AND p.entidad_id = ? AND p.is_active = 1
-        ORDER BY p.rol, per.nombre_completo
+        ORDER BY p.rol, (per.nombres || ' ' || per.apellidos)
       `,
       args: [id]
     });
@@ -835,7 +835,7 @@ router.post('/:id/participantes', async (req, res) => {
 
     await tursoClient.execute({
       sql: `
-        INSERT INTO sgc_participantes (
+        INSERT INTO sgc_personal_relaciones (
           id, organization_id, entidad_tipo, entidad_id, personal_id, rol,
           observaciones, created_at, updated_at, is_active
         ) VALUES (?, 1, 'hallazgo', ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)

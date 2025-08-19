@@ -11,6 +11,7 @@ import ExperienciaModal from './ExperienciaModal';
 import FormacionModal from './FormacionModal';
 import HabilidadesModal from './HabilidadesModal';
 import CapacitacionPersonalModal from './CapacitacionPersonalModal';
+import { PersonalSingleSkeleton } from "@/components/ui/skeleton";
 
 export default function PersonalSingle({ initialPerson = null, onBack }) {
   const { id } = useParams();
@@ -434,14 +435,7 @@ export default function PersonalSingle({ initialPerson = null, onBack }) {
 
   if (loading) {
     console.log('⏳ PersonalSingle en estado de carga...');
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando información del personal...</p>
-        </div>
-      </div>
-    );
+    return <PersonalSingleSkeleton />;
   }
 
   if (error || !person) {

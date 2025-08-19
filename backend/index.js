@@ -41,6 +41,7 @@ const eventsRoutes = require('./routes/events.routes.js');
 const adminRoutes = require('./routes/admin.routes.js');
 const planesRoutes = require('./routes/planes.js');
 const suscripcionesRoutes = require('./routes/suscripciones.js');
+const coordinacionRoutes = require('./routes/coordinacion.routes.js');
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -107,6 +108,9 @@ app.use('/api/politica-calidad', politicaCalidadRoutes);
 
 // Rutas de events (básico)
 app.use('/api/events', eventsRoutes);
+
+// Rutas de coordinación de agentes
+app.use('/api', coordinacionRoutes);
 
 // Rutas de evaluaciones (SGC estandarizado) - TEMPORALMENTE DESHABILITADAS
 // app.use('/api/evaluaciones', evaluacionesRoutes);

@@ -12,6 +12,7 @@ import HallazgoWorkflowManager from './HallazgoWorkflowManager';
 import HallazgoStatCard from './HallazgoStatCard';
 import DashboardView from '@/components/mejoras/DashboardView';
 import DataTable from '../shared/DataTable/DataTable';
+import { HallazgosListSkeleton } from '@/components/ui/skeleton';
 
 // ===============================================
 // COMPONENTE DE LISTADO DE HALLAZGOS - REFACTORIZADO CON DATATABLE
@@ -514,7 +515,7 @@ const HallazgosListingNEW = () => {
 
   const stats = getStats();
 
-  if (loading) return <div className="p-8 text-center">Cargando hallazgos...</div>;
+  if (loading) return <HallazgosListSkeleton />;
   if (error) return (
     <div className="p-8 text-center">
       <div className="text-red-600 mb-4">{error}</div>

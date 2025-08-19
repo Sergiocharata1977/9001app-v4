@@ -19,7 +19,10 @@ import {
   ArrowLeft,
   ChevronDown,
   ChevronRight,
-  X
+  X,
+  Bot,
+  Workflow,
+  GitBranch
 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 
@@ -27,7 +30,7 @@ const SuperAdminSidebar = ({ isOpen, onClose, isMobile }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
-  const [expandedSections, setExpandedSections] = useState(['system', 'organizations']);
+  const [expandedSections, setExpandedSections] = useState(['system', 'organizations', 'agents']);
 
   const toggleSection = (sectionId) => {
     setExpandedSections(prev => 
@@ -77,6 +80,38 @@ const SuperAdminSidebar = ({ isOpen, onClose, isMobile }) => {
           path: '/super-admin/monitoring', 
           icon: Zap,
           description: 'Estado de servicios y rendimiento'
+        }
+      ]
+    },
+    {
+      id: 'agents',
+      name: '🤖 Sistema de Agentes',
+      icon: Bot,
+      color: 'indigo',
+      items: [
+        { 
+          name: 'Coordinación de Agentes', 
+          path: '/super-admin/coordination', 
+          icon: Bot,
+          description: 'Dashboard de coordinación de agentes'
+        },
+        { 
+          name: 'Demo de Flujo', 
+          path: '/super-admin/workflow-demo', 
+          icon: Workflow,
+          description: 'Demo interactivo del flujo de trabajo'
+        },
+        { 
+          name: 'Etapas Detalladas', 
+          path: '/super-admin/workflow-stages', 
+          icon: GitBranch,
+          description: 'Vista técnica de cada etapa'
+        },
+        { 
+          name: 'Integración Auto-Planner', 
+          path: '/super-admin/auto-planner', 
+          icon: Settings,
+          description: 'Conexión con sistema auto-planner existente'
         }
       ]
     },
@@ -198,6 +233,7 @@ const SuperAdminSidebar = ({ isOpen, onClose, isMobile }) => {
       blue: isActive ? 'bg-blue-600 text-white' : 'text-blue-600 hover:bg-blue-50',
       green: isActive ? 'bg-green-600 text-white' : 'text-green-600 hover:bg-green-50',
       orange: isActive ? 'bg-orange-600 text-white' : 'text-orange-600 hover:bg-orange-50',
+      indigo: isActive ? 'bg-indigo-600 text-white' : 'text-indigo-600 hover:bg-indigo-50',
       red: isActive ? 'bg-red-600 text-white' : 'text-red-600 hover:bg-red-50'
     };
     return colors[color] || colors.purple;

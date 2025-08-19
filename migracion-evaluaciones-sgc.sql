@@ -22,11 +22,11 @@ UNION ALL
 SELECT 'evaluacion_programacion' as tabla, COUNT(*) as registros FROM evaluacion_programacion;
 
 -- ===============================================
--- PASO 2: MIGRAR EVALUACIONES_INDIVIDUALES → SGC_PARTICIPANTES
+-- PASO 2: MIGRAR EVALUACIONES_INDIVIDUALES → SGC_PERSONAL_RELACIONES
 -- ===============================================
 
 -- Migrar evaluados
-INSERT OR IGNORE INTO sgc_participantes (
+INSERT OR IGNORE INTO sgc_personal_relaciones (
     id, 
     organization_id, 
     entidad_tipo, 
@@ -63,7 +63,7 @@ FROM evaluaciones_individuales ei
 WHERE ei.empleado_id IS NOT NULL;
 
 -- Migrar evaluadores
-INSERT OR IGNORE INTO sgc_participantes (
+INSERT OR IGNORE INTO sgc_personal_relaciones (
     id, 
     organization_id, 
     entidad_tipo, 
@@ -147,10 +147,10 @@ SELECT
 FROM evaluaciones_competencias_detalle ecd;
 
 -- ===============================================
--- PASO 4: MIGRAR EVALUACION_PROGRAMACION → SGC_PARTICIPANTES (coordinadores)
+-- PASO 4: MIGRAR EVALUACION_PROGRAMACION → SGC_PERSONAL_RELACIONES (coordinadores)
 -- ===============================================
 
-INSERT OR IGNORE INTO sgc_participantes (
+INSERT OR IGNORE INTO sgc_personal_relaciones (
     id, 
     organization_id, 
     entidad_tipo, 
@@ -194,8 +194,8 @@ WHERE ep.usuario_creador IS NOT NULL;
 -- ===============================================
 
 -- Contar registros migrados
-SELECT 'sgc_participantes (evaluaciones)' as tabla, COUNT(*) as registros_migrados 
-FROM sgc_participantes 
+SELECT 'sgc_personal_relaciones (evaluaciones)' as tabla, COUNT(*) as registros_migrados 
+FROM sgc_personal_relaciones 
 WHERE entidad_tipo IN ('evaluacion', 'evaluacion_programacion')
 UNION ALL
 SELECT 'sgc_normas_relacionadas (evaluaciones)' as tabla, COUNT(*) as registros_migrados 
@@ -207,7 +207,7 @@ SELECT
     'Evaluaciones con participantes' as verificacion,
     COUNT(DISTINCT sp.entidad_id) as evaluaciones_con_participantes,
     (SELECT COUNT(*) FROM evaluaciones_individuales) as total_evaluaciones_originales
-FROM sgc_participantes sp 
+FROM sgc_personal_relaciones sp 
 WHERE sp.entidad_tipo = 'evaluacion';
 
 SELECT 
@@ -233,8 +233,8 @@ SELECT
     JSON_EXTRACT(sp_evaluado.datos_adicionales, '$.estado') as estado,
     sp_evaluado.created_at,
     sp_evaluado.updated_at
-FROM sgc_participantes sp_evaluado
-LEFT JOIN sgc_participantes sp_evaluador ON (
+FROM sgc_personal_relaciones sp_evaluado
+LEFT JOIN sgc_personal_relaciones sp_evaluador ON (
     sp_evaluado.entidad_tipo = sp_evaluador.entidad_tipo 
     AND sp_evaluado.entidad_id = sp_evaluador.entidad_id
     AND sp_evaluador.rol = 'evaluador'
@@ -286,9 +286,9 @@ FROM evaluacion_programacion
 UNION ALL
 SELECT 
     'MIGRADOS' as tipo,
-    'sgc_participantes (evaluaciones)' as tabla,
+    'sgc_personal_relaciones (evaluaciones)' as tabla,
     COUNT(*) as registros
-FROM sgc_participantes 
+FROM sgc_personal_relaciones 
 WHERE entidad_tipo IN ('evaluacion', 'evaluacion_programacion')
 UNION ALL
 SELECT 

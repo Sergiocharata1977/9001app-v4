@@ -132,8 +132,8 @@ SELECT
 -- Verificar todas las tablas SGC
 SELECT 
     'TABLAS_SGC_DISPONIBLES' as tipo,
-    'sgc_participantes' as tabla,
-    (SELECT COUNT(*) FROM sgc_participantes) as registros
+    'sgc_personal_relaciones' as tabla,
+    (SELECT COUNT(*) FROM sgc_personal_relaciones) as registros
 UNION ALL
 SELECT 'TABLAS_SGC_DISPONIBLES', 'sgc_documentos_relacionados', (SELECT COUNT(*) FROM sgc_documentos_relacionados)
 UNION ALL

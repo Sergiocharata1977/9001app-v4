@@ -8,6 +8,11 @@ import SystemFeatures from '../pages/SuperAdmin/SystemFeatures';
 import DatabaseSchema from '../pages/SuperAdmin/DatabaseSchema';
 import SystemStats from '../pages/SuperAdmin/SystemStats';
 import SystemMonitoring from '../pages/SuperAdmin/SystemMonitoring';
+import AgentCoordination from '../pages/SuperAdmin/AgentCoordination';
+import AgentWorkflowDemo from '../pages/SuperAdmin/AgentWorkflowDemo';
+import WorkflowStages from '../pages/SuperAdmin/WorkflowStages';
+import AutoPlannerIntegration from '../pages/SuperAdmin/AutoPlannerIntegration';
+import CoordinacionAgentesViewer from '../components/admin/CoordinacionAgentesViewer';
 import SystemConfig from '../pages/SuperAdmin/SystemConfig';
 import SystemLogs from '../pages/SuperAdmin/SystemLogs';
 import BackupRestore from '../pages/SuperAdmin/BackupRestore';
@@ -15,6 +20,7 @@ import RolesPermissions from '../pages/SuperAdmin/RolesPermissions';
 import AccessAudit from '../pages/SuperAdmin/AccessAudit';
 import PlansManagement from '../pages/SuperAdmin/PlansManagement';
 import MaintenanceMode from '../pages/SuperAdmin/MaintenanceMode';
+import ProjectStructure from '../pages/SuperAdmin/ProjectStructure';
 
 const SuperAdminRoutes = () => {
   return (
@@ -23,6 +29,11 @@ const SuperAdminRoutes = () => {
         <Route path="/dashboard" element={<SuperAdminDashboard />} />
         <Route path="/stats" element={<SystemStats />} />
         <Route path="/monitoring" element={<SystemMonitoring />} />
+        <Route path="/coordination" element={<AgentCoordination />} />
+                            <Route path="/coordinacion-documento" element={<CoordinacionAgentesViewer />} />
+        <Route path="/workflow-demo" element={<AgentWorkflowDemo />} />
+        <Route path="/workflow-stages" element={<WorkflowStages />} />
+        <Route path="/auto-planner" element={<AutoPlannerIntegration />} />
         
         {/* Organizaciones */}
         <Route path="/organizations" element={<OrganizationsManagement />} />
@@ -38,6 +49,7 @@ const SuperAdminRoutes = () => {
         <Route path="/database/schema" element={<DatabaseSchema />} />
         <Route path="/database/docs" element={<DatabaseSchema />} />
         <Route path="/database/backup" element={<BackupRestore />} />
+        <Route path="/database/structure" element={<ProjectStructure />} />
         
         {/* Sistema */}
         <Route path="/config" element={<SystemConfig />} />

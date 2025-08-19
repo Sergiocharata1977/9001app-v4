@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS hallazgos (
     fecha_verificacion TEXT,
     fecha_cierre TEXT,
     
-    -- Información de responsabilidad (DEPRECATED - usar sgc_participantes)
+    -- Información de responsabilidad (DEPRECATED - usar sgc_personal_relaciones)
     responsable_id TEXT, -- Temporal para migración
     auditor_id TEXT,     -- Temporal para migración
     
@@ -165,7 +165,7 @@ INSERT OR REPLACE INTO hallazgos (
 -- ===============================================
 
 -- 4.1 CREAR PARTICIPANTES SGC PARA HALLAZGOS EXISTENTES
-INSERT OR IGNORE INTO sgc_participantes (
+INSERT OR IGNORE INTO sgc_personal_relaciones (
     id, organization_id, entidad_tipo, entidad_id, personal_id, rol,
     observaciones, created_at, updated_at, is_active
 )
@@ -184,7 +184,7 @@ FROM hallazgos h
 WHERE h.responsable_id IS NOT NULL AND h.is_active = 1;
 
 -- 4.2 CREAR AUDITORES SGC PARA HALLAZGOS
-INSERT OR IGNORE INTO sgc_participantes (
+INSERT OR IGNORE INTO sgc_personal_relaciones (
     id, organization_id, entidad_tipo, entidad_id, personal_id, rol,
     observaciones, created_at, updated_at, is_active
 )
@@ -262,7 +262,7 @@ LEFT JOIN (
         COUNT(*) as total,
         COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
         COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
-    FROM sgc_participantes 
+    FROM sgc_personal_relaciones 
     WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
     GROUP BY entidad_id
 ) participantes ON h.id = participantes.entidad_id
@@ -351,7 +351,7 @@ COMMIT;
 -- Mostrar resumen de la migración
 SELECT 'HALLAZGOS TOTALES' as categoria, COUNT(*) as cantidad FROM hallazgos WHERE is_active = 1
 UNION ALL
-SELECT 'PARTICIPANTES SGC', COUNT(*) FROM sgc_participantes WHERE entidad_tipo = 'hallazgo' AND is_active = 1
+SELECT 'PARTICIPANTES SGC', COUNT(*) FROM sgc_personal_relaciones WHERE entidad_tipo = 'hallazgo' AND is_active = 1
 UNION ALL
 SELECT 'NORMAS SGC', COUNT(*) FROM sgc_normas_relacionadas WHERE entidad_tipo = 'hallazgo' AND is_active = 1
 UNION ALL
@@ -362,7 +362,7 @@ SELECT
     'HALLAZGOS SIN RESPONSABLE' as verificacion,
     COUNT(*) as cantidad
 FROM hallazgos h 
-LEFT JOIN sgc_participantes p ON p.entidad_tipo = 'hallazgo' AND p.entidad_id = h.id AND p.rol = 'responsable'
+LEFT JOIN sgc_personal_relaciones p ON p.entidad_tipo = 'hallazgo' AND p.entidad_id = h.id AND p.rol = 'responsable'
 WHERE h.is_active = 1 AND p.id IS NULL;
 
 -- ===============================================

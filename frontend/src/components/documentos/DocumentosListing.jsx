@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import documentosService from '@/services/documentosService';
 import DocumentoModal from './DocumentoModal';
 import { useAuth } from '@/context/AuthContext';
+import { DocumentosListSkeleton } from '@/components/ui/skeleton';
 
 const DocumentosListing = () => {
   const [documentos, setDocumentos] = useState([]);
@@ -120,9 +121,7 @@ const DocumentosListing = () => {
 
       {/* Lista de documentos */}
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-        </div>
+        <DocumentosListSkeleton />
       ) : filteredDocumentos.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">

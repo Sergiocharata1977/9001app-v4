@@ -14,7 +14,7 @@ const colors = {
 
 // Lista de las nuevas tablas SGC estandarizadas
 const TABLAS_SGC_ESTANDARIZADO = [
-  'sgc_participantes',
+  'sgc_personal_relaciones',
   'sgc_documentos_relacionados', 
   'sgc_normas_relacionadas',
   'procesos_relaciones'
@@ -22,7 +22,7 @@ const TABLAS_SGC_ESTANDARIZADO = [
 
 // Lista de vistas SGC
 const VISTAS_SGC = [
-  'v_sgc_participantes_completos',
+  'v_sgc_personal_relaciones_completos',
   'v_sgc_documentos_completos',
   'v_sgc_normas_completas',
   'v_mapa_procesos'
@@ -98,7 +98,7 @@ async function verificarSGCEstandarizado(organizationId = '2') {
         };
 
         // Mostrar ejemplos de entidad_tipo si es una tabla genérica
-        if (['sgc_participantes', 'sgc_documentos_relacionados', 'sgc_normas_relacionadas'].includes(tabla)) {
+        if (['sgc_personal_relaciones', 'sgc_documentos_relacionados', 'sgc_normas_relacionadas'].includes(tabla)) {
           try {
             const tiposResult = await tursoClient.execute({
               sql: `SELECT entidad_tipo, COUNT(*) as cantidad FROM ${tabla} WHERE organization_id = ? GROUP BY entidad_tipo ORDER BY cantidad DESC LIMIT 5`,
@@ -158,7 +158,7 @@ async function verificarSGCEstandarizado(organizationId = '2') {
     // Verificar procesos de ejemplo
     try {
       const procesosEjemplo = await tursoClient.execute({
-        sql: `SELECT entidad_id, COUNT(*) as cantidad FROM sgc_participantes WHERE entidad_tipo = 'proceso' AND organization_id = ? GROUP BY entidad_id`,
+        sql: `SELECT entidad_id, COUNT(*) as cantidad FROM sgc_personal_relaciones WHERE entidad_tipo = 'proceso' AND organization_id = ? GROUP BY entidad_id`,
         args: [organizationId]
       });
       

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import MainLayout from "../components/layout/MainLayout";
 import ProtectedRoute, { SuperAdminRoute, OrganizationAdminRoute } from "./ProtectedRoute";
+import SuperAdminRoutes from "./SuperAdminRoutes";
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -37,7 +38,7 @@ const ManualUsuarioPage = lazy(() => import("../pages/Documentacion/funcional/Ma
 const SoportePage = lazy(() => import("../pages/Documentacion/funcional/SoportePage"));
 const ArquitecturaPage = lazy(() => import("../pages/Documentacion/ArquitecturaPage"));
 const BaseDatosPage = lazy(() => import("../pages/Documentacion/tecnica/BaseDatosPage"));
-const DesarrolloPage = lazy(() => import("../pages/Documentacion/tecnica/DesarrolloPage"));
+// const DesarrolloPage = lazy(() => import("../pages/Documentacion/tecnica/DesarrolloPage"));
 
 // Menu Piramidal ISO 9001
 const ProcesosISO = lazy(() => import("../pages/ProcesosISO"));
@@ -263,11 +264,11 @@ const AppRoutes = () => {
                         <BaseDatosPage />
                       </SuperAdminRoute>
                     } />
-                    <Route path="desarrollo" element={
+                    {/* <Route path="desarrollo" element={
                       <SuperAdminRoute>
                         <DesarrolloPage />
                       </SuperAdminRoute>
-                    } />
+                    } /> */}
                     <Route path="administracion" element={
                       <SuperAdminRoute>
                         <AdministracionPage />
@@ -291,11 +292,11 @@ const AppRoutes = () => {
                   </Route>
 
                   {/* Base de Datos y Esquemas */}
-                  <Route path="database-schema" element={
+                  {/* <Route path="database-schema" element={
                     <SuperAdminRoute>
                       <DatabaseSchemaPage />
                     </SuperAdminRoute>
-                  } />
+                  } /> */}
 
                   {/* Prueba de renderizado */}
                   <Route path="test-simple" element={<TestSimpleComponent />} />
@@ -314,6 +315,13 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } 
         />
+        
+        {/* Rutas Super Admin */}
+        <Route path="/super-admin/*" element={
+          <SuperAdminRoute>
+            <SuperAdminRoutes />
+          </SuperAdminRoute>
+        } />
       </Routes>
     </Suspense>
   );

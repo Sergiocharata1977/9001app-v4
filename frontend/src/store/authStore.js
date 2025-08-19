@@ -40,17 +40,19 @@ const useAuthStore = create(
               organization_plan: rawUser.organization_plan || rawUser.organization?.plan || null,
             };
 
+            // Guardar en localStorage inmediatamente
+            localStorage.setItem('token', accessToken);
+            if (refreshToken) {
+              localStorage.setItem('refreshToken', refreshToken);
+            }
+
+            // Actualizar estado de forma síncrona para evitar delays
             set({
               user,
               token: accessToken,
               isAuthenticated: true,
               isLoading: false
             });
-
-            localStorage.setItem('token', accessToken);
-            if (refreshToken) {
-              localStorage.setItem('refreshToken', refreshToken);
-            }
 
             return body?.data || body;
           } catch (error) {

@@ -16,6 +16,7 @@ const LoginPage = () => {
   
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
+  const isSuperAdmin = useAuthStore((state) => state.isSuperAdmin);
 
   const handleChange = (e) => {
     setFormData({
@@ -34,10 +35,9 @@ const LoginPage = () => {
       setIsSubmitted(true);
       toast.success('¡Inicio de sesión exitoso!');
       
-      // Redirigir después de un breve delay
-      setTimeout(() => {
-        navigate('/app/personal');
-      }, 1000);
+      // Redirección inteligente basada en el rol
+      const redirectPath = isSuperAdmin() ? '/super-admin/dashboard' : '/app/personal';
+      navigate(redirectPath);
     } catch (error) {
       toast.error(error.message || 'Error al iniciar sesión');
       console.error('Login error:', error);

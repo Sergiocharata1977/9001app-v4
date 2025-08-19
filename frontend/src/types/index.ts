@@ -35,6 +35,125 @@ export * from './forms';
 // Tipos de acciones
 export * from './acciones';
 
+// Tipos de procesos SGC
+export * from './procesos';
+
+// Tipos de minutas SGC
+export * from './minutas';
+
+// Importaciones específicas para evitar errores de linter
+import type { User, Department, Address, ContactInfo } from './common';
+import type { FileUpload } from './api';
+
+// Definición temporal de Process para evitar errores
+interface Process {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+// ========== TIPOS SGC ESTANDARIZADO ==========
+
+// Tipos para el sistema SGC estandarizado
+export interface SgcPersonalRelacion {
+  id: string;
+  organization_id: number;
+  entidad_tipo: 'minuta' | 'auditoria' | 'capacitacion' | 'proceso' | 'hallazgo' | 'evaluacion' | 'revision_direccion';
+  entidad_id: string;
+  personal_id: string;
+  rol: string;
+  asistio?: boolean;
+  justificacion_ausencia?: string;
+  observaciones?: string;
+  datos_adicionales?: string; // JSON string
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  is_active: boolean;
+}
+
+export interface SgcDocumentoRelacionado {
+  id: string;
+  organization_id: number;
+  entidad_tipo: 'minuta' | 'auditoria' | 'capacitacion' | 'proceso' | 'hallazgo' | 'evaluacion' | 'revision_direccion';
+  entidad_id: string;
+  documento_id: number;
+  tipo_relacion: 'adjunto' | 'evidencia' | 'material' | 'resultado' | 'entrada' | 'salida';
+  descripcion?: string;
+  es_obligatorio: boolean;
+  datos_adicionales?: string; // JSON string
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  is_active: boolean;
+}
+
+export interface SgcNormaRelacionada {
+  id: string;
+  organization_id: number;
+  entidad_tipo: 'minuta' | 'auditoria' | 'capacitacion' | 'proceso' | 'hallazgo' | 'evaluacion' | 'revision_direccion';
+  entidad_id: string;
+  norma_id: number;
+  punto_norma: string;
+  clausula_descripcion?: string;
+  tipo_relacion: 'aplica' | 'no_aplica' | 'competencia' | 'requisito';
+  nivel_cumplimiento: 'cumple' | 'no_cumple' | 'parcial' | 'pendiente' | 'no_aplica';
+  observaciones?: string;
+  evidencias?: string;
+  acciones_requeridas?: string;
+  datos_adicionales?: string; // JSON string
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  is_active: boolean;
+}
+
+// Tipos para vistas SGC completas
+export interface SgcPersonalRelacionCompleto extends SgcPersonalRelacion {
+  personal?: {
+    id: string;
+    nombre_completo: string;
+    puesto: string;
+    departamento: string;
+    email: string;
+  };
+}
+
+export interface SgcDocumentoRelacionadoCompleto extends SgcDocumentoRelacionado {
+  documento?: {
+    id: number;
+    nombre: string;
+    tipo: string;
+    ruta_archivo: string;
+  };
+}
+
+export interface SgcNormaRelacionadaCompleto extends SgcNormaRelacionada {
+  norma?: {
+    id: number;
+    nombre: string;
+    descripcion: string;
+  };
+}
+
+// Tipos para estadísticas SGC
+export interface SgcEstadisticas {
+  total_participantes: number;
+  total_documentos: number;
+  total_normas: number;
+  distribucion_roles: Array<{
+    rol: string;
+    cantidad: number;
+  }>;
+  cumplimiento_normas: Array<{
+    nivel_cumplimiento: string;
+    cantidad: number;
+  }>;
+}
+
 // ========== TIPOS ADICIONALES ESPECÍFICOS ==========
 
 // Tipos de productos y servicios

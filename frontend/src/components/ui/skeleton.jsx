@@ -303,4 +303,323 @@ export const ModalSkeleton = React.memo(() => {
 
 ModalSkeleton.displayName = 'ModalSkeleton';
 
+/**
+ * Skeleton para PersonalSingle
+ */
+export const PersonalSingleSkeleton = React.memo(() => {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Skeleton */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-10 w-20" />
+              <Skeleton className="h-8 w-64" />
+            </div>
+            <div className="flex items-center space-x-3">
+              <Skeleton className="h-10 w-24" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Skeleton */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Profile Card Skeleton */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="text-center">
+                {/* Avatar Skeleton */}
+                <Skeleton className="w-32 h-32 mx-auto mb-4 rounded-full" />
+                
+                {/* Name and Title Skeleton */}
+                <Skeleton className="h-8 w-48 mx-auto mb-2" />
+                <Skeleton className="h-6 w-32 mx-auto mb-4" />
+                
+                {/* Status Skeleton */}
+                <Skeleton className="h-8 w-24 mx-auto" />
+              </div>
+            </div>
+          </div>
+
+          {/* Details Skeleton */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <Skeleton className="h-6 w-32 mb-6" />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+PersonalSingleSkeleton.displayName = 'PersonalSingleSkeleton';
+
+/**
+ * Skeleton para listas de personal
+ */
+export const PersonalListSkeleton = React.memo(({ items = 6 }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Array.from({ length: items }).map((_, index) => (
+        <div key={index} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-4 h-20"></div>
+          <div className="p-4 space-y-3">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-3 w-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-2/3" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          </div>
+          <div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-gray-800/50">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-8 w-16" />
+              <div className="flex gap-1">
+                <Skeleton className="h-8 w-8 rounded" />
+                <Skeleton className="h-8 w-8 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+PersonalListSkeleton.displayName = 'PersonalListSkeleton';
+
+/**
+ * Skeleton para listas de hallazgos
+ */
+export const HallazgosListSkeleton = React.memo(({ items = 6 }) => {
+  return (
+    <div className="space-y-4">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex space-x-2">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-10" />
+        </div>
+      </div>
+
+      {/* Stats Cards Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-6 w-12" />
+              </div>
+              <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Table Skeleton */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-6 w-32" />
+            <div className="flex space-x-2">
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="h-8 w-20" />
+            </div>
+          </div>
+        </div>
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {Array.from({ length: items }).map((_, index) => (
+            <div key={index} className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+HallazgosListSkeleton.displayName = 'HallazgosListSkeleton';
+
+/**
+ * Skeleton para listas de documentos
+ */
+export const DocumentosListSkeleton = React.memo(({ items = 6 }) => {
+  return (
+    <div className="space-y-4">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex space-x-2">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-10" />
+        </div>
+      </div>
+
+      {/* Search and Filters Skeleton */}
+      <div className="flex items-center space-x-4 mb-6">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
+      </div>
+
+      {/* Documents Grid Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: items }).map((_, index) => (
+          <div key={index} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+            <div className="p-4 space-y-3">
+              {/* File Icon */}
+              <div className="flex items-center space-x-3">
+                <Skeleton className="h-8 w-8 rounded" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </div>
+              
+              {/* Document Info */}
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+              
+              {/* Status and Actions */}
+              <div className="flex items-center justify-between pt-2">
+                <Skeleton className="h-6 w-16" />
+                <div className="flex space-x-2">
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+DocumentosListSkeleton.displayName = 'DocumentosListSkeleton';
+
+/**
+ * Skeleton para formularios de hallazgos
+ */
+export const HallazgoFormSkeleton = React.memo(() => {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+      
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-28" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
+      </div>
+    </div>
+  );
+});
+
+HallazgoFormSkeleton.displayName = 'HallazgoFormSkeleton';
+
+/**
+ * Skeleton para formularios de documentos
+ */
+export const DocumentoFormSkeleton = React.memo(() => {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+      
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-28" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-20" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
+      </div>
+    </div>
+  );
+});
+
+DocumentoFormSkeleton.displayName = 'DocumentoFormSkeleton';
+
 export default Skeleton;

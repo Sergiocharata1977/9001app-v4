@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,13 +13,26 @@ import {
   LogOut,
   User
 } from 'lucide-react';
-import SuperAdminSidebar from '../menu/SuperAdminSidebar';
+import SuperAdminSidebarSimple from '../menu/SuperAdminSidebarSimple';
 import useAuthStore from '@/store/authStore';
 
 const SuperAdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -59,15 +72,15 @@ const SuperAdminLayout = ({ children }) => {
 
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 z-50 lg:z-40">
-        <SuperAdminSidebar
+        <SuperAdminSidebarSimple
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          isMobile={true}
+          isMobile={isMobile}
         />
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-80">
+      <div className={`transition-all duration-300 ${isMobile ? 'pl-0' : 'pl-80'}`}>
         {/* Top navigation */}
         <header className="bg-white shadow-sm border-b border-slate-200">
           <div className="flex items-center justify-between px-4 py-3 lg:px-6">

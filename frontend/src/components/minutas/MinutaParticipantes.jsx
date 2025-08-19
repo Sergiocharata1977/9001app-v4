@@ -248,7 +248,7 @@ const MinutaParticipantes = ({ minutaId, isOpen }) => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium">
-                        {participante.participante_nombre}
+                        {participante.nombre_personal}
                       </span>
                       <Badge className={getRolBadgeColor(participante.rol)}>
                         {participante.rol}

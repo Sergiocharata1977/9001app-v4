@@ -1,6 +1,6 @@
 -- ===============================================
 -- MIGRACIÓN CAPACITACIONES AL SISTEMA SGC ESTANDARIZADO
--- Migra capacitacion_asistentes → sgc_participantes
+-- Migra capacitacion_asistentes → sgc_personal_relaciones
 -- Prepara sistema para usar documentos y normas SGC
 -- ===============================================
 
@@ -20,7 +20,7 @@ SELECT 'VERIFICACION_INICIAL' as paso;
 -- Contar registros actuales
 SELECT 'CAPACITACIONES' as tabla, COUNT(*) as registros FROM capacitaciones;
 SELECT 'CAPACITACION_ASISTENTES' as tabla, COUNT(*) as registros FROM capacitacion_asistentes;
-SELECT 'SGC_PARTICIPANTES_CAPACITACION' as tabla, COUNT(*) as registros FROM sgc_participantes WHERE entidad_tipo = 'capacitacion';
+SELECT 'SGC_PERSONAL_RELACIONES_CAPACITACION' as tabla, COUNT(*) as registros FROM sgc_personal_relaciones WHERE entidad_tipo = 'capacitacion';
 SELECT 'SGC_DOCUMENTOS_CAPACITACION' as tabla, COUNT(*) as registros FROM sgc_documentos_relacionados WHERE entidad_tipo = 'capacitacion';
 SELECT 'SGC_NORMAS_CAPACITACION' as tabla, COUNT(*) as registros FROM sgc_normas_relacionadas WHERE entidad_tipo = 'capacitacion';
 
@@ -30,8 +30,8 @@ SELECT 'SGC_NORMAS_CAPACITACION' as tabla, COUNT(*) as registros FROM sgc_normas
 
 SELECT 'MIGRACION_PARTICIPANTES' as paso;
 
--- Migrar capacitacion_asistentes → sgc_participantes
-INSERT INTO sgc_participantes (
+-- Migrar capacitacion_asistentes → sgc_personal_relaciones
+INSERT INTO sgc_personal_relaciones (
     id, 
     organization_id, 
     entidad_tipo, 
@@ -61,7 +61,7 @@ SELECT
     1 as is_active
 FROM capacitacion_asistentes ca
 WHERE NOT EXISTS (
-    SELECT 1 FROM sgc_participantes sp 
+    SELECT 1 FROM sgc_personal_relaciones sp 
     WHERE sp.entidad_tipo = 'capacitacion' 
     AND sp.entidad_id = ca.capacitacion_id 
     AND sp.personal_id = ca.empleado_id
@@ -74,7 +74,7 @@ WHERE NOT EXISTS (
 SELECT 'DATOS_EJEMPLO' as paso;
 
 -- Ejemplo de instructor para cada capacitación
-INSERT INTO sgc_participantes (
+INSERT INTO sgc_personal_relaciones (
     id, organization_id, entidad_tipo, entidad_id, personal_id,
     rol, asistio, datos_adicionales, created_at, updated_at, is_active
 )
@@ -96,7 +96,7 @@ SELECT
     1
 FROM capacitaciones c
 WHERE NOT EXISTS (
-    SELECT 1 FROM sgc_participantes sp 
+    SELECT 1 FROM sgc_personal_relaciones sp 
     WHERE sp.entidad_tipo = 'capacitacion' 
     AND sp.entidad_id = c.id 
     AND sp.rol = 'instructor'
@@ -183,7 +183,7 @@ WHERE NOT EXISTS (
 SELECT 'VERIFICACION_FINAL' as paso;
 
 -- Contar registros después de la migración
-SELECT 'SGC_PARTICIPANTES_CAPACITACION' as tabla, COUNT(*) as registros_nuevos FROM sgc_participantes WHERE entidad_tipo = 'capacitacion';
+SELECT 'SGC_PERSONAL_RELACIONES_CAPACITACION' as tabla, COUNT(*) as registros_nuevos FROM sgc_personal_relaciones WHERE entidad_tipo = 'capacitacion';
 SELECT 'SGC_DOCUMENTOS_CAPACITACION' as tabla, COUNT(*) as registros_nuevos FROM sgc_documentos_relacionados WHERE entidad_tipo = 'capacitacion';
 SELECT 'SGC_NORMAS_CAPACITACION' as tabla, COUNT(*) as registros_nuevos FROM sgc_normas_relacionadas WHERE entidad_tipo = 'capacitacion';
 
@@ -195,7 +195,7 @@ SELECT
     COUNT(DISTINCT sdr.id) as documentos,
     COUNT(DISTINCT snr.id) as normas_competencias
 FROM capacitaciones c
-LEFT JOIN sgc_participantes sp ON c.id = sp.entidad_id AND sp.entidad_tipo = 'capacitacion' AND sp.is_active = 1
+LEFT JOIN sgc_personal_relaciones sp ON c.id = sp.entidad_id AND sp.entidad_tipo = 'capacitacion' AND sp.is_active = 1
 LEFT JOIN sgc_documentos_relacionados sdr ON c.id = sdr.entidad_id AND sdr.entidad_tipo = 'capacitacion' AND sdr.is_active = 1
 LEFT JOIN sgc_normas_relacionadas snr ON c.id = snr.entidad_id AND snr.entidad_tipo = 'capacitacion' AND snr.is_active = 1
 GROUP BY c.id, c.nombre
@@ -208,7 +208,7 @@ SELECT 'VERIFICACION_INTEGRIDAD' as verificacion;
 SELECT 'CAPACITACIONES_SIN_PARTICIPANTES' as alerta, COUNT(*) as cantidad
 FROM capacitaciones c
 WHERE NOT EXISTS (
-    SELECT 1 FROM sgc_participantes sp 
+    SELECT 1 FROM sgc_personal_relaciones sp 
     WHERE sp.entidad_tipo = 'capacitacion' 
     AND sp.entidad_id = c.id 
     AND sp.is_active = 1
@@ -216,7 +216,7 @@ WHERE NOT EXISTS (
 
 -- Participantes sin personal válido (esto debería ser 0)
 SELECT 'PARTICIPANTES_SIN_PERSONAL_VALIDO' as alerta, COUNT(*) as cantidad
-FROM sgc_participantes sp
+FROM sgc_personal_relaciones sp
 WHERE sp.entidad_tipo = 'capacitacion'
 AND NOT EXISTS (
     SELECT 1 FROM personal p WHERE p.id = sp.personal_id
@@ -231,7 +231,7 @@ COMMIT;
 /*
 CAMBIOS NECESARIOS EN EL BACKEND:
 
-1. Actualizar rutas de capacitaciones para usar sgc_participantes:
+1. Actualizar rutas de capacitaciones para usar sgc_personal_relaciones:
    - GET /api/capacitaciones/:id/participantes (en lugar de /asistentes)
    - POST /api/capacitaciones/:id/participantes
    - DELETE /api/capacitaciones/:id/participantes/:participanteId
@@ -243,7 +243,7 @@ CAMBIOS NECESARIOS EN EL BACKEND:
    - POST /api/capacitaciones/:id/competencias
 
 3. Usar vistas SGC para consultas optimizadas:
-   - v_sgc_participantes_completos
+   - v_sgc_personal_relaciones_completos
    - v_sgc_documentos_completos
    - v_sgc_normas_completas
 

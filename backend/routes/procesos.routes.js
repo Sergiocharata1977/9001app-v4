@@ -6,7 +6,7 @@ const router = express.Router();
 
 // ===============================================
 // RUTAS PROCESOS SGC - SISTEMA ESTANDARIZADO
-// Integrado con tablas: sgc_participantes, sgc_documentos_relacionados, sgc_normas_relacionadas
+// Integrado con tablas: sgc_personal_relaciones, sgc_documentos_relacionados, sgc_normas_relacionadas
 // ===============================================
 
 // GET /api/procesos - Obtener todos los procesos con información SGC
@@ -29,7 +29,7 @@ router.get('/', authMiddleware, async (req, res) => {
         COUNT(DISTINCT sd.id) as total_documentos,
         COUNT(DISTINCT sn.id) as total_normas
       FROM procesos p
-      LEFT JOIN sgc_participantes sp ON p.id = sp.entidad_id AND sp.entidad_tipo = 'proceso' AND sp.is_active = 1
+      LEFT JOIN sgc_personal_relaciones sp ON p.id = sp.entidad_id AND sp.entidad_tipo = 'proceso' AND sp.is_active = 1
       LEFT JOIN sgc_documentos_relacionados sd ON p.id = sd.entidad_id AND sd.entidad_tipo = 'proceso' AND sd.is_active = 1
       LEFT JOIN sgc_normas_relacionadas sn ON p.id = sn.entidad_id AND sn.entidad_tipo = 'proceso' AND sn.is_active = 1
       WHERE p.organization_id = ? AND p.is_active = 1
@@ -81,7 +81,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     // Obtener participantes SGC
     const participantesResult = await tursoClient.execute({
       sql: `SELECT sp.*, p.nombre_completo, p.puesto 
-            FROM sgc_participantes sp
+            FROM sgc_personal_relaciones sp
             LEFT JOIN personal p ON sp.personal_id = p.id
             WHERE sp.entidad_tipo = 'proceso' AND sp.entidad_id = ? AND sp.is_active = 1
             ORDER BY sp.rol`,
@@ -318,7 +318,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     // También desactivar datos SGC relacionados
     await Promise.all([
       tursoClient.execute({
-        sql: 'UPDATE sgc_participantes SET is_active = 0 WHERE entidad_tipo = "proceso" AND entidad_id = ?',
+        sql: 'UPDATE sgc_personal_relaciones SET is_active = 0 WHERE entidad_tipo = "proceso" AND entidad_id = ?',
         args: [id]
       }),
       tursoClient.execute({
@@ -362,7 +362,7 @@ router.get('/:id/participantes', authMiddleware, async (req, res) => {
         sp.id, sp.personal_id, sp.rol, sp.asistio, sp.justificacion_ausencia,
         sp.observaciones, sp.datos_adicionales, sp.created_at, sp.updated_at,
         p.nombre_completo, p.puesto, p.departamento, p.email
-      FROM sgc_participantes sp
+      FROM sgc_personal_relaciones sp
       LEFT JOIN personal p ON sp.personal_id = p.id
       WHERE sp.entidad_tipo = 'proceso' AND sp.entidad_id = ? 
         AND sp.organization_id = ? AND sp.is_active = 1
@@ -404,7 +404,7 @@ router.post('/:id/participantes', authMiddleware, async (req, res) => {
     const participanteId = `PART_PROC_${id}_${personal_id}`;
     
     const result = await tursoClient.execute({
-      sql: `INSERT INTO sgc_participantes (
+      sql: `INSERT INTO sgc_personal_relaciones (
         id, organization_id, entidad_tipo, entidad_id, personal_id, rol,
         observaciones, created_at, updated_at, created_by, is_active
       ) VALUES (?, ?, 'proceso', ?, ?, ?, ?, datetime('now'), datetime('now'), ?, 1)

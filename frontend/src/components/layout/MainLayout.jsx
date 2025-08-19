@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from '../menu/Sidebar';
 import TopBar from '../menu/TopBar';
+import SuperAdminRedirect from '../common/SuperAdminRedirect';
 
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -26,6 +27,9 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Componente de redirección automática para Super Admins */}
+      <SuperAdminRedirect />
+      
       {/* Sidebar */}
       <AnimatePresence mode="wait">
         {(sidebarOpen || !isMobile) && (

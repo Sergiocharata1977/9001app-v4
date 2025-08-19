@@ -40,7 +40,7 @@ async function updateDatabaseDocs() {
 - \`organization_features\` - Features por organización
 
 ### 📋 Sistema SGC
-- \`sgc_participantes\` - Participantes genéricos SGC
+- \`sgc_personal_relaciones\` - Participantes genéricos SGC
 - \`sgc_documentos_relacionados\` - Documentos relacionados SGC
 - \`sgc_normas_relacionadas\` - Normas relacionadas SGC
 
@@ -69,7 +69,7 @@ async function updateDatabaseDocs() {
 - \`usuarios.organization_id\` → \`organizations.id\`
 - \`personal.departamento_id\` → \`departamentos.id\`
 - \`personal.puesto_id\` → \`puestos.id\`
-- \`sgc_participantes.user_id\` → \`usuarios.id\`
+- \`sgc_personal_relaciones.user_id\` → \`usuarios.id\`
 
 ## 📝 NOTAS IMPORTANTES
 - **Organización ID 3:** ISOFlow3 Platform (Super Admin)

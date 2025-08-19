@@ -151,6 +151,8 @@ export interface Permission {
 
 // ========== TIPOS DE AUDITORÍA ==========
 
+import type { FileUpload } from './api';
+
 // Auditoría
 export interface Audit {
   id: string;

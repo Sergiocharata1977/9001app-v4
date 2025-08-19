@@ -161,7 +161,7 @@ async function alterProcesosToSGC() {
     
     console.log('\n🎉 MIGRACIÓN TABLA PROCESOS COMPLETADA EXITOSAMENTE');
     console.log('\n📋 La tabla procesos ahora tiene estructura SGC completa y está lista para usar:');
-    console.log('   • sgc_participantes (entidad_tipo = "proceso", entidad_id = procesos.id)');
+    console.log('   • sgc_personal_relaciones (entidad_tipo = "proceso", entidad_id = procesos.id)');
     console.log('   • sgc_documentos_relacionados (entidad_tipo = "proceso", entidad_id = procesos.id)');
     console.log('   • sgc_normas_relacionadas (entidad_tipo = "proceso", entidad_id = procesos.id)');
     

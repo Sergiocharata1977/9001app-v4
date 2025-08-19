@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import AppRoutes from './routes/AppRoutes.jsx';
 import { QueryProvider } from './hooks/useQueryClient.jsx';
 import { useAuthInitializer } from './hooks/useAuthInitializer.js';
+import LoginDebug from './components/common/LoginDebug.jsx';
 import './index.css';
 
 // Componente interno que maneja la inicialización de auth
@@ -30,6 +31,9 @@ const AppContent = () => {
         {/* Usar AppRoutes, toda la app va bajo /app y públicas fuera */}
         <Route path="/*" element={<AppRoutes />} />
       </Routes>
+      
+      {/* Componente de debug para desarrollo */}
+      <LoginDebug />
       
       <Toaster
         position="top-right"

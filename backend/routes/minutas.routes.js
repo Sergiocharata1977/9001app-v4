@@ -49,7 +49,7 @@ router.get('/stats', async (req, res) => {
         args: []
       }),
       tursoClient.execute({
-        sql: `SELECT COUNT(*) as total FROM sgc_participantes WHERE entidad_tipo = 'minuta' AND is_active = 1`,
+        sql: `SELECT COUNT(*) as total FROM sgc_personal_relaciones WHERE entidad_tipo = 'minuta' AND is_active = 1`,
         args: []
       }),
       tursoClient.execute({
@@ -578,9 +578,9 @@ router.get('/:id/participantes', async (req, res) => {
     const { id } = req.params;
     
     const result = await tursoClient.execute({
-      sql: `SELECT * FROM v_sgc_participantes_completos 
+      sql: `SELECT * FROM v_sgc_personal_relaciones_completos 
              WHERE entidad_tipo = 'minuta' AND entidad_id = ?
-             ORDER BY rol, participante_nombre`,
+             ORDER BY rol, nombre_personal`,
       args: [id]
     });
 
@@ -628,7 +628,7 @@ router.post('/:id/participantes', async (req, res) => {
     const participanteId = `PART_MIN_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
     const result = await tursoClient.execute({
-      sql: `INSERT INTO sgc_participantes (
+      sql: `INSERT INTO sgc_personal_relaciones (
         id, organization_id, entidad_tipo, entidad_id, personal_id, 
         rol, asistio, datos_adicionales, created_at, updated_at, is_active
       ) VALUES (?, 2, 'minuta', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)`,
@@ -644,7 +644,7 @@ router.post('/:id/participantes', async (req, res) => {
 
     // Obtener el participante creado con datos completos
     const createdParticipante = await tursoClient.execute({
-      sql: `SELECT * FROM v_sgc_participantes_completos WHERE id = ?`,
+      sql: `SELECT * FROM v_sgc_personal_relaciones_completos WHERE id = ?`,
       args: [participanteId]
     });
 
@@ -669,7 +669,7 @@ router.delete('/:id/participantes/:participanteId', async (req, res) => {
     const { id, participanteId } = req.params;
 
     const result = await tursoClient.execute({
-      sql: `UPDATE sgc_participantes SET is_active = 0, updated_at = CURRENT_TIMESTAMP
+      sql: `UPDATE sgc_personal_relaciones SET is_active = 0, updated_at = CURRENT_TIMESTAMP
              WHERE id = ? AND entidad_tipo = 'minuta' AND entidad_id = ?`,
       args: [participanteId, id]
     });

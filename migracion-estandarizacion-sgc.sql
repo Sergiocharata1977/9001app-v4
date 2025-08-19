@@ -16,8 +16,8 @@
 -- PASO 2: MIGRAR DATOS EXISTENTES
 -- ===============================================
 
--- 👥 MIGRAR minutas_participantes → sgc_participantes
-INSERT INTO sgc_participantes (
+-- 👥 MIGRAR minutas_participantes → sgc_personal_relaciones
+INSERT INTO sgc_personal_relaciones (
     id, organization_id, entidad_tipo, entidad_id, personal_id, rol, 
     asistio, justificacion_ausencia, created_at, updated_at, is_active
 )
@@ -88,7 +88,7 @@ AND r.id IS NOT NULL;
 -- ===============================================
 
 -- Mantener relaciones_sgc solo para relaciones que NO sean:
--- - participantes (ahora en sgc_participantes)
+-- - participantes (ahora en sgc_personal_relaciones)
 -- - documentos (ahora en sgc_documentos_relacionados)  
 -- - normas (ahora en sgc_normas_relacionadas)
 
@@ -104,7 +104,7 @@ AND r.id IS NOT NULL;
 -- ===============================================
 
 -- Ejemplo: Auditoría con participantes
-INSERT OR IGNORE INTO sgc_participantes (
+INSERT OR IGNORE INTO sgc_personal_relaciones (
     id, organization_id, entidad_tipo, entidad_id, personal_id, rol, asistio
 ) VALUES 
 ('part_aud_001', 2, 'auditoria', 'AUD_001', 'PER_001', 'auditor', 1),
@@ -139,9 +139,9 @@ SELECT
 FROM minutas_participantes
 UNION ALL
 SELECT 
-    'SGC_PARTICIPANTES_MINUTAS' as destino,
+    'SGC_PERSONAL_RELACIONES_MINUTAS' as destino,
     COUNT(*) as registros_destino
-FROM sgc_participantes 
+FROM sgc_personal_relaciones 
 WHERE entidad_tipo = 'minuta';
 
 -- Verificar migración de documentos
@@ -192,12 +192,12 @@ DELETE FROM relaciones_sgc WHERE destino_tipo = 'norma';
 -- TRIGGERS PARA MANTENER CONSISTENCIA
 -- ===============================================
 
--- Trigger para actualizar updated_at en sgc_participantes
-CREATE TRIGGER IF NOT EXISTS trigger_sgc_participantes_updated_at
-AFTER UPDATE ON sgc_participantes
+-- Trigger para actualizar updated_at en sgc_personal_relaciones
+CREATE TRIGGER IF NOT EXISTS trigger_sgc_personal_relaciones_updated_at
+AFTER UPDATE ON sgc_personal_relaciones
 FOR EACH ROW
 BEGIN
-    UPDATE sgc_participantes 
+    UPDATE sgc_personal_relaciones 
     SET updated_at = CURRENT_TIMESTAMP 
     WHERE id = NEW.id;
 END;

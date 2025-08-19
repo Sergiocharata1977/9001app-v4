@@ -1,271 +1,190 @@
 import React from 'react';
-import { Database, Table, Key, Link, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { 
+  Database, 
+  Users, 
+  Building2, 
+  Shield, 
+  Key, 
+  Info,
+  AlertTriangle,
+  CheckCircle
+} from 'lucide-react';
 
 const BaseDatosPage = () => {
-  const tablasSistema = [
-    {
-      nombre: 'organizations',
-      descripcion: 'Organizaciones del sistema multi-tenant',
-      campos: ['id', 'name', 'email', 'created_at', 'updated_at'],
-      color: 'bg-blue-500'
-    },
-    {
-      nombre: 'usuarios',
-      descripcion: 'Usuarios del sistema con roles y permisos',
-      campos: ['id', 'name', 'email', 'role', 'organization_id', 'created_at'],
-      color: 'bg-green-500'
-    },
-    {
-      nombre: 'departamentos',
-      descripcion: 'Estructura organizacional por departamentos',
-      campos: ['id', 'nombre', 'descripcion', 'organization_id', 'created_at'],
-      color: 'bg-purple-500'
-    },
-    {
-      nombre: 'personal',
-      descripcion: 'Empleados y personal de la organización',
-      campos: ['id', 'nombre', 'email', 'departamento_id', 'puesto_id', 'organization_id'],
-      color: 'bg-orange-500'
-    },
-    {
-      nombre: 'auditorias',
-      descripcion: 'Registro de auditorías internas y externas',
-      campos: ['id', 'tipo', 'fecha', 'auditor', 'estado', 'organization_id'],
-      color: 'bg-red-500'
-    },
-    {
-      nombre: 'hallazgos',
-      descripcion: 'Hallazgos y no conformidades del sistema',
-      campos: ['id', 'descripcion', 'estado', 'responsable', 'organization_id'],
-      color: 'bg-yellow-500'
-    }
-  ];
-
-  const relacionesPrincipales = [
-    {
-      tabla: 'organizations',
-      relacion: '1:N',
-      con: 'usuarios',
-      descripcion: 'Una organización puede tener múltiples usuarios'
-    },
-    {
-      tabla: 'organizations',
-      relacion: '1:N',
-      con: 'departamentos',
-      descripcion: 'Una organización puede tener múltiples departamentos'
-    },
-    {
-      tabla: 'departamentos',
-      relacion: '1:N',
-      con: 'personal',
-      descripcion: 'Un departamento puede tener múltiples empleados'
-    },
-    {
-      tabla: 'usuarios',
-      relacion: '1:N',
-      con: 'auditorias',
-      descripcion: 'Un usuario puede realizar múltiples auditorías'
-    }
-  ];
-
-  const configuracionBD = [
-    {
-      titulo: 'Multi-Tenant',
-      descripcion: 'Aislamiento de datos por organización',
-      detalles: [
-        'Cada tabla incluye organization_id',
-        'Filtros automáticos por tenant',
-        'Middleware de autenticación por organización'
-      ]
-    },
-    {
-      titulo: 'Índices',
-      descripcion: 'Optimización de consultas',
-      detalles: [
-        'Índice en organization_id en todas las tablas',
-        'Índices en campos de búsqueda frecuente',
-        'Índices en relaciones foreign key'
-      ]
-    },
-    {
-      titulo: 'Auditoría',
-      descripcion: 'Trazabilidad de cambios',
-      detalles: [
-        'Campos created_at y updated_at automáticos',
-        'Registro de usuario que realiza cambios',
-        'Historial de modificaciones'
-      ]
-    }
-  ];
-
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
-            <Database className="w-8 h-8 text-white" />
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-800">Base de Datos</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Documentación técnica de la estructura de base de datos, relaciones, 
-          índices y configuración del sistema ISOFlow3.
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Documentación de Base de Datos
+        </h1>
+        <p className="text-gray-600">
+          Información técnica completa sobre la estructura y funcionamiento de la base de datos
         </p>
       </div>
 
-      {/* Configuración de Base de Datos */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">⚙️ Configuración</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {configuracionBD.map((config, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-800">
-                  {config.titulo}
-                </CardTitle>
-                <p className="text-sm text-gray-600">{config.descripcion}</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {config.detalles.map((detalle, detalleIndex) => (
-                    <li key={detalleIndex} className="text-sm text-gray-700 flex items-start space-x-2">
-                      <span className="text-blue-500">•</span>
-                      <span>{detalle}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Tablas Principales */}
+        <Card className="shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <CardTitle className="flex items-center">
+              <Database className="w-5 h-5 mr-2" />
+              Tablas Principales
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">usuarios</h3>
+                <p className="text-gray-600 mb-2">Usuarios del sistema con roles y organización</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">organization_id</Badge>
+                  <Badge variant="outline">role</Badge>
+                  <Badge variant="outline">email</Badge>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-green-500 pl-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">organizations</h3>
+                <p className="text-gray-600 mb-2">Organizaciones del sistema</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">id</Badge>
+                  <Badge variant="outline">name</Badge>
+                  <Badge variant="outline">plan</Badge>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-purple-500 pl-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">organization_features</h3>
+                <p className="text-gray-600 mb-2">Features habilitadas por organización</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">organization_id</Badge>
+                  <Badge variant="outline">feature_name</Badge>
+                  <Badge variant="outline">enabled</Badge>
+                </div>
+              </div>
+              
+              <div className="border-l-4 border-orange-500 pl-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">user_feature_permissions</h3>
+                <p className="text-gray-600 mb-2">Permisos específicos de usuarios</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">user_id</Badge>
+                  <Badge variant="outline">feature_name</Badge>
+                  <Badge variant="outline">permission</Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Notas Importantes */}
+        <Card className="shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
+            <CardTitle className="flex items-center">
+              <Info className="w-5 h-5 mr-2" />
+              Notas Importantes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                <div>
+                  <p className="font-medium text-gray-900">Organización ID 3: ISOFlow3 Platform</p>
+                  <p className="text-sm text-gray-600">Super Admin - Acceso global</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                <div>
+                  <p className="font-medium text-gray-900">Organización ID 2: Organización Demo</p>
+                  <p className="text-sm text-gray-600">Organización de demostración</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="w-5 h-5 text-orange-500 mt-0.5" />
+                <div>
+                  <p className="font-medium text-gray-900">Tabla de features: organization_features</p>
+                  <p className="text-sm text-gray-600">Importante: incluye "s" al final</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="w-5 h-5 text-orange-500 mt-0.5" />
+                <div>
+                  <p className="font-medium text-gray-900">Tabla de usuarios: usuarios</p>
+                  <p className="text-sm text-gray-600">No "users" - nombre en español</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <Shield className="w-5 h-5 text-blue-500 mt-0.5" />
+                <div>
+                  <p className="font-medium text-gray-900">Segregación de Datos</p>
+                  <p className="text-sm text-gray-600">Todos los datos segregados por organization_id</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Tablas del Sistema */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">📊 Tablas del Sistema</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tablasSistema.map((tabla, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 ${tabla.color} rounded-lg flex items-center justify-center`}>
-                    <Table className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-semibold text-gray-800">
-                      {tabla.nombre}
-                    </CardTitle>
-                    <p className="text-sm text-gray-600">{tabla.descripcion}</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
+      {/* Información Adicional */}
+      <div className="mt-8">
+        <Card className="shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-gray-500 to-gray-600 text-white">
+            <CardTitle className="flex items-center">
+              <Key className="w-5 h-5 mr-2" />
+              Información Adicional
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Roles del Sistema</h3>
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-800">Campos principales:</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {tabla.campos.map((campo, campoIndex) => (
-                      <Badge key={campoIndex} variant="secondary" className="text-xs">
-                        {campo}
-                      </Badge>
-                    ))}
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-red-500">super_admin</Badge>
+                    <span className="text-sm text-gray-600">Acceso global completo</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-blue-500">admin</Badge>
+                    <span className="text-sm text-gray-600">Administrador de organización</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-green-500">user</Badge>
+                    <span className="text-sm text-gray-600">Usuario estándar</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Relaciones */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800">🔗 Relaciones Principales</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {relacionesPrincipales.map((relacion, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                    <Link className="w-4 h-4 text-white" />
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Características del Sistema</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-gray-600">Multi-tenancy por organización</span>
                   </div>
-                  <div>
-                    <CardTitle className="text-base font-semibold text-gray-800">
-                      {relacion.tabla} → {relacion.con}
-                    </CardTitle>
-                    <Badge variant="outline" className="text-xs">
-                      {relacion.relacion}
-                    </Badge>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-gray-600">Control granular de features</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-gray-600">Permisos por usuario</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-gray-600">Auditoría completa</span>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-sm text-gray-600">{relacion.descripcion}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Estructura Multi-Tenant */}
-      <div className="bg-emerald-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">🏢 Estructura Multi-Tenant</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-semibold text-emerald-800 mb-2">Aislamiento de Datos</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• Cada organización tiene su propio espacio de datos</li>
-              <li>• organization_id presente en todas las tablas</li>
-              <li>• Middleware automático de filtrado por tenant</li>
-              <li>• Sin acceso cross-tenant</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-emerald-800 mb-2">Seguridad</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• Validación de permisos por organización</li>
-              <li>• Roles jerárquicos (super_admin, admin, manager, employee)</li>
-              <li>• Auditoría de todas las operaciones</li>
-              <li>• Encriptación de datos sensibles</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Optimización */}
-      <div className="bg-blue-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">🚀 Optimización</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <h4 className="font-semibold text-blue-800 mb-2">Índices</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• organization_id en todas las tablas</li>
-              <li>• Campos de búsqueda frecuente</li>
-              <li>• Relaciones foreign key</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-blue-800 mb-2">Consultas</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• Prepared statements</li>
-              <li>• Paginación automática</li>
-              <li>• Filtros optimizados</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-blue-800 mb-2">Mantenimiento</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• Backups automáticos</li>
-              <li>• Limpieza de datos antiguos</li>
-              <li>• Monitoreo de rendimiento</li>
-            </ul>
-          </div>
-        </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -8,7 +8,22 @@
   <!-- Cargar configuración dinámica antes que la aplicación -->
   <script src="/runtime-config.js"></script>
   <!-- Cargar sobrescritura opcional de configuración (si existe) -->
-  <script src="/runtime-config.override.js" onerror="console.log('No override config found, using defaults')"></script>
+  <script>
+    // Cargar configuración override si existe, sino usar defaults
+    fetch('/runtime-config.override.js')
+      .then(response => {
+        if (response.ok) {
+          const script = document.createElement('script');
+          script.src = '/runtime-config.override.js';
+          document.head.appendChild(script);
+        } else {
+          console.log('No override config found, using defaults');
+        }
+      })
+      .catch(() => {
+        console.log('No override config found, using defaults');
+      });
+  </script>
 </head>
 <body>
   <div id="root"></div>
