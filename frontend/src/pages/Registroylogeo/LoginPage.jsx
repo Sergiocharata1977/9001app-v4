@@ -85,7 +85,8 @@ const LoginPage = () => {
         <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-emerald-600 opacity-10 rounded-full mix-blend-screen filter blur-3xl animate-pulse animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 flex min-h-screen">
+      {/* Contenedor principal con margen de 2cm */}
+      <div className="relative z-10 flex min-h-screen p-sgc-sep-2">
         {/* Lado izquierdo - Información */}
         <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 text-white">
           <motion.div
@@ -144,7 +145,7 @@ const LoginPage = () => {
         </div>
 
         {/* Lado derecho - Formulario */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full lg:w-1/2 flex items-center justify-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

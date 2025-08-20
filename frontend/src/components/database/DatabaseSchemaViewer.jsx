@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -6,400 +6,392 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { 
   Database, 
   Table, 
-  Link, 
-  Eye, 
-  EyeOff, 
+  RefreshCw,
   Search,
   Filter,
   Download,
+  ChevronDown,
+  ChevronRight,
+  Key,
+  Link,
   Info
 } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { schema, schemaRelations } from '../../lib/schema';
 
 const DatabaseSchemaViewer = () => {
+  const [schemaData, setSchemaData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTable, setSelectedTable] = useState(null);
-  const [showRelations, setShowRelations] = useState(true);
-  const [filterType, setFilterType] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [expandedTables, setExpandedTables] = useState(new Set());
 
-  // Extraer información de las tablas del esquema
-  const tables = useMemo(() => {
-    return Object.entries(schema).map(([tableName, table]) => {
-      const columns = Object.entries(table).map(([columnName, column]) => ({
-        name: columnName,
-        type: column.dataType,
-        isPrimary: column.primaryKey,
-        isRequired: column.notNull,
-        isUnique: column.unique,
-        hasDefault: column.hasDefault,
-        isForeignKey: column.references !== undefined
-      }));
-
-      return {
-        name: tableName,
-        displayName: tableName.charAt(0).toUpperCase() + tableName.slice(1),
-        columns,
-        relationCount: Object.keys(schemaRelations[`${tableName}Relations`] || {}).length
-      };
-    });
+  useEffect(() => {
+    loadSchemaData();
+    // Actualizar cada hora
+    const interval = setInterval(loadSchemaData, 60 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Filtrar tablas según el término de búsqueda
-  const filteredTables = useMemo(() => {
-    return tables.filter(table => {
-      const matchesSearch = table.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          table.displayName.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      if (filterType === 'all') return matchesSearch;
-      if (filterType === 'with-relations') return matchesSearch && table.relationCount > 0;
-      if (filterType === 'core') {
-        const coreTables = ['organizations', 'users', 'personal', 'procesos', 'hallazgos'];
-        return matchesSearch && coreTables.includes(table.name);
-      }
-      
-      return matchesSearch;
-    });
-  }, [tables, searchTerm, filterType]);
-
-  // Obtener relaciones para una tabla específica
-  const getTableRelations = (tableName) => {
-    const tableRelations = schemaRelations[`${tableName}Relations`];
-    if (!tableRelations) return [];
-
-    return Object.entries(tableRelations).map(([relationName, relation]) => ({
-      name: relationName,
-      type: relation.references ? 'foreign' : 'many',
-      targetTable: relation.references?.[0]?.table || relation.fields?.[0]?.table
-    }));
+  const loadSchemaData = async () => {
+    try {
+      const response = await fetch('/api/database/schema');
+      const data = await response.json();
+      setSchemaData(data);
+      setLastUpdate(new Date(data.lastUpdate));
+      setLoading(false);
+    } catch (error) {
+      console.error('Error cargando esquema:', error);
+      setLoading(false);
+    }
   };
 
-  // Generar estadísticas del esquema
-  const schemaStats = useMemo(() => {
-    const totalTables = tables.length;
-    const totalColumns = tables.reduce((sum, table) => sum + table.columns.length, 0);
-    const totalRelations = tables.reduce((sum, table) => sum + table.relationCount, 0);
-    const primaryKeys = tables.reduce((sum, table) => 
-      sum + table.columns.filter(col => col.isPrimary).length, 0);
-    const foreignKeys = tables.reduce((sum, table) => 
-      sum + table.columns.filter(col => col.isForeignKey).length, 0);
-
-    return {
-      totalTables,
-      totalColumns,
-      totalRelations,
-      primaryKeys,
-      foreignKeys
-    };
-  }, [tables]);
-
-  // Exportar esquema como JSON
-  const exportSchema = () => {
-    const schemaData = {
-      tables: tables.map(table => ({
-        name: table.name,
-        displayName: table.displayName,
-        columns: table.columns,
-        relations: getTableRelations(table.name)
-      })),
-      stats: schemaStats,
-      exportedAt: new Date().toISOString()
-    };
-
-    const blob = new Blob([JSON.stringify(schemaData, null, 2)], {
-      type: 'application/json'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `isoflow3-schema-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleManualUpdate = async () => {
+    setLoading(true);
+    try {
+      await fetch('/api/database/schema/update', { method: 'POST' });
+      await loadSchemaData();
+    } catch (error) {
+      console.error('Error en actualización manual:', error);
+    }
   };
+
+  const toggleTableExpansion = (tableName) => {
+    const newExpanded = new Set(expandedTables);
+    if (newExpanded.has(tableName)) {
+      newExpanded.delete(tableName);
+    } else {
+      newExpanded.add(tableName);
+    }
+    setExpandedTables(newExpanded);
+  };
+
+  const getTableCategories = () => {
+    const categories = {
+      'Organizaciones y Usuarios': ['organizations', 'organization_features', 'user_feature_permissions'],
+      'Gestión de Personal': ['personal', 'departamentos', 'puestos', 'competencias'],
+      'Procesos y Documentos': ['procesos', 'documentos', 'normas'],
+      'Auditorías y Calidad': ['auditorias', 'hallazgos', 'acciones'],
+      'Indicadores y Objetivos': ['indicadores', 'mediciones', 'objetivos_calidad'],
+      'Comunicación': ['minutas'],
+      'Capacitación': ['capacitaciones'],
+      'Productos': ['productos'],
+      'Sistema': ['sqlite_sequence']
+    };
+    return categories;
+  };
+
+  const getFilteredTables = () => {
+    if (!schemaData) return [];
+    
+    const categories = getTableCategories();
+    let tables = Object.entries(schemaData.tables);
+    
+    // Filtrar por búsqueda
+    if (searchTerm) {
+      tables = tables.filter(([tableName, table]) => 
+        tableName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        table.columns.some(col => col.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    // Filtrar por categoría
+    if (selectedCategory !== 'all') {
+      const categoryTables = categories[selectedCategory] || [];
+      tables = tables.filter(([tableName]) => categoryTables.includes(tableName));
+    }
+    
+    return tables;
+  };
+
+  const getColumnTypeColor = (type) => {
+    if (type.includes('INTEGER')) return 'bg-blue-100 text-blue-800';
+    if (type.includes('TEXT')) return 'bg-green-100 text-green-800';
+    if (type.includes('REAL')) return 'bg-purple-100 text-purple-800';
+    if (type.includes('DATETIME')) return 'bg-orange-100 text-orange-800';
+    if (type.includes('DATE')) return 'bg-red-100 text-red-800';
+    return 'bg-gray-100 text-gray-800';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2">Cargando estructura de base de datos...</span>
+      </div>
+    );
+  }
+
+  const filteredTables = getFilteredTables();
+  const categories = getTableCategories();
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Database className="h-8 w-8 text-emerald-600" />
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="mb-8">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Esquema de Base de Datos</h1>
-            <p className="text-slate-600">Visualización y análisis de la estructura ISOFlow3</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Estructura Completa de Base de Datos
+            </h1>
+            <p className="text-gray-600">
+              Documentación técnica completa - Tabla por tabla, campo por campo
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button onClick={handleManualUpdate} disabled={loading}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Actualizar Ahora
+            </Button>
+            {lastUpdate && (
+              <Badge variant="outline">
+                Última actualización: {lastUpdate.toLocaleString('es-ES')}
+              </Badge>
+            )}
           </div>
         </div>
-        <Button onClick={exportSchema} variant="outline" className="flex items-center space-x-2">
-          <Download className="h-4 w-4" />
-          <span>Exportar</span>
-        </Button>
       </div>
 
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Table className="h-5 w-5 text-emerald-600" />
-              <div>
-                <p className="text-2xl font-bold">{schemaStats.totalTables}</p>
-                <p className="text-sm text-slate-600">Tablas</p>
-              </div>
+      {/* Estadísticas Generales */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Database className="w-5 h-5 mr-2" />
+            Estadísticas Generales
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{schemaData.totalTables}</div>
+              <div className="text-sm text-gray-600">Total de Tablas</div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Database className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-2xl font-bold">{schemaStats.totalColumns}</p>
-                <p className="text-sm text-slate-600">Columnas</p>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {Object.values(schemaData.tables).reduce((sum, table) => sum + table.columns.length, 0)}
               </div>
+              <div className="text-sm text-gray-600">Total de Campos</div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Link className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-2xl font-bold">{schemaStats.totalRelations}</p>
-                <p className="text-sm text-slate-600">Relaciones</p>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {Object.values(schemaData.tables).reduce((sum, table) => sum + table.relations.length, 0)}
               </div>
+              <div className="text-sm text-gray-600">Total de Relaciones</div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Info className="h-5 w-5 text-orange-600" />
-              <div>
-                <p className="text-2xl font-bold">{schemaStats.primaryKeys}</p>
-                <p className="text-sm text-slate-600">Claves Primarias</p>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {Object.values(schemaData.tables).reduce((sum, table) => sum + table.recordCount, 0)}
               </div>
+              <div className="text-sm text-gray-600">Total de Registros</div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Link className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="text-2xl font-bold">{schemaStats.foreignKeys}</p>
-                <p className="text-sm text-slate-600">Claves Foráneas</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Controles */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input
-            placeholder="Buscar tablas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="filter" className="text-sm font-medium">Filtrar:</Label>
+      {/* Filtros */}
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center space-x-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Buscar tabla o campo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
           <select
-            id="filter"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="all">Todas las tablas</option>
-            <option value="core">Tablas principales</option>
-            <option value="with-relations">Con relaciones</option>
+            <option value="all">Todas las Categorías</option>
+            {Object.keys(categories).map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </select>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowRelations(!showRelations)}
-          className="flex items-center space-x-2"
-        >
-          {showRelations ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          <span>{showRelations ? 'Ocultar' : 'Mostrar'} relaciones</span>
-        </Button>
+        
+        <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <span>Mostrando {filteredTables.length} de {Object.keys(schemaData.tables).length} tablas</span>
+          {searchTerm && <span>• Filtrado por: "{searchTerm}"</span>}
+          {selectedCategory !== 'all' && <span>• Categoría: {selectedCategory}</span>}
+        </div>
       </div>
 
-      {/* Contenido principal */}
-      <Tabs defaultValue="grid" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="grid">Vista de Cuadrícula</TabsTrigger>
-          <TabsTrigger value="list">Vista de Lista</TabsTrigger>
-          <TabsTrigger value="details">Detalles</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="grid" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTables.map((table) => (
-              <Card 
-                key={table.name}
-                className={`cursor-pointer transition-all hover:shadow-lg ${
-                  selectedTable?.name === table.name ? 'ring-2 ring-emerald-500' : ''
-                }`}
-                onClick={() => setSelectedTable(table)}
-              >
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-lg">
-                    <span className="flex items-center space-x-2">
-                      <Table className="h-5 w-5 text-emerald-600" />
-                      <span>{table.displayName}</span>
-                    </span>
-                    {table.relationCount > 0 && (
-                      <Badge variant="secondary" className="text-xs">
-                        {table.relationCount} rel
-                      </Badge>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-2">
-                    <p className="text-sm text-slate-600">
-                      {table.columns.length} columnas
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {table.columns.slice(0, 3).map((column) => (
-                        <Badge key={column.name} variant="outline" className="text-xs">
-                          {column.name}
-                        </Badge>
-                      ))}
-                      {table.columns.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{table.columns.length - 3} más
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="list" className="space-y-4">
-          <div className="space-y-2">
-            {filteredTables.map((table) => (
-              <Card 
-                key={table.name}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedTable?.name === table.name ? 'ring-2 ring-emerald-500' : ''
-                }`}
-                onClick={() => setSelectedTable(table)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Table className="h-5 w-5 text-emerald-600" />
-                      <div>
-                        <h3 className="font-semibold">{table.displayName}</h3>
-                        <p className="text-sm text-slate-600">
-                          {table.columns.length} columnas • {table.relationCount} relaciones
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {table.columns.filter(col => col.isPrimary).map(col => (
-                        <Badge key={col.name} variant="default" className="text-xs">
-                          PK: {col.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="details" className="space-y-4">
-          {selectedTable ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Detalles de la tabla */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Table className="h-5 w-5 text-emerald-600" />
-                    <span>{selectedTable.displayName}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+      {/* Lista Completa de Tablas */}
+      <div className="space-y-6">
+        {filteredTables.map(([tableName, table]) => (
+          <Card key={tableName} className="shadow-lg">
+            <CardHeader 
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-pointer"
+              onClick={() => toggleTableExpansion(tableName)}
+            >
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {expandedTables.has(tableName) ? (
+                    <ChevronDown className="w-5 h-5" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5" />
+                  )}
+                  <Table className="w-5 h-5" />
+                  <span className="font-mono">{tableName}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="secondary">
+                    {table.recordCount} registros
+                  </Badge>
+                  <Badge variant="secondary">
+                    {table.columns.length} campos
+                  </Badge>
+                  {table.relations.length > 0 && (
+                    <Badge variant="secondary">
+                      {table.relations.length} relaciones
+                    </Badge>
+                  )}
+                </div>
+              </CardTitle>
+            </CardHeader>
+            
+            {expandedTables.has(tableName) && (
+              <CardContent className="p-6">
+                <div className="space-y-6">
+                  {/* Campos de la Tabla */}
                   <div>
-                    <h4 className="font-semibold mb-2">Columnas</h4>
-                    <div className="space-y-2">
-                      {selectedTable.columns.map((column) => (
-                        <div key={column.name} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-medium">{column.name}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {column.type}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            {column.isPrimary && (
-                              <Badge variant="default" className="text-xs">PK</Badge>
-                            )}
-                            {column.isRequired && (
-                              <Badge variant="secondary" className="text-xs">NOT NULL</Badge>
-                            )}
-                            {column.isUnique && (
-                              <Badge variant="outline" className="text-xs">UNIQUE</Badge>
-                            )}
-                            {column.isForeignKey && (
-                              <Badge variant="destructive" className="text-xs">FK</Badge>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Key className="w-4 h-4 mr-2" />
+                      Campos de la Tabla ({table.columns.length})
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-200">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="border border-gray-200 px-4 py-2 text-left font-semibold">Campo</th>
+                            <th className="border border-gray-200 px-4 py-2 text-left font-semibold">Tipo</th>
+                            <th className="border border-gray-200 px-4 py-2 text-center font-semibold">Requerido</th>
+                            <th className="border border-gray-200 px-4 py-2 text-center font-semibold">Clave Primaria</th>
+                            <th className="border border-gray-200 px-4 py-2 text-left font-semibold">Valor por Defecto</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {table.columns.map((column, index) => (
+                            <tr key={column.name} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="border border-gray-200 px-4 py-2 font-mono text-sm">
+                                <div className="flex items-center space-x-2">
+                                  <span>{column.name}</span>
+                                  {column.primaryKey && (
+                                    <Badge variant="destructive" className="text-xs">PK</Badge>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="border border-gray-200 px-4 py-2">
+                                <Badge className={`text-xs ${getColumnTypeColor(column.type)}`}>
+                                  {column.type}
+                                </Badge>
+                              </td>
+                              <td className="border border-gray-200 px-4 py-2 text-center">
+                                {column.notNull ? (
+                                  <Badge variant="secondary" className="text-xs">✅ Sí</Badge>
+                                ) : (
+                                  <span className="text-gray-400">❌ No</span>
+                                )}
+                              </td>
+                              <td className="border border-gray-200 px-4 py-2 text-center">
+                                {column.primaryKey ? (
+                                  <Badge variant="destructive" className="text-xs">✅ Sí</Badge>
+                                ) : (
+                                  <span className="text-gray-400">❌ No</span>
+                                )}
+                              </td>
+                              <td className="border border-gray-200 px-4 py-2 font-mono text-sm">
+                                {column.defaultValue || '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
 
-              {/* Relaciones */}
-              {showRelations && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Link className="h-5 w-5 text-purple-600" />
-                      <span>Relaciones</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {getTableRelations(selectedTable.name).length > 0 ? (
-                      <div className="space-y-2">
-                        {getTableRelations(selectedTable.name).map((relation) => (
-                          <div key={relation.name} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                            <span className="font-medium">{relation.name}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {relation.type === 'foreign' ? 'FK' : '1:N'} → {relation.targetTable}
-                            </Badge>
+                  {/* Relaciones */}
+                  {table.relations.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <Link className="w-4 h-4 mr-2" />
+                        Relaciones ({table.relations.length})
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {table.relations.map((relation, index) => (
+                          <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Badge variant="outline" className="text-xs">FK</Badge>
+                              <span className="font-mono text-sm">{relation.column}</span>
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              → <span className="font-mono">{relation.referencesTable}.{relation.referencesColumn}</span>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              ON UPDATE: {relation.onUpdate || 'NO ACTION'} | ON DELETE: {relation.onDelete || 'NO ACTION'}
+                            </div>
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <p className="text-slate-600 text-sm">No hay relaciones definidas para esta tabla.</p>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Table className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-600">Selecciona una tabla para ver sus detalles</p>
+                    </div>
+                  )}
+
+                  {/* Índices */}
+                  {table.indexes.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <Info className="w-4 h-4 mr-2" />
+                        Índices ({table.indexes.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {table.indexes.map((index) => (
+                          <div key={index.name} className="flex items-center space-x-2 bg-gray-50 p-3 rounded">
+                            <span className="font-mono text-sm">{index.name}</span>
+                            {index.unique && (
+                              <Badge variant="outline" className="text-xs">Único</Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Información Adicional */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h5 className="font-semibold text-gray-900 mb-2">Información Adicional</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="font-semibold">Registros:</span> {table.recordCount}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Última Análisis:</span> {new Date(table.lastAnalyzed).toLocaleString('es-ES')}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Tamaño Estimado:</span> {Math.round(table.recordCount * table.columns.length * 0.1)} KB
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+            )}
+          </Card>
+        ))}
+      </div>
+
+      {/* Mensaje si no hay resultados */}
+      {filteredTables.length === 0 && (
+        <Card className="text-center py-12">
+          <CardContent>
+            <div className="text-gray-500">
+              <Table className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-semibold mb-2">No se encontraron tablas</h3>
+              <p>Intenta ajustar los filtros de búsqueda o categoría</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -4,6 +4,14 @@ import useAuthStore from "../store/authStore";
 import MainLayout from "../components/layout/MainLayout";
 import ProtectedRoute, { SuperAdminRoute, OrganizationAdminRoute } from "./ProtectedRoute";
 import SuperAdminRoutes from "./SuperAdminRoutes";
+import CRMLayout from '@/layouts/CRMLayout';
+import CRMDashboard from '@/components/crm/CRMDashboard';
+import ClientesListing from '@/components/crm/ClientesListing';
+import OportunidadesListing from '@/components/crm/OportunidadesListing';
+import ActividadesListing from '@/components/crm/ActividadesListing';
+import VendedoresListing from '@/components/crm/VendedoresListing';
+import CRMTestComponent from '@/components/crm/CRMTestComponent';
+import CRMSimpleTest from '@/components/crm/CRMSimpleTest';
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -90,6 +98,7 @@ const ProductosPage = lazy(() => import("../components/productos/ProductosListin
 const ProductosListingNEW = lazy(() => import("../components/productos/ProductosListingNEW"));
 const EncuestasPage = lazy(() => import("../components/encuestas/EncuestasListing"));
 const ResponderEncuesta = lazy(() => import("../components/encuestas/ResponderEncuesta"));
+const SatisfaccionClientePage = lazy(() => import("../pages/SatisfaccionClientePage"));
 const TicketsPage = lazy(() => import("../components/tickets/TicketsListing"));
 const AuditoriasPage = lazy(() => import("../pages/Auditorias/AuditoriasPage"));
 const AuditoriaSinglePage = lazy(() => import("../pages/Auditorias/AuditoriaSinglePage"));
@@ -219,6 +228,7 @@ const AppRoutes = () => {
                   
                   <Route path="tickets" element={<TicketsPage />} />
                   <Route path="encuestas" element={<EncuestasPage />} />
+                  <Route path="satisfaccion-cliente" element={<SatisfaccionClientePage />} />
                   {/* Rutas de Evaluación de Competencias (Temporalmente deshabilitado) */}
                   {/* <Route path="evalcompe-programacion" element={<EvalcompeProgramacionListing />} /> */}
                   {/* <Route path="evalcompe-programacion/:id" element={<EvalcompeProgramacionSingle />} /> */}
@@ -307,6 +317,8 @@ const AppRoutes = () => {
                   {/* Jerarquía SGC */}
                   <Route path="sgc-hierarchy" element={<SGCHierarchyPage />} />
 
+
+
                   {/* Redirección por defecto dentro del layout */}
                   <Route path="/" element={<Navigate to="/app/personal" replace />} />
                   <Route path="*" element={<Navigate to="/app/personal" replace />} />
@@ -316,6 +328,23 @@ const AppRoutes = () => {
           } 
         />
         
+        {/* CRM - Gestión de Clientes (Layout independiente) */}
+        <Route path="/app/crm/*" element={
+          <ProtectedRoute>
+            <CRMLayout>
+              <Routes>
+                <Route index element={<CRMDashboard />} />
+                <Route path="clientes" element={<ClientesListing />} />
+                <Route path="oportunidades" element={<OportunidadesListing />} />
+                <Route path="actividades" element={<ActividadesListing />} />
+                <Route path="vendedores" element={<VendedoresListing />} />
+                <Route path="test" element={<CRMTestComponent />} />
+                <Route path="test-simple" element={<CRMSimpleTest />} />
+              </Routes>
+            </CRMLayout>
+          </ProtectedRoute>
+        } />
+
         {/* Rutas Super Admin */}
         <Route path="/super-admin/*" element={
           <SuperAdminRoute>

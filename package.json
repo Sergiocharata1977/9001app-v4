@@ -48,7 +48,20 @@
     "automation:stop": "node scripts/start-automation-system.js stop",
     "automation:restart": "node scripts/start-automation-system.js restart",
     "automation:status": "node scripts/start-automation-system.js status",
-    "automation:help": "node scripts/start-automation-system.js help"
+    "automation:help": "node scripts/start-automation-system.js help",
+    "automation:setup": "node scripts/setup-cron-jobs.js",
+    "automation:scheduler": "node scripts/automation-scheduler.js continuous",
+    "automation:cleanup": "node scripts/automation-scheduler.js cleanup",
+    "automation:monitor": "node scripts/automation-scheduler.js monitor",
+    "automation:db-tracker": "node scripts/automation-scheduler.js db-tracker",
+    "automation:pm2-start": "pm2 start scripts/pm2-automation.config.js",
+    "automation:pm2-stop": "pm2 stop 9001app2-automation",
+    "automation:pm2-restart": "pm2 restart 9001app2-automation",
+    "automation:pm2-logs": "pm2 logs 9001app2-automation",
+    "db-schema:update": "node backend/scripts/database-schema-updater.js",
+    "db-schema:start": "node backend/scripts/database-schema-updater.js --continuous",
+    "db-schema:stop": "pkill -f database-schema-updater",
+    "db-schema:status": "node backend/scripts/database-schema-status.js"
   },
   "dependencies": {
     "@libsql/client": "^0.15.12",

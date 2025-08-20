@@ -56,12 +56,12 @@ function PersonalCard({ person, onView, onEdit, onDelete }) {
 
   return (
     <Card 
-      className="hover:shadow-lg transition-all duration-200 flex flex-col h-full cursor-pointer hover:scale-[1.02] border-2 hover:border-teal-200" 
+      className="hover:shadow-sgc-lg transition-all duration-200 flex flex-col h-full cursor-pointer hover:scale-[1.02] border-2 hover:border-teal-200 rounded-sgc-lg" 
       onClick={handleView}
     >
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-sgc-gap">
             <Avatar className="h-12 w-12">
               <AvatarImage src={person.imagen} alt={`${person.nombres} ${person.apellidos}`} />
               <AvatarFallback className="bg-teal-100 text-teal-700 font-semibold">
@@ -80,13 +80,13 @@ function PersonalCard({ person, onView, onEdit, onDelete }) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="flex-shrink-0 hover:bg-teal-50"
+                className="flex-shrink-0 hover:bg-teal-50 rounded-sgc"
                 onClick={(e) => e.stopPropagation()} // Prevenir que el click del dropdown active el click de la card
               >
                 <MoreHorizontal className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="rounded-sgc">
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleView(); }}>
                 <Eye className="mr-2 h-4 w-4" />
                 Ver Perfil

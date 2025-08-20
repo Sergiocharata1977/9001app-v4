@@ -1,6 +1,6 @@
 import React from 'react';
-import DatabaseFlowDiagram from '@/components/database/DatabaseFlowDiagram';
-import ProjectStructureViewer from '@/components/database/ProjectStructureViewer';
+import DatabaseFlowViewer from '@/components/admin/DatabaseFlowViewer';
+import FileStructureViewer from '@/components/admin/FileStructureViewer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -62,10 +62,10 @@ const ProjectStructure = () => {
       {/* Secciones Principales */}
       <div className="space-y-8">
         {/* Diagrama de Flujo de BD */}
-        <DatabaseFlowDiagram />
+        <DatabaseFlowViewer />
 
         {/* Estructura del Proyecto */}
-        <ProjectStructureViewer />
+        <FileStructureViewer />
 
         {/* Explicación de la Sección de Base de Datos */}
         <Card className="shadow-lg">

@@ -80,7 +80,10 @@ const MainLayout = ({ children }) => {
             transition={{ duration: 0.4 }}
             className="h-full"
           >
-            {children}
+            {/* Contenedor principal con separación de 1cm */}
+            <div className="p-sgc-sep">
+              {children}
+            </div>
           </motion.div>
         </main>
       </div>

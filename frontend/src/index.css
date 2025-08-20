@@ -29,6 +29,24 @@
   --conforme: #16a34a;
   --no-conforme: #ef4444;
   --observacion: #f59e0b;
+
+  /* Sistema de Espaciado SGC Pro */
+  --sgc-sep: 38px; /* Separación de 1cm */
+  --sgc-p: 24px;   /* Padding interno */
+  --sgc-p-sm: 16px;
+  --sgc-p-lg: 32px;
+  --sgc-m: 24px;   /* Margen entre elementos */
+  --sgc-m-sm: 16px;
+  --sgc-m-lg: 32px;
+  --sgc-gap: 24px; /* Gap entre elementos */
+  --sgc-gap-sm: 16px;
+  --sgc-gap-lg: 32px;
+
+  /* Bordes redondeados */
+  --sgc-radius: 12px;
+  --sgc-radius-lg: 16px;
+  --sgc-radius-xl: 20px;
+  --sgc-radius-2xl: 24px;
 }
 
 /* Clases utilitarias para SGC Pro */
@@ -68,6 +86,219 @@
 .bg-conforme { background-color: var(--conforme); }
 .bg-no-conforme { background-color: var(--no-conforme); }
 .bg-observacion { background-color: var(--observacion); }
+
+/* ===============================================
+   COMPONENTES MEJORADOS SGC PRO
+   =============================================== */
+
+/* Contenedor principal con separación */
+.sgc-container {
+  padding: var(--sgc-sep);
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Cards mejoradas */
+.sgc-card {
+  border-radius: var(--sgc-radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.sgc-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Botones mejorados */
+.sgc-button {
+  border-radius: var(--sgc-radius);
+  padding: 12px 24px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.sgc-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Formularios mejorados */
+.sgc-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sgc-gap);
+}
+
+.sgc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sgc-input {
+  border-radius: var(--sgc-radius);
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease-in-out;
+}
+
+.sgc-input:focus {
+  outline: none;
+  border-color: var(--sgc-500);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Grid mejorado */
+.sgc-grid {
+  display: grid;
+  gap: var(--sgc-gap);
+}
+
+.sgc-grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.sgc-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sgc-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sgc-grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sgc-grid-cols-2,
+  .sgc-grid-cols-3,
+  .sgc-grid-cols-4 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  
+  .sgc-container {
+    padding: var(--sgc-p);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sgc-grid-cols-3,
+  .sgc-grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ===============================================
+   MEJORAS ESPECÍFICAS PARA COMPONENTES
+   =============================================== */
+
+/* Sidebar mejorado */
+.sgc-sidebar {
+  border-right: 1px solid #374151;
+  box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.sgc-sidebar-item {
+  border-radius: var(--sgc-radius);
+  margin-bottom: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.sgc-sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+/* TopBar mejorado */
+.sgc-topbar {
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Modal mejorado */
+.sgc-modal {
+  border-radius: var(--sgc-radius-lg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Tabla mejorada */
+.sgc-table {
+  border-radius: var(--sgc-radius);
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.sgc-table th {
+  background-color: #f9fafb;
+  padding: var(--sgc-p-sm);
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sgc-table td {
+  padding: var(--sgc-p-sm);
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.sgc-table tr:hover {
+  background-color: #f9fafb;
+}
+
+/* ===============================================
+   ANIMACIONES Y TRANSICIONES
+   =============================================== */
+
+.sgc-fade-in {
+  animation: sgcFadeIn 0.3s ease-in-out;
+}
+
+@keyframes sgcFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sgc-slide-in {
+  animation: sgcSlideIn 0.3s ease-in-out;
+}
+
+@keyframes sgcSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===============================================
+   UTILIDADES ADICIONALES
+   =============================================== */
+
+.sgc-separator {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+  margin: var(--sgc-m) 0;
+}
+
+.sgc-divider {
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, #e5e7eb, transparent);
+  margin: 0 var(--sgc-m);
+}
+
+.sgc-badge {
+  border-radius: var(--sgc-radius);
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===============================================
+   MODE CLARO/OSCURO
+   =============================================== */
  
 @layer base {
   :root {

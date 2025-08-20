@@ -6,6 +6,41 @@ export default {
   ],
   theme: {
     extend: {
+      // Sistema de espaciado personalizado para SGC Pro
+      spacing: {
+        // Separación de 1cm (aproximadamente 38px)
+        'sgc-sep': '38px',
+        // Separación de 2cm (aproximadamente 76px)
+        'sgc-sep-2': '76px',
+        // Espaciado interno consistente
+        'sgc-p': '24px',
+        'sgc-p-sm': '16px',
+        'sgc-p-lg': '32px',
+        // Margen entre elementos
+        'sgc-m': '24px',
+        'sgc-m-sm': '16px',
+        'sgc-m-lg': '32px',
+        // Gap entre elementos
+        'sgc-gap': '24px',
+        'sgc-gap-sm': '16px',
+        'sgc-gap-lg': '32px',
+      },
+      // Bordes redondeados mejorados
+      borderRadius: {
+        'sgc': '12px',
+        'sgc-lg': '16px',
+        'sgc-xl': '20px',
+        'sgc-2xl': '24px',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      // Sombras mejoradas
+      boxShadow: {
+        'sgc': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'sgc-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'sgc-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -40,11 +75,6 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
       },
       keyframes: {
         'accordion-down': {

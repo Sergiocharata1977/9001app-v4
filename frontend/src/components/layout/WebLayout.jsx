@@ -5,8 +5,7 @@ import {
   Menu, 
   X, 
   Building2,
-  ArrowRight,
-  Database
+  ArrowRight
 } from 'lucide-react';
 
 const WebLayout = ({ children }) => {
@@ -16,8 +15,7 @@ const WebLayout = ({ children }) => {
   const navigation = [
     { name: 'Inicio', href: '/' },
     { name: 'Características', href: '/caracteristicas' },
-    { name: 'Contacto', href: '/contacto' },
-    { name: 'Base de Datos', href: '/database-docs', icon: Database }
+    { name: 'Contacto', href: '/contacto' }
   ];
 
   const isActive = (path) => location.pathname === path;

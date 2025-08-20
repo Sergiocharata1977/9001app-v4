@@ -101,6 +101,21 @@ export const encuestasService = {
   },
 
   /**
+   * Agrega una respuesta a una encuesta
+   * @param {Object} respuesta - Datos de la respuesta
+   * @returns {Promise<Object>} Resultado del envío de respuesta
+   */
+  async addRespuesta(respuesta) {
+    try {
+      const data = await apiClient.post('/respuestas', respuesta);
+      return data;
+    } catch (error) {
+      console.error('Error al agregar respuesta:', error);
+      throw new Error(error.message || 'Error al enviar la respuesta');
+    }
+  },
+
+  /**
    * Obtiene encuestas por tipo
    * @param {string} tipo - Tipo de encuestas a buscar
    * @returns {Promise<Array>} Lista de encuestas filtradas por tipo

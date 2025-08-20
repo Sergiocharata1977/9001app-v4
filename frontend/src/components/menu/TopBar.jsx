@@ -46,15 +46,15 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm"
+      className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-sgc-p py-sgc-p-sm flex items-center justify-between shadow-sgc"
     >
       {/* Left Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-sgc-gap">
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggleSidebar}
-          className="hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sgc"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -64,19 +64,19 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Buscar en el sistema..."
-            className="pl-10 w-80 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+            className="pl-10 w-80 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 rounded-sgc"
           />
         </div>
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-sgc-gap-sm">
         {/* Theme Toggle */}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sgc"
         >
           {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </Button>
@@ -85,10 +85,10 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
         <Button
           variant="ghost"
           size="icon"
-          className="relative hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="relative hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sgc"
         >
           <Bell className="h-5 w-5" />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
+          <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-full">
             3
           </Badge>
         </Button>
@@ -98,7 +98,7 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
           variant="outline"
           size="sm"
           onClick={() => navigate('/app/procesos-iso')}
-          className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 flex items-center gap-2"
+          className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 flex items-center gap-2 rounded-sgc"
         >
           <Building className="w-4 h-4" />
           Menu Visual
@@ -109,7 +109,7 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 px-3"
+              className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 rounded-sgc"
             >
               <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-medium">
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}

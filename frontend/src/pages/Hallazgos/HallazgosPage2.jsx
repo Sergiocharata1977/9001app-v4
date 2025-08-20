@@ -114,8 +114,8 @@ const HallazgosPage2 = () => {
   // Función para renderizar la vista de lista (movida adentro del componente)
   const renderListView = () => (
     <div className="space-y-4">
-      {hallazgos.map(hallazgo => (
-        <Card key={hallazgo.id} className="hover:shadow-md cursor-pointer transition-shadow" onClick={() => handleRowClick(hallazgo.id)}>
+      {hallazgos.map((hallazgo, index) => (
+        <Card key={hallazgo.id || `hallazgo-${index}`} className="hover:shadow-md cursor-pointer transition-shadow" onClick={() => handleRowClick(hallazgo.id)}>
             <CardContent className="p-4 flex justify-between items-center">
                 <div className="flex-grow">
                     <div className="flex items-center gap-4 mb-2">

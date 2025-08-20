@@ -37,9 +37,9 @@ const CoordinacionAgentesViewer = () => {
     
     return markdown
       // Headers
-      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-purple-600 mt-4 mb-2">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-purple-700 mt-6 mb-3">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-purple-800 mt-8 mb-4">$1</h1>')
+      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-purple-600 mt-6 mb-3 border-b border-purple-200 pb-2">$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-purple-700 mt-8 mb-4 border-b border-purple-300 pb-3">$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-purple-800 mt-8 mb-6 border-b border-purple-400 pb-4">$1</h1>')
       
       // Estados y badges
       .replace(/🟢/g, '<span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>')
@@ -48,22 +48,33 @@ const CoordinacionAgentesViewer = () => {
       .replace(/✅/g, '<span class="inline-block w-4 h-4 text-green-600">✓</span>')
       .replace(/❌/g, '<span class="inline-block w-4 h-4 text-red-600">✗</span>')
       .replace(/⏳/g, '<span class="inline-block w-4 h-4 text-yellow-600">⏳</span>')
+      .replace(/🔄/g, '<span class="inline-block w-4 h-4 text-blue-600">🔄</span>')
+      .replace(/⏸️/g, '<span class="inline-block w-4 h-4 text-orange-600">⏸️</span>')
       
       // Estados de texto
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       
-      // Listas
+      // Listas con mejor formato para la bitácora
+      .replace(/^- 📅 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">📅</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- ⏰ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">⏰</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 🖊️ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-purple-600 mr-2">🖊️</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 🎯 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-orange-600 mr-2">🎯</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 🔄 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">🔄</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 📦 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">📦</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 📑 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-purple-600 mr-2">📑</span> <span class="font-medium">$1</span></li>')
       .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1">• $1</li>')
+      
+      // Checkboxes
       .replace(/^\[ \] (.*$)/gim, '<li class="ml-4 mb-1"><input type="checkbox" class="mr-2" disabled> $1</li>')
       .replace(/^\[x\] (.*$)/gim, '<li class="ml-4 mb-1"><input type="checkbox" class="mr-2" checked disabled> <span class="line-through">$1</span></li>')
       
       // Separadores
-      .replace(/^---$/gim, '<hr class="my-6 border-gray-300">')
+      .replace(/^---$/gim, '<hr class="my-8 border-gray-300">')
       
-      // Párrafos
-      .replace(/\n\n/g, '</p><p class="mb-3">')
-      .replace(/^(.+)$/gm, '<p class="mb-3">$1</p>');
+      // Párrafos con mejor espaciado
+      .replace(/\n\n/g, '</p><p class="mb-4 leading-relaxed">')
+      .replace(/^(.+)$/gm, '<p class="mb-4 leading-relaxed">$1</p>');
   };
 
   // Cargar documento al montar el componente

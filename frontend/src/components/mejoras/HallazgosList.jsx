@@ -13,9 +13,9 @@ const HallazgosList = ({ hallazgos, onCardClick }) => {
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      {hallazgos.map((hallazgo) => (
+      {hallazgos.map((hallazgo, index) => (
         <HallazgoCard 
-          key={hallazgo.id}
+          key={hallazgo.id || `hallazgo-${index}`}
           hallazgo={hallazgo}
           onClick={onCardClick}
         />

@@ -55,6 +55,13 @@ export const ROUTES = {
     SURVEYS: '/app/encuestas',
     USERS: '/app/usuarios',
     
+    // CRM - Gestión de Clientes
+    CRM: '/app/crm',
+    CRM_CLIENTES: '/app/crm/clientes',
+    CRM_OPORTUNIDADES: '/app/crm/oportunidades',
+    CRM_ACTIVIDADES: '/app/crm/actividades',
+    CRM_VENDEDORES: '/app/crm/vendedores',
+    
     // Administración
     SUPER_ADMIN: '/app/admin/super',
     ORG_ADMIN: '/app/admin/organization',

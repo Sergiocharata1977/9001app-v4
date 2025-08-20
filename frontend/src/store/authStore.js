@@ -142,14 +142,12 @@ const useAuthStore = create(
           
           const localToken = localStorage.getItem('token');
           if (localToken) {
-            // Verificar si el token es válido
-            try {
-              const response = await authApi.verifyToken();
-              return localToken;
-            } catch (error) {
-              localStorage.removeItem('token');
-              return null;
-            }
+            // Actualizar el estado con el token del localStorage
+            set((state) => ({
+              ...state,
+              token: localToken
+            }));
+            return localToken;
           }
           
           return null;

@@ -31,9 +31,13 @@ import {
   BookOpen,
   HelpCircle,
   Crown,
-  ArrowRight
+  ArrowRight,
+  DollarSign,
+  Brain,
+  MessageSquare
 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
+import RAGAssistant from '@/components/assistant/RAGAssistant';
 
 const Sidebar = ({ isOpen, onClose, isMobile }) => {
   const navigate = useNavigate();
@@ -41,6 +45,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
   const user = useAuthStore((state) => state.user);
   const [expandedSections, setExpandedSections] = useState(['recursos-humanos', 'procesos']);
   const [expandedSubmenus, setExpandedSubmenus] = useState({});
+  const [showRAGAssistant, setShowRAGAssistant] = useState(false);
 
   const toggleSection = (sectionId) => {
     setExpandedSections(prev => 
@@ -176,27 +181,57 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
     <motion.div
       initial={{ x: -320 }}
       animate={{ x: 0 }}
-      className="h-full w-80 bg-slate-800 text-white flex flex-col shadow-lg"
+      className="h-full w-80 bg-slate-800 text-white flex flex-col shadow-sgc-lg border-r border-slate-700"
     >
       {/* Header */}
-      <div className="p-4 border-b border-slate-700">
+      <div className="p-sgc-p border-b border-slate-700">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-emerald-500 rounded-sgc flex items-center justify-center">
             <FileText className="w-5 h-5 text-white" />
           </div>
           <div>
-            <div className="font-semibold text-white">SGC Pro</div>
-            <div className="text-xs text-slate-400">Sistema de Gestión ISO 9001</div>
+            <h1 className="text-lg font-bold">SGC Pro</h1>
+            <p className="text-xs text-slate-400">Sistema de Gestión ISO 9001</p>
           </div>
         </div>
       </div>
 
+      {/* Botón CRM - Diseño estándar */}
+      <div className="p-4 border-b border-slate-700">
+        <Button
+          onClick={() => handleNavigation('/app/crm')}
+          className="w-full bg-slate-700 text-white hover:bg-red-600 border-2 border-slate-600 hover:border-red-500 font-semibold py-3 px-4 rounded-lg transition-all duration-200"
+        >
+          <Target className="w-5 h-5 mr-2" />
+          <div className="text-left flex-1">
+            <div className="font-semibold text-lg">CRM - Gestión de Clientes</div>
+            <div className="text-xs text-slate-300">Sistema de Gestión Comercial</div>
+          </div>
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+
+      {/* Botón Asistente RAG */}
+      <div className="p-4 border-b border-slate-700">
+        <Button
+          onClick={() => setShowRAGAssistant(true)}
+          className="w-full bg-slate-700 text-white hover:bg-blue-600 border-2 border-slate-600 hover:border-blue-500 font-semibold py-3 px-4 rounded-lg transition-all duration-200"
+        >
+          <Brain className="w-5 h-5 mr-2" />
+          <div className="text-left flex-1">
+            <div className="font-semibold text-lg">🧠 Asistente IA</div>
+            <div className="text-xs text-slate-300">Consulta inteligente del SGC</div>
+          </div>
+          <MessageSquare className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+
       {/* Super Admin Button - Solo mostrar si es super admin */}
       {user?.role === 'super_admin' && (
-        <div className="p-4 border-b border-purple-700/50">
+        <div className="p-sgc-p border-b border-purple-700/50">
           <Button
             onClick={handleSuperAdminAccess}
-            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-300"
+            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 rounded-sgc-lg shadow-sgc transition-all duration-300"
           >
             <Crown className="w-5 h-5 mr-2" />
             <span>Panel Super Admin</span>
@@ -209,12 +244,12 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       )}
 
       {/* Search */}
-      <div className="p-4">
+      <div className="p-sgc-p">
         <div className="relative">
           <input
             type="text"
             placeholder="Buscar en el sistema..."
-            className="w-full bg-slate-700 text-white placeholder-slate-400 rounded-lg px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full bg-slate-700 text-white placeholder-slate-400 rounded-sgc px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 border border-slate-600"
           />
           <div className="absolute left-3 top-2.5">
             <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +261,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto">
-        <nav className="px-4 space-y-2">
+        <nav className="px-sgc-p space-y-sgc-gap-sm">
           {departmentModules.map((module, index) => {
             // Si es un elemento único (single), renderizar directamente
             if (module.single) {
@@ -235,10 +270,10 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                 <button
                   key={index}
                   onClick={() => handleNavigation(module.path)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center space-x-3 px-sgc-p-sm py-2 rounded-sgc text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-emerald-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-700'
+                      ? 'bg-emerald-600 text-white shadow-sgc'
+                      : 'text-slate-300 hover:bg-slate-700 hover:shadow-sgc'
                   }`}
                 >
                   <module.icon className="w-5 h-5" />
@@ -250,13 +285,13 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
             // Si es un módulo con submenús
             const isExpanded = expandedSections.includes(module.id);
             return (
-              <div key={module.id} className="space-y-1">
+              <div key={module.id} className="space-y-sgc-gap-sm">
                 <button
                   onClick={() => toggleSection(module.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between px-sgc-p-sm py-2 rounded-sgc text-sm font-medium transition-colors ${
                     isExpanded
-                      ? 'bg-slate-700 text-white'
-                      : 'text-slate-300 hover:bg-slate-700'
+                      ? 'bg-slate-700 text-white shadow-sgc'
+                      : 'text-slate-300 hover:bg-slate-700 hover:shadow-sgc'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -276,7 +311,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="space-y-1 ml-8"
+                      className="space-y-sgc-gap-sm ml-8"
                     >
                       {module.items.map((item) => {
                         const isActive = location.pathname === item.path;
@@ -284,10 +319,10 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                           <button
                             key={item.path}
                             onClick={() => handleNavigation(item.path)}
-                            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            className={`w-full flex items-center space-x-3 px-sgc-p-sm py-2 rounded-sgc text-sm font-medium transition-colors ${
                               isActive
-                                ? 'bg-emerald-600 text-white'
-                                : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                                ? 'bg-emerald-600 text-white shadow-sgc'
+                                : 'text-slate-400 hover:bg-slate-700 hover:text-white hover:shadow-sgc'
                             }`}
                           >
                             <item.icon className="w-4 h-4" />
@@ -305,7 +340,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-700">
+      <div className="p-sgc-p border-t border-slate-700">
         <div className="text-center">
           <div className="text-xs text-slate-400 mb-2">
             Sistema de Gestión de Calidad
@@ -315,6 +350,14 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
           </div>
         </div>
       </div>
+
+      {/* Asistente RAG */}
+      {showRAGAssistant && (
+        <RAGAssistant 
+          onClose={() => setShowRAGAssistant(false)}
+          organizationId={user?.organization_id || 1}
+        />
+      )}
     </motion.div>
   );
 };
