@@ -1,7 +1,11 @@
 const express = require('express');
-const { tursoClient } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
+const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
+
+// Aplicar middleware de autenticación a todas las rutas
+router.use(authMiddleware);
 
 // ===============================================
 // RUTAS ESPECÍFICAS (deben ir antes de las rutas con parámetros)
@@ -10,7 +14,7 @@ const router = express.Router();
 // Buscar hallazgos con datos SGC completos
 router.get('/search', async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, page = 1, limit = 20 } = req.query;
     
     if (!q) {
       return res.status(400).json({
@@ -19,52 +23,51 @@ router.get('/search', async (req, res) => {
       });
     }
 
-    const result = await tursoClient.execute(`
-      SELECT 
-        h.*,
-        COALESCE(participantes.total, 0) as total_participantes,
-        COALESCE(participantes.responsables, 0) as total_responsables,
-        COALESCE(participantes.auditores, 0) as total_auditores,
-        COALESCE(documentos.total, 0) as total_documentos,
-        COALESCE(documentos.evidencias, 0) as total_evidencias,
-        COALESCE(normas.total, 0) as total_normas,
-        (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
-        (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
-      FROM hallazgos h
-      LEFT JOIN (
+    // Parámetros de paginación
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const limitValue = parseInt(limit);
+
+    // Query optimizada con paginación
+    const result = await tursoClient.execute({
+      sql: `
         SELECT 
-          entidad_id, 
-          COUNT(*) as total,
-          COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
-          COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
-        FROM sgc_personal_relaciones 
-        WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-        GROUP BY entidad_id
-      ) participantes ON h.id = participantes.entidad_id
-      LEFT JOIN (
-        SELECT 
-          entidad_id, 
-          COUNT(*) as total,
-          COUNT(CASE WHEN tipo_relacion = 'evidencia' THEN 1 END) as evidencias
-        FROM sgc_documentos_relacionados 
-        WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-        GROUP BY entidad_id
-      ) documentos ON h.id = documentos.entidad_id
-      LEFT JOIN (
-        SELECT entidad_id, COUNT(*) as total 
-        FROM sgc_normas_relacionadas 
-        WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-        GROUP BY entidad_id
-      ) normas ON h.id = normas.entidad_id
-      LEFT JOIN personal resp ON h.responsable_id = resp.id
-      LEFT JOIN personal aud ON h.auditor_id = aud.id
-      WHERE h.is_active = 1 AND (h.titulo LIKE '%${q}%' OR h.descripcion LIKE '%${q}%')
-      ORDER BY h.created_at DESC
-    `);
+          h.*,
+          (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
+          (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
+        FROM hallazgos h
+        LEFT JOIN personal resp ON h.responsable_id = resp.id
+        LEFT JOIN personal aud ON h.auditor_id = aud.id
+        WHERE h.is_active = 1 AND (h.titulo LIKE ? OR h.descripcion LIKE ?)
+        ORDER BY h.created_at DESC
+        LIMIT ? OFFSET ?
+      `,
+      args: [`%${q}%`, `%${q}%`, limitValue, offset]
+    });
+
+    // Query para obtener total de registros
+    const countResult = await tursoClient.execute({
+      sql: `
+        SELECT COUNT(*) as total
+        FROM hallazgos h
+        WHERE h.is_active = 1 AND (h.titulo LIKE ? OR h.descripcion LIKE ?)
+      `,
+      args: [`%${q}%`, `%${q}%`]
+    });
+
+    const total = countResult.rows[0]?.total || 0;
+    const totalPages = Math.ceil(total / limitValue);
 
     res.json({
       status: 'success',
-      data: result.rows
+      data: result.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: limitValue,
+        total,
+        totalPages,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1
+      }
     });
   } catch (error) {
     console.error('Error al buscar hallazgos:', error);
@@ -221,65 +224,82 @@ router.get('/export', async (req, res) => {
 // Obtener todos los hallazgos con datos SGC
 router.get('/', async (req, res) => {
   try {
-    const { organization_id } = req.query;
+    const { organization_id, page = 1, limit = 20, estado, categoria } = req.query;
     
-    let whereClause = 'h.is_active = 1';
+    // Parámetros de paginación
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const limitValue = parseInt(limit);
+    
+    // Construir WHERE clause dinámico
+    let whereConditions = ['h.is_active = 1'];
+    let queryParams = [];
+    
     if (organization_id) {
-      whereClause += ` AND h.organization_id = ${parseInt(organization_id)}`;
+      whereConditions.push('h.organization_id = ?');
+      queryParams.push(parseInt(organization_id));
     }
     
-    const result = await tursoClient.execute(`
-      SELECT 
-        h.*,
-        COALESCE(participantes.total, 0) as total_participantes,
-        COALESCE(participantes.responsables, 0) as total_responsables,
-        COALESCE(participantes.auditores, 0) as total_auditores,
-        COALESCE(documentos.total, 0) as total_documentos,
-        COALESCE(documentos.evidencias, 0) as total_evidencias,
-        COALESCE(normas.total, 0) as total_normas,
-        (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
-        (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
-      FROM hallazgos h
-      LEFT JOIN (
+    if (estado) {
+      whereConditions.push('h.estado = ?');
+      queryParams.push(estado);
+    }
+    
+    if (categoria) {
+      whereConditions.push('h.categoria = ?');
+      queryParams.push(categoria);
+    }
+    
+    const whereClause = whereConditions.join(' AND ');
+    
+    // Query optimizada con paginación
+    const result = await tursoClient.execute({
+      sql: `
         SELECT 
-          entidad_id, 
-          COUNT(*) as total,
-          COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
-          COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
-        FROM sgc_personal_relaciones 
-        WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-        GROUP BY entidad_id
-      ) participantes ON h.id = participantes.entidad_id
-      LEFT JOIN (
-        SELECT 
-          entidad_id, 
-          COUNT(*) as total,
-          COUNT(CASE WHEN tipo_relacion = 'evidencia' THEN 1 END) as evidencias
-        FROM sgc_documentos_relacionados 
-        WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-        GROUP BY entidad_id
-      ) documentos ON h.id = documentos.entidad_id
-      LEFT JOIN (
-        SELECT entidad_id, COUNT(*) as total 
-        FROM sgc_normas_relacionadas 
-        WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-        GROUP BY entidad_id
-      ) normas ON h.id = normas.entidad_id
-      LEFT JOIN personal resp ON h.responsable_id = resp.id
-      LEFT JOIN personal aud ON h.auditor_id = aud.id
-      WHERE ${whereClause}
-      ORDER BY h.created_at DESC
-    `);
+          h.*,
+          (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
+          (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
+        FROM hallazgos h
+        LEFT JOIN personal resp ON h.responsable_id = resp.id
+        LEFT JOIN personal aud ON h.auditor_id = aud.id
+        WHERE ${whereClause}
+        ORDER BY h.created_at DESC
+        LIMIT ? OFFSET ?
+      `,
+      args: [...queryParams, limitValue, offset]
+    });
 
-    console.log('📋 [HallazgosService] Obteniendo todos los hallazgos');
+    // Query para obtener total de registros
+    const countResult = await tursoClient.execute({
+      sql: `
+        SELECT COUNT(*) as total
+        FROM hallazgos h
+        WHERE ${whereClause}
+      `,
+      args: queryParams
+    });
+
+    const total = countResult.rows[0]?.total || 0;
+    const totalPages = Math.ceil(total / limitValue);
+
+    console.log('📋 [HallazgosService] Obteniendo hallazgos con paginación');
+    console.log('📋 [HallazgosService] Página:', page, 'Límite:', limit);
     console.log('📋 [HallazgosService] Cantidad de hallazgos:', result.rows.length);
+    console.log('📋 [HallazgosService] Total de registros:', total);
 
     res.json({
       status: 'success',
-      data: result.rows
+      data: result.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: limitValue,
+        total,
+        totalPages,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1
+      }
     });
   } catch (error) {
-    console.error('Error al obtener hallazgos:', error);
+    console.error('❌ Error al obtener hallazgos:', error);
     res.status(500).json({
       status: 'error',
       message: 'Error al obtener hallazgos',
@@ -293,44 +313,14 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
+    // Query simplificada para obtener datos básicos del hallazgo
     const result = await tursoClient.execute({
       sql: `
         SELECT 
           h.*,
-          COALESCE(participantes.total, 0) as total_participantes,
-          COALESCE(participantes.responsables, 0) as total_responsables,
-          COALESCE(participantes.auditores, 0) as total_auditores,
-          COALESCE(documentos.total, 0) as total_documentos,
-          COALESCE(documentos.evidencias, 0) as total_evidencias,
-          COALESCE(normas.total, 0) as total_normas,
           (resp.nombres || ' ' || resp.apellidos) as responsable_nombre,
           (aud.nombres || ' ' || aud.apellidos) as auditor_nombre
         FROM hallazgos h
-        LEFT JOIN (
-          SELECT 
-            entidad_id, 
-            COUNT(*) as total,
-            COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
-            COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
-          FROM sgc_personal_relaciones 
-          WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-          GROUP BY entidad_id
-        ) participantes ON h.id = participantes.entidad_id
-        LEFT JOIN (
-          SELECT 
-            entidad_id, 
-            COUNT(*) as total,
-            COUNT(CASE WHEN tipo_relacion = 'evidencia' THEN 1 END) as evidencias
-          FROM sgc_documentos_relacionados 
-          WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-          GROUP BY entidad_id
-        ) documentos ON h.id = documentos.entidad_id
-        LEFT JOIN (
-          SELECT entidad_id, COUNT(*) as total 
-          FROM sgc_normas_relacionadas 
-          WHERE entidad_tipo = 'hallazgo' AND is_active = 1 
-          GROUP BY entidad_id
-        ) normas ON h.id = normas.entidad_id
         LEFT JOIN personal resp ON h.responsable_id = resp.id
         LEFT JOIN personal aud ON h.auditor_id = aud.id
         WHERE h.is_active = 1 AND h.id = ?
@@ -345,9 +335,58 @@ router.get('/:id', async (req, res) => {
       });
     }
 
+    // Obtener datos SGC por separado para evitar consultas complejas
+    const [participantesResult, documentosResult, normasResult] = await Promise.all([
+      tursoClient.execute({
+        sql: `
+          SELECT 
+            COUNT(*) as total,
+            COUNT(CASE WHEN rol = 'responsable' THEN 1 END) as responsables,
+            COUNT(CASE WHEN rol = 'auditor' THEN 1 END) as auditores
+          FROM sgc_personal_relaciones 
+          WHERE entidad_tipo = 'hallazgo' AND entidad_id = ? AND is_active = 1
+        `,
+        args: [id]
+      }),
+      tursoClient.execute({
+        sql: `
+          SELECT 
+            COUNT(*) as total,
+            COUNT(CASE WHEN tipo_relacion = 'evidencia' THEN 1 END) as evidencias
+          FROM sgc_documentos_relacionados 
+          WHERE entidad_tipo = 'hallazgo' AND entidad_id = ? AND is_active = 1
+        `,
+        args: [id]
+      }),
+      tursoClient.execute({
+        sql: `
+          SELECT COUNT(*) as total
+          FROM sgc_normas_relacionadas 
+          WHERE entidad_tipo = 'hallazgo' AND entidad_id = ? AND is_active = 1
+        `,
+        args: [id]
+      })
+    ]);
+
+    const hallazgo = result.rows[0];
+    const participantes = participantesResult.rows[0];
+    const documentos = documentosResult.rows[0];
+    const normas = normasResult.rows[0];
+
+    // Combinar datos
+    const hallazgoCompleto = {
+      ...hallazgo,
+      total_participantes: participantes?.total || 0,
+      total_responsables: participantes?.responsables || 0,
+      total_auditores: participantes?.auditores || 0,
+      total_documentos: documentos?.total || 0,
+      total_evidencias: documentos?.evidencias || 0,
+      total_normas: normas?.total || 0
+    };
+
     res.json({
       status: 'success',
-      data: result.rows[0]
+      data: hallazgoCompleto
     });
   } catch (error) {
     console.error('Error al obtener hallazgo:', error);

@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { tursoClient } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 const { randomUUID } = require('crypto');
 
 /**

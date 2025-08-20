@@ -7,13 +7,13 @@ const router = express.Router();
 router.get('/coordinacion-document', (req, res) => {
   try {
     // Ruta al documento de coordinación
-    const documentPath = path.join(__dirname, '..', '..', 'COORDINACION-AGENTES.md');
+    const documentPath = path.join(__dirname, '..', '..', 'docs-esenciales', '04-sistema-coordinacion-agentes-19-08-2025.md');
     
     // Verificar si el archivo existe
     if (!fs.existsSync(documentPath)) {
       return res.status(404).json({
         error: 'Documento de coordinación no encontrado',
-        message: 'El archivo COORDINACION-AGENTES.md no existe'
+        message: 'El archivo 04-sistema-coordinacion-agentes-19-08-2025.md no existe'
       });
     }
     
@@ -51,7 +51,7 @@ router.post('/coordinacion-document', (req, res) => {
     }
     
     // Ruta al documento de coordinación
-    const documentPath = path.join(__dirname, '..', '..', 'COORDINACION-AGENTES.md');
+    const documentPath = path.join(__dirname, '..', '..', 'docs-esenciales', '04-sistema-coordinacion-agentes-19-08-2025.md');
     
     // Escribir el contenido al archivo
     fs.writeFileSync(documentPath, content, 'utf8');
@@ -74,7 +74,7 @@ router.post('/coordinacion-document', (req, res) => {
 // Ruta para obtener el estado del documento
 router.get('/coordinacion-status', (req, res) => {
   try {
-    const documentPath = path.join(__dirname, '..', '..', 'COORDINACION-AGENTES.md');
+    const documentPath = path.join(__dirname, '..', '..', 'docs-esenciales', '04-sistema-coordinacion-agentes-19-08-2025.md');
     
     if (!fs.existsSync(documentPath)) {
       return res.json({

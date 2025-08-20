@@ -42,6 +42,16 @@ const adminRoutes = require('./routes/admin.routes.js');
 const planesRoutes = require('./routes/planes.js');
 const suscripcionesRoutes = require('./routes/suscripciones.js');
 const coordinacionRoutes = require('./routes/coordinacion.routes.js');
+const crmRoutes = require('./routes/crm.routes.js');
+const databaseRoutes = require('./routes/database.routes.js');
+
+// Importar rutas RAG si existe el módulo
+let ragRoutes = null;
+try {
+  ragRoutes = require('./RAG-Backend/routes/ragRoutes.js');
+} catch (error) {
+  console.log('⚠️  Módulo RAG no encontrado, continuando sin RAG...');
+}
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -111,6 +121,18 @@ app.use('/api/events', eventsRoutes);
 
 // Rutas de coordinación de agentes
 app.use('/api', coordinacionRoutes);
+
+// Rutas de CRM
+app.use('/api/crm', crmRoutes);
+
+// Rutas de base de datos
+app.use('/api/database', databaseRoutes);
+
+// Rutas de RAG (si está disponible)
+if (ragRoutes) {
+  app.use('/api/rag', ragRoutes);
+  console.log('✅ Rutas RAG registradas');
+}
 
 // Rutas de evaluaciones (SGC estandarizado) - TEMPORALMENTE DESHABILITADAS
 // app.use('/api/evaluaciones', evaluacionesRoutes);

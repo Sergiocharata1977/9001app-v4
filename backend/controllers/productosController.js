@@ -1,4 +1,4 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 // @desc    Obtener todos los productos de la organización
 // @route   GET /api/productos

@@ -1,4 +1,4 @@
-const { tursoClient } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 const { randomUUID } = require('crypto');
 
 // Función para registrar una acción en los logs de auditoría

@@ -1,4 +1,4 @@
-const { tursoClient } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 // Obtener todos los planes
 const getAllPlanes = async (req, res) => {

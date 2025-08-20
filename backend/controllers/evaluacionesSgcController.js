@@ -1,4 +1,4 @@
-const { tursoClient } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 // ===============================================
 // CONTROLADOR EVALUACIONES SGC ESTANDARIZADO

@@ -1,4 +1,4 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 // GET /api/encuestas - Listar todas las encuestas
 const getEncuestas = async (req, res) => {

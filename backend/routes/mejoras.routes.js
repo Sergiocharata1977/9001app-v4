@@ -1,5 +1,5 @@
 const { Router  } = require('express');
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 const { randomUUID  } = require('crypto');
 const { ensureTenant, secureQuery, requireRole  } = require('../middleware/tenantMiddleware.js');
 

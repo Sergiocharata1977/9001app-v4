@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 

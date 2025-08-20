@@ -1,4 +1,4 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 /**
  * Middleware para validar límites del plan de la organización

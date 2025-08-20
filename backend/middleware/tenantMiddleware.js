@@ -1,4 +1,4 @@
-const { tursoClient } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 /**
  * Middleware para asegurar que todas las operaciones estén limitadas a la organización del usuario

@@ -1,4 +1,4 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 // Obtener todas las evaluaciones individuales de la organización
 const getEvaluaciones = async (req, res) => {

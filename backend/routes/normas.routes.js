@@ -1,5 +1,5 @@
 const express = require('express');
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
 
 const router = express.Router();

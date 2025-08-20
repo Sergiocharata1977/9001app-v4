@@ -1,37 +1,26 @@
-const dotenv = require('dotenv');
-const { existsSync } = require('fs');
-const { join } = require('path');
+// Configuración de variables de entorno para isoflow4
+require('dotenv').config();
 
-// 🔍 Cargar variables de entorno en orden de prioridad
-function loadEnvConfig() {
-  const envFiles = [
-    '.env.local',      // 1️⃣ Prioridad: Configuración local
-    '.env.development', // 2️⃣ Configuración de desarrollo
-    '.env'             // 3️⃣ Configuración por defecto
-  ];
+const loadEnvConfig = () => {
+  return {
+    // Configuración de base de datos isoflow4
+    TURSO_DATABASE_URL: 'libsql://isoflow4-sergiocharata1977.aws-us-east-1.turso.io',
+    TURSO_AUTH_TOKEN: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTU2OTAwMDYsImlkIjoiYjRjZTU4MWItZjc3Yy00OTY4LTgxODYtNjEwM2E4MmY0NWQxIiwicmlkIjoiMmI4MTUwOWEtYWQ2Yy00NThkLTg2OTMtYjQ3ZDQ1OWFkYWNiIn0.hs83X428FW-ZjxGvLZ1eWE6Gjp4JceY2e88VDSAgaLHOxVe-IntR-S_-bQoyA-UnMnoFYJtP-PiktziqDMOVDw',
+    
+    // Otras configuraciones
+    PORT: process.env.PORT || 3001,
+    NODE_ENV: process.env.NODE_ENV || 'development',
+    JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
+    
+    // Configuración RAG
+    RAG_ENABLED: process.env.RAG_ENABLED || 'true',
+    RAG_MODEL_PROVIDER: process.env.RAG_MODEL_PROVIDER || 'local',
+    RAG_MODEL_NAME: process.env.RAG_MODEL_NAME || 'sentence-transformers/all-MiniLM-L6-v2',
+    
+    // Configuración de archivos
+    UPLOAD_PATH: process.env.UPLOAD_PATH || './uploads',
+    MAX_FILE_SIZE: process.env.MAX_FILE_SIZE || 10485760, // 10MB
+  };
+};
 
-  // Buscar y cargar el primer archivo .env que exista
-  for (const envFile of envFiles) {
-    const envPath = join(__dirname, '..', envFile);
-    if (existsSync(envPath)) {
-      console.log(`📄 Cargando configuración desde: ${envFile}`);
-      dotenv.config({ path: envPath });
-      
-      // Verificar que tenemos las variables críticas
-      if (!process.env.DATABASE_URL || !process.env.TURSO_AUTH_TOKEN) {
-        console.warn(`⚠️  Faltan variables críticas en ${envFile}`);
-        console.log('📝 Necesitas configurar:');
-        console.log('   - DATABASE_URL');
-        console.log('   - TURSO_AUTH_TOKEN');
-      }
-      
-      return;
-    }
-  }
-
-  console.error('❌ No se encontró ningún archivo de configuración (.env.local, .env.development, .env)');
-  console.log('📝 Crea un archivo .env.local con tus credenciales de desarrollo');
-}
-
-// Exportar función para usar en otros archivos
 module.exports = { loadEnvConfig };

@@ -1,4 +1,4 @@
-const { tursoClient  } = require('../lib/tursoClient.js');
+const tursoClient = require('../lib/tursoClient.js');
 
 // Listar todas las competencias de la organización del usuario
 const getCompetencias = async (req, res) => {
