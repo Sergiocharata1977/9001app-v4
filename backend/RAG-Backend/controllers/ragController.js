@@ -3,420 +3,309 @@
  * Maneja todas las operaciones del módulo RAG
  */
 
-const RAGIndexerService = require('../services/ragIndexerService');
-const RAGSearchService = require('../services/ragSearchService');
-const RAGGeneratorService = require('../services/ragGeneratorService');
-const { validateQuery } = require('../models/rag.models');
+const { RAGDataModel } = require('../models/rag.models.js');
 
-class RAGController {
-  constructor(db, config) {
-    this.db = db;
-    this.config = config;
-    this.indexerService = new RAGIndexerService(db, config);
-    this.searchService = new RAGSearchService(db, config);
-    this.generatorService = new RAGGeneratorService(db, config, this.searchService);
+// @desc    Obtener estado de salud del sistema RAG
+// @route   GET /api/rag/health
+// @access  Private
+const getRAGHealth = async (req, res) => {
+  try {
+    const organizationId = req.user?.organizationId;
+    
+    // Verificar que podemos obtener datos del sistema
+    const testData = await RAGDataModel.getAllSystemData(organizationId);
+    
+    res.json({
+      success: true,
+      message: 'Sistema RAG funcionando correctamente',
+      data: {
+        status: 'healthy',
+        totalRecords: testData.length,
+        organizationId: organizationId,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error en health check RAG:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error en el sistema RAG',
+      error: error.message
+    });
   }
+};
 
-  /**
-   * Activa/desactiva RAG para una organización
-   */
-  async toggleRAG(req, res) {
-    try {
-      const { organizationId, enabled } = req.body;
-      const userId = req.user.id;
+// @desc    Buscar información en el sistema
+// @route   POST /api/rag/search
+// @access  Private
+const searchRAG = async (req, res) => {
+  try {
+    const { query, limit = 10 } = req.body;
+    const organizationId = req.user?.organizationId;
 
-      // Validar permisos
-      if (!this.hasRAGPermission(req.user, organizationId)) {
-        return res.status(403).json({
-          success: false,
-          message: 'No tienes permisos para configurar RAG'
-        });
-      }
-
-      // Validar datos
-      if (!organizationId || typeof enabled !== 'boolean') {
-        return res.status(400).json({
-          success: false,
-          message: 'organizationId y enabled son requeridos'
-        });
-      }
-
-      // Actualizar configuración
-      await this.updateRAGConfig(organizationId, enabled);
-
-      // Si se está activando, iniciar indexación
-      if (enabled) {
-        // Iniciar indexación en background
-        this.indexerService.indexOrganizationData(organizationId)
-          .catch(error => console.error('Background indexing failed:', error));
-      }
-
-      res.json({
-        success: true,
-        message: `RAG ${enabled ? 'activado' : 'desactivado'} para la organización`,
-        enabled
-      });
-    } catch (error) {
-      console.error('Error toggling RAG:', error);
-      res.status(500).json({
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: 'La consulta es requerida'
       });
     }
-  }
 
-  /**
-   * Procesa consulta RAG
-   */
-  async query(req, res) {
-    try {
-      const { query, organizationId } = req.body;
-      const userId = req.user.id;
+    console.log(`🔍 Búsqueda RAG: "${query}" para organización ${organizationId}`);
 
-      // Validar permisos
-      if (!this.hasRAGPermission(req.user, organizationId)) {
-        return res.status(403).json({
-          success: false,
-          message: 'No tienes permisos para usar RAG'
-        });
-      }
+    // Buscar en todos los datos del sistema
+    const results = await RAGDataModel.searchInSystemData(query, organizationId);
 
-      // Validar consulta
-      const validation = validateQuery(query);
-      if (!validation.isValid) {
-        return res.status(400).json({
-          success: false,
-          message: `Consulta inválida: ${validation.errors.join(', ')}`
-        });
-      }
-
-      // Verificar que RAG esté habilitado
-      const ragEnabled = await this.isRAGEnabled(organizationId);
-      if (!ragEnabled) {
-        return res.status(400).json({
-          success: false,
-          message: 'RAG no está habilitado para esta organización'
-        });
-      }
-
-      // Generar respuesta RAG
-      const response = await this.generatorService.generateRAGResponse(
-        query, 
-        organizationId,
-        { userId }
-      );
-
-      res.json({
-        success: true,
-        data: response
-      });
-    } catch (error) {
-      console.error('Error processing RAG query:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error procesando consulta RAG'
-      });
-    }
-  }
-
-  /**
-   * Reindexa datos de una organización
-   */
-  async reindex(req, res) {
-    try {
-      const { organizationId } = req.body;
-      const userId = req.user.id;
-
-      // Validar permisos
-      if (!this.hasRAGPermission(req.user, organizationId)) {
-        return res.status(403).json({
-          success: false,
-          message: 'No tienes permisos para reindexar RAG'
-        });
-      }
-
-      // Verificar que RAG esté habilitado
-      const ragEnabled = await this.isRAGEnabled(organizationId);
-      if (!ragEnabled) {
-        return res.status(400).json({
-          success: false,
-          message: 'RAG no está habilitado para esta organización'
-        });
-      }
-
-      // Iniciar reindexación en background
-      this.indexerService.indexOrganizationData(organizationId)
-        .then(result => {
-          console.log(`Reindexación completada para organización ${organizationId}:`, result);
-        })
-        .catch(error => {
-          console.error(`Error en reindexación para organización ${organizationId}:`, error);
-        });
-
-      res.json({
-        success: true,
-        message: 'Reindexación iniciada. Se completará en segundo plano.'
-      });
-    } catch (error) {
-      console.error('Error starting reindex:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error iniciando reindexación'
-      });
-    }
-  }
-
-  /**
-   * Obtiene estado de RAG
-   */
-  async getStatus(req, res) {
-    try {
-      const { organizationId } = req.params;
-      const userId = req.user.id;
-
-      // Validar permisos
-      if (!this.hasRAGPermission(req.user, organizationId)) {
-        return res.status(403).json({
-          success: false,
-          message: 'No tienes permisos para ver estado de RAG'
-        });
-      }
-
-      // Obtener configuración
-      const config = await this.getRAGConfig(organizationId);
+    // Generar respuesta contextualizada
+    let response = `Basándome en la información del sistema, aquí está lo que encontré sobre "${query}":\n\n`;
+    
+    if (results.length > 0) {
+      response += `📊 **Resultados encontrados (${results.length}):**\n\n`;
       
-      // Obtener estadísticas
-      const stats = await this.searchService.getSearchStats(organizationId);
-
-      res.json({
-        success: true,
-        data: {
-          enabled: config ? config.is_enabled : false,
-          lastIndexed: config ? config.last_indexed_at : null,
-          stats: stats || {
-            total_embeddings: 0,
-            content_types: 0,
-            unique_sources: 0
-          }
-        }
+      results.slice(0, 5).forEach((result, index) => {
+        response += `${index + 1}. **[${result.tipo.toUpperCase()}]** ${result.titulo}\n`;
+        response += `   ${result.contenido.substring(0, 150)}${result.contenido.length > 150 ? '...' : ''}\n\n`;
       });
-    } catch (error) {
-      console.error('Error getting RAG status:', error);
-      res.status(500).json({
+      
+      if (results.length > 5) {
+        response += `... y ${results.length - 5} resultados más.\n\n`;
+      }
+      
+      response += `💡 **Fuentes consultadas:** ${results.length} registros del sistema SGC`;
+    } else {
+      response += `❌ No encontré información específica sobre "${query}" en el sistema.\n\n`;
+      response += `💡 **Sugerencias:**\n`;
+      response += `• Intenta con términos más generales\n`;
+      response += `• Verifica la ortografía\n`;
+      response += `• Consulta sobre: indicadores, auditorías, personal, procesos, normas ISO 9001`;
+    }
+
+    res.json({
+      success: true,
+      message: 'Búsqueda completada',
+      data: {
+        response: response,
+        query: query,
+        sources: results.slice(0, limit).map(result => ({
+          tipo: result.tipo,
+          titulo: result.titulo,
+          contenido: result.contenido.substring(0, 100) + '...',
+          codigo: result.codigo
+        })),
+        totalFound: results.length,
+        organizationId: organizationId
+      }
+    });
+  } catch (error) {
+    console.error('Error en búsqueda RAG:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error en la búsqueda',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Obtener contexto para respuesta del asistente
+// @route   POST /api/rag/context
+// @access  Private
+const getRAGContext = async (req, res) => {
+  try {
+    const { question, contextType = 'all' } = req.body;
+    const organizationId = req.user?.organizationId;
+
+    if (!question || question.trim().length === 0) {
+      return res.status(400).json({
         success: false,
-        message: 'Error obteniendo estado de RAG'
+        message: 'La pregunta es requerida'
       });
     }
+
+    console.log(`🎯 Obteniendo contexto para: "${question}"`);
+
+    let contextData = [];
+
+    // Obtener datos según el tipo de contexto solicitado
+    switch (contextType) {
+      case 'documentos':
+        contextData = await RAGDataModel.getAllDocuments(organizationId);
+        break;
+      case 'normas':
+        contextData = await RAGDataModel.getAllNormas(organizationId);
+        break;
+      case 'personal':
+        contextData = await RAGDataModel.getPersonalInfo(organizationId);
+        break;
+      case 'auditorias':
+        contextData = await RAGDataModel.getAuditoriasInfo(organizationId);
+        break;
+      case 'hallazgos':
+        contextData = await RAGDataModel.getHallazgosAcciones(organizationId);
+        break;
+      case 'indicadores':
+        contextData = await RAGDataModel.getIndicadoresObjetivos(organizationId);
+        break;
+      case 'procesos':
+        contextData = await RAGDataModel.getProcesosDepartamentos(organizationId);
+        break;
+      case 'capacitaciones':
+        contextData = await RAGDataModel.getCapacitaciones(organizationId);
+        break;
+      case 'all':
+      default:
+        contextData = await RAGDataModel.getAllSystemData(organizationId);
+        break;
+    }
+
+    // Buscar información relevante para la pregunta
+    const relevantData = await RAGDataModel.searchInSystemData(question, organizationId);
+
+    // Preparar contexto para el asistente
+    const context = {
+      question: question,
+      relevantData: relevantData,
+      totalSystemData: contextData.length,
+      organizationId: organizationId,
+      contextType: contextType,
+      timestamp: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      message: 'Contexto obtenido correctamente',
+      data: context
+    });
+  } catch (error) {
+    console.error('Error obteniendo contexto RAG:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error obteniendo contexto',
+      error: error.message
+    });
   }
+};
 
-  /**
-   * Búsqueda semántica directa
-   */
-  async search(req, res) {
-    try {
-      const { query, organizationId, options = {} } = req.body;
-      const userId = req.user.id;
+// @desc    Obtener estadísticas del sistema RAG
+// @route   GET /api/rag/stats
+// @access  Private
+const getRAGStats = async (req, res) => {
+  try {
+    const organizationId = req.user?.organizationId;
 
-      // Validar permisos
-      if (!this.hasRAGPermission(req.user, organizationId)) {
-        return res.status(403).json({
-          success: false,
-          message: 'No tienes permisos para usar búsqueda RAG'
-        });
+    console.log(`📊 Obteniendo estadísticas RAG para organización ${organizationId}`);
+
+    // Obtener todos los datos del sistema
+    const allData = await RAGDataModel.getAllSystemData(organizationId);
+
+    // Calcular estadísticas
+    const stats = {};
+    allData.forEach(item => {
+      stats[item.tipo] = (stats[item.tipo] || 0) + 1;
+    });
+
+    // Obtener estadísticas por tipo
+    const statsByType = Object.entries(stats).map(([tipo, count]) => ({
+      tipo: tipo,
+      count: count,
+      percentage: ((count / allData.length) * 100).toFixed(1)
+    }));
+
+    res.json({
+      success: true,
+      message: 'Estadísticas obtenidas correctamente',
+      data: {
+        totalRecords: allData.length,
+        organizationId: organizationId,
+        statsByType: statsByType,
+        timestamp: new Date().toISOString()
       }
+    });
+  } catch (error) {
+    console.error('Error obteniendo estadísticas RAG:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error obteniendo estadísticas',
+      error: error.message
+    });
+  }
+};
 
-      // Validar consulta
-      const validation = validateQuery(query);
-      if (!validation.isValid) {
+// @desc    Obtener datos por tipo específico
+// @route   GET /api/rag/data/:type
+// @access  Private
+const getRAGDataByType = async (req, res) => {
+  try {
+    const { type } = req.params;
+    const organizationId = req.user?.organizationId;
+    const { limit = 50, offset = 0 } = req.query;
+
+    console.log(`📋 Obteniendo datos de tipo: ${type}`);
+
+    let data = [];
+
+    switch (type) {
+      case 'documentos':
+        data = await RAGDataModel.getAllDocuments(organizationId);
+        break;
+      case 'normas':
+        data = await RAGDataModel.getAllNormas(organizationId);
+        break;
+      case 'personal':
+        data = await RAGDataModel.getPersonalInfo(organizationId);
+        break;
+      case 'auditorias':
+        data = await RAGDataModel.getAuditoriasInfo(organizationId);
+        break;
+      case 'hallazgos':
+        data = await RAGDataModel.getHallazgosAcciones(organizationId);
+        break;
+      case 'indicadores':
+        data = await RAGDataModel.getIndicadoresObjetivos(organizationId);
+        break;
+      case 'procesos':
+        data = await RAGDataModel.getProcesosDepartamentos(organizationId);
+        break;
+      case 'capacitaciones':
+        data = await RAGDataModel.getCapacitaciones(organizationId);
+        break;
+      case 'minutas':
+        data = await RAGDataModel.getMinutas(organizationId);
+        break;
+      default:
         return res.status(400).json({
           success: false,
-          message: `Consulta inválida: ${validation.errors.join(', ')}`
+          message: 'Tipo de datos no válido'
         });
+    }
+
+    // Aplicar paginación
+    const paginatedData = data.slice(offset, offset + parseInt(limit));
+
+    res.json({
+      success: true,
+      message: `Datos de tipo ${type} obtenidos correctamente`,
+      data: {
+        type: type,
+        records: paginatedData,
+        total: data.length,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        organizationId: organizationId
       }
-
-      // Realizar búsqueda
-      const results = await this.searchService.searchSemantic(
-        query, 
-        organizationId, 
-        options
-      );
-
-      res.json({
-        success: true,
-        data: results
-      });
-    } catch (error) {
-      console.error('Error in RAG search:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error en búsqueda RAG'
-      });
-    }
+    });
+  } catch (error) {
+    console.error(`Error obteniendo datos de tipo ${req.params.type}:`, error);
+    res.status(500).json({
+      success: false,
+      message: 'Error obteniendo datos',
+      error: error.message
+    });
   }
+};
 
-  /**
-   * Obtiene sugerencias de consultas
-   */
-  async getSuggestions(req, res) {
-    try {
-      const { organizationId } = req.params;
-      const userId = req.user.id;
-
-      // Validar permisos
-      if (!this.hasRAGPermission(req.user, organizationId)) {
-        return res.status(403).json({
-          success: false,
-          message: 'No tienes permisos para obtener sugerencias'
-        });
-      }
-
-      const suggestions = this.getCommonQueries();
-
-      res.json({
-        success: true,
-        data: suggestions
-      });
-    } catch (error) {
-      console.error('Error getting suggestions:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error obteniendo sugerencias'
-      });
-    }
-  }
-
-  /**
-   * Obtiene historial de consultas
-   */
-  async getQueryHistory(req, res) {
-    try {
-      const { organizationId } = req.params;
-      const { limit = 20, offset = 0 } = req.query;
-      const userId = req.user.id;
-
-      // Validar permisos
-      if (!this.hasRAGPermission(req.user, organizationId)) {
-        return res.status(403).json({
-          success: false,
-          message: 'No tienes permisos para ver historial'
-        });
-      }
-
-      const queries = await this.db.all(`
-        SELECT 
-          id,
-          query_text,
-          response_text,
-          processing_time_ms,
-          created_at
-        FROM rag_queries 
-        WHERE organization_id = ?
-        ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
-      `, [organizationId, limit, offset]);
-
-      res.json({
-        success: true,
-        data: queries
-      });
-    } catch (error) {
-      console.error('Error getting query history:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error obteniendo historial'
-      });
-    }
-  }
-
-  // Métodos auxiliares
-
-  /**
-   * Verifica permisos RAG
-   */
-  hasRAGPermission(user, organizationId) {
-    // Solo admins y managers pueden usar RAG
-    return user.role === 'admin' || user.role === 'manager';
-  }
-
-  /**
-   * Verifica si RAG está habilitado
-   */
-  async isRAGEnabled(organizationId) {
-    try {
-      const result = await this.db.get(
-        'SELECT is_enabled FROM rag_config WHERE organization_id = ?',
-        [organizationId]
-      );
-      return result ? result.is_enabled : false;
-    } catch (error) {
-      console.error('Error checking RAG status:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Actualiza configuración RAG
-   */
-  async updateRAGConfig(organizationId, enabled) {
-    try {
-      // Verificar si existe configuración
-      const existing = await this.db.get(
-        'SELECT id FROM rag_config WHERE organization_id = ?',
-        [organizationId]
-      );
-
-      if (existing) {
-        // Actualizar configuración existente
-        await this.db.run(
-          'UPDATE rag_config SET is_enabled = ?, updated_at = CURRENT_TIMESTAMP WHERE organization_id = ?',
-          [enabled, organizationId]
-        );
-      } else {
-        // Crear nueva configuración
-        await this.db.run(`
-          INSERT INTO rag_config 
-          (organization_id, is_enabled, created_at, updated_at)
-          VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `, [organizationId, enabled]);
-      }
-    } catch (error) {
-      console.error('Error updating RAG config:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Obtiene configuración RAG
-   */
-  async getRAGConfig(organizationId) {
-    try {
-      return await this.db.get(
-        'SELECT * FROM rag_config WHERE organization_id = ?',
-        [organizationId]
-      );
-    } catch (error) {
-      console.error('Error getting RAG config:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Obtiene consultas comunes
-   */
-  getCommonQueries() {
-    return [
-      "¿Qué objetivos están asociados al proceso de Producción?",
-      "¿Qué indicadores se están utilizando para evaluar la calidad del área de Logística?",
-      "¿Qué hallazgos se detectaron en la última auditoría interna?",
-      "¿Qué acciones se definieron en base a las no conformidades del mes pasado?",
-      "¿Qué actividades tiene asignadas el usuario Juan Pérez esta semana?",
-      "¿Cuáles son los procesos más críticos de la organización?",
-      "¿Qué departamentos tienen más hallazgos de auditoría?",
-      "¿Cuáles son los indicadores de calidad más importantes?",
-      "¿Qué capacitaciones están programadas para este mes?",
-      "¿Cuál es el estado de cumplimiento de los objetivos de calidad?"
-    ];
-  }
-}
-
-module.exports = RAGController; 
+module.exports = {
+  getRAGHealth,
+  searchRAG,
+  getRAGContext,
+  getRAGStats,
+  getRAGDataByType
+}; 

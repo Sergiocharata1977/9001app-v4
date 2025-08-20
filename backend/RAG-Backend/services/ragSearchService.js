@@ -1,34 +1,12 @@
 /**
- * Servicio de Búsqueda Semántica RAG
- * Responsable de realizar búsquedas semánticas en los embeddings
+ * Servicio de Búsqueda RAG
+ * Responsable de realizar búsquedas semánticas en los datos indexados
  */
-
-const { CONTENT_TYPES, validateQuery } = require('../models/rag.models');
-const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
-const { HuggingFaceTransformersEmbeddings } = require('langchain/embeddings/hf_transformers');
 
 class RAGSearchService {
   constructor(db, config) {
     this.db = db;
     this.config = config;
-    this.embeddings = this.initializeEmbeddings();
-  }
-
-  /**
-   * Inicializa el modelo de embeddings
-   */
-  initializeEmbeddings() {
-    if (this.config.modelProvider === 'openai') {
-      return new OpenAIEmbeddings({
-        openAIApiKey: process.env.OPENAI_API_KEY,
-        modelName: this.config.embeddingModel
-      });
-    } else {
-      return new HuggingFaceTransformersEmbeddings({
-        modelName: this.config.embeddingModel,
-        cacheFolder: './models'
-      });
-    }
   }
 
   /**
@@ -36,285 +14,119 @@ class RAGSearchService {
    */
   async searchSemantic(query, organizationId, options = {}) {
     try {
-      // Validar consulta
-      const validation = validateQuery(query);
-      if (!validation.isValid) {
-        throw new Error(`Invalid query: ${validation.errors.join(', ')}`);
-      }
-
-      // Verificar que RAG esté habilitado para la organización
-      const ragEnabled = await this.isRAGEnabled(organizationId);
-      if (!ragEnabled) {
-        throw new Error('RAG is not enabled for this organization');
-      }
-
-      // Generar embedding de la consulta
-      const queryEmbedding = await this.embeddings.embedQuery(query);
-
-      // Buscar embeddings similares
-      const results = await this.findSimilarEmbeddings(
-        queryEmbedding, 
-        organizationId, 
-        options
-      );
-
-      // Procesar y formatear resultados
-      const processedResults = await this.processSearchResults(results, query);
+      console.log(`🔍 Búsqueda semántica: "${query}" para organización ${organizationId}`);
+      
+      const startTime = Date.now();
+      
+      // Por ahora implementamos búsqueda por texto simple
+      // En una implementación completa, aquí se usarían embeddings reales
+      const results = await this.searchByText(query, organizationId, options);
+      
+      const processingTime = Date.now() - startTime;
+      console.log(`✅ Búsqueda completada en ${processingTime}ms, ${results.length} resultados`);
 
       return {
         query,
-        results: processedResults,
-        totalResults: processedResults.length,
-        searchTime: Date.now()
+        results,
+        processingTime,
+        totalResults: results.length
       };
     } catch (error) {
-      console.error('Error in semantic search:', error);
+      console.error('Error en búsqueda semántica:', error);
       throw error;
     }
   }
 
   /**
-   * Verifica si RAG está habilitado para la organización
+   * Búsqueda por texto simple (placeholder para embeddings reales)
    */
-  async isRAGEnabled(organizationId) {
+  async searchByText(query, organizationId, options = {}) {
     try {
-      const result = await this.db.get(
-        'SELECT is_enabled FROM rag_config WHERE organization_id = ?',
-        [organizationId]
-      );
-      return result ? result.is_enabled : false;
-    } catch (error) {
-      console.error('Error checking RAG status:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Encuentra embeddings similares
-   */
-  async findSimilarEmbeddings(queryEmbedding, organizationId, options = {}) {
-    const {
-      limit = this.config.search.maxResults,
-      similarityThreshold = this.config.search.similarityThreshold,
-      sourceType = null,
-      sourceTable = null
-    } = options;
-
-    try {
-      // Obtener todos los embeddings de la organización
-      let query = `
-        SELECT 
-          id, 
-          content_text, 
-          content_metadata, 
-          embedding_vector,
-          source_type,
-          source_id
-        FROM rag_embeddings 
-        WHERE organization_id = ?
-      `;
+      const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 2);
       
-      const params = [organizationId];
-
-      // Aplicar filtros adicionales
-      if (sourceType) {
-        query += ' AND source_type = ?';
-        params.push(sourceType);
-      }
-
-      if (sourceTable) {
-        query += ' AND content_metadata LIKE ?';
-        params.push(`%"table_name":"${sourceTable}"%`);
-      }
-
-      const embeddings = await this.db.all(query, params);
-
-      // Calcular similitud y ordenar
-      const similarities = await Promise.all(
-        embeddings.map(async (embedding) => {
-          const storedEmbedding = JSON.parse(embedding.embedding_vector);
-          const similarity = this.calculateCosineSimilarity(queryEmbedding, storedEmbedding);
-          
-          return {
-            ...embedding,
-            similarity,
-            metadata: JSON.parse(embedding.content_metadata)
-          };
-        })
-      );
-
-      // Filtrar por umbral de similitud y ordenar
-      const filteredResults = similarities
-        .filter(result => result.similarity >= similarityThreshold)
-        .sort((a, b) => b.similarity - a.similarity)
-        .slice(0, limit);
-
-      return filteredResults;
-    } catch (error) {
-      console.error('Error finding similar embeddings:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Calcula similitud coseno entre dos vectores
-   */
-  calculateCosineSimilarity(vectorA, vectorB) {
-    if (vectorA.length !== vectorB.length) {
-      return 0;
-    }
-
-    let dotProduct = 0;
-    let normA = 0;
-    let normB = 0;
-
-    for (let i = 0; i < vectorA.length; i++) {
-      dotProduct += vectorA[i] * vectorB[i];
-      normA += vectorA[i] * vectorA[i];
-      normB += vectorB[i] * vectorB[i];
-    }
-
-    normA = Math.sqrt(normA);
-    normB = Math.sqrt(normB);
-
-    if (normA === 0 || normB === 0) {
-      return 0;
-    }
-
-    return dotProduct / (normA * normB);
-  }
-
-  /**
-   * Procesa y formatea los resultados de búsqueda
-   */
-  async processSearchResults(results, originalQuery) {
-    return results.map(result => ({
-      id: result.id,
-      content: result.content_text,
-      similarity: result.similarity,
-      source: {
-        type: result.source_type,
-        id: result.source_id,
-        table: result.metadata.table_name,
-        chunk: result.metadata.chunk_index,
-        totalChunks: result.metadata.total_chunks
-      },
-      metadata: result.metadata
-    }));
-  }
-
-  /**
-   * Búsqueda híbrida (semántica + keywords)
-   */
-  async hybridSearch(query, organizationId, options = {}) {
-    try {
-      // Búsqueda semántica
-      const semanticResults = await this.searchSemantic(query, organizationId, options);
-      
-      // Búsqueda por keywords
-      const keywordResults = await this.keywordSearch(query, organizationId, options);
-      
-      // Combinar y deduplicar resultados
-      const combinedResults = this.combineSearchResults(semanticResults.results, keywordResults);
-      
-      return {
-        query,
-        results: combinedResults,
-        totalResults: combinedResults.length,
-        searchType: 'hybrid'
-      };
-    } catch (error) {
-      console.error('Error in hybrid search:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Búsqueda por keywords
-   */
-  async keywordSearch(query, organizationId, options = {}) {
-    const { limit = this.config.search.maxResults } = options;
-    
-    try {
-      const keywords = query.toLowerCase().split(' ').filter(word => word.length > 2);
-      
-      if (keywords.length === 0) {
+      if (searchTerms.length === 0) {
         return [];
       }
 
-      // Construir consulta SQL con LIKE
-      const likeConditions = keywords.map(() => 'content_text LIKE ?').join(' AND ');
-      const sqlQuery = `
+      // Construir consulta SQL dinámica
+      const conditions = searchTerms.map(term => 
+        `LOWER(chunk_text) LIKE '%${term}%'`
+      ).join(' AND ');
+
+      const sql = `
         SELECT 
-          id, 
-          content_text, 
-          content_metadata, 
-          source_type,
-          source_id
-        FROM rag_embeddings 
-        WHERE organization_id = ? AND ${likeConditions}
-        ORDER BY length(content_text) ASC
-        LIMIT ?
+          e.*,
+          json_extract(e.metadata, '$.titulo') as titulo,
+          json_extract(e.metadata, '$.nombre') as nombre,
+          json_extract(e.metadata, '$.codigo') as codigo,
+          json_extract(e.metadata, '$.source') as source
+        FROM rag_embeddings e
+        WHERE e.organization_id = ? 
+        AND (${conditions})
+        ORDER BY 
+          CASE 
+            WHEN LOWER(chunk_text) LIKE '%${query.toLowerCase()}%' THEN 1
+            ELSE 2
+          END,
+          content_type ASC,
+          chunk_index ASC
+        LIMIT 20
       `;
 
-      const params = [organizationId, ...keywords.map(k => `%${k}%`), limit];
-      const results = await this.db.all(sqlQuery, params);
-
+      const results = await this.db.all(sql, [organizationId]);
+      
+      // Procesar y enriquecer resultados
       return results.map(result => ({
         id: result.id,
-        content: result.content_text,
-        similarity: 0.5, // Similitud fija para keyword search
+        content: result.chunk_text,
+        contentType: result.content_type,
+        contentId: result.content_id,
+        metadata: JSON.parse(result.metadata || '{}'),
+        score: this.calculateScore(query, result.chunk_text),
         source: {
-          type: result.source_type,
-          id: result.source_id,
-          metadata: JSON.parse(result.content_metadata)
+          type: result.content_type,
+          id: result.content_id,
+          name: result.titulo || result.nombre || result.codigo || `ID: ${result.content_id}`,
+          source: result.source
         }
       }));
     } catch (error) {
-      console.error('Error in keyword search:', error);
+      console.error('Error en búsqueda por texto:', error);
       return [];
     }
   }
 
   /**
-   * Combina resultados de búsquedas diferentes
+   * Calcula score de relevancia
    */
-  combineSearchResults(semanticResults, keywordResults) {
-    const combined = [...semanticResults];
+  calculateScore(query, text) {
+    const queryTerms = query.toLowerCase().split(' ');
+    const textLower = text.toLowerCase();
     
-    // Agregar resultados de keyword que no estén ya en semantic
-    keywordResults.forEach(keywordResult => {
-      const exists = combined.some(semanticResult => 
-        semanticResult.id === keywordResult.id
-      );
-      
-      if (!exists) {
-        combined.push(keywordResult);
+    let score = 0;
+    let exactMatches = 0;
+    
+    for (const term of queryTerms) {
+      if (term.length > 2) {
+        const regex = new RegExp(term, 'gi');
+        const matches = (textLower.match(regex) || []).length;
+        score += matches;
+        
+        if (textLower.includes(term)) {
+          exactMatches++;
+        }
       }
-    });
-
-    // Ordenar por similitud
-    return combined.sort((a, b) => b.similarity - a.similarity);
-  }
-
-  /**
-   * Búsqueda por tipo de contenido
-   */
-  async searchByContentType(query, organizationId, contentType, options = {}) {
-    return this.searchSemantic(query, organizationId, {
-      ...options,
-      sourceType: contentType
-    });
-  }
-
-  /**
-   * Búsqueda en tabla específica
-   */
-  async searchInTable(query, organizationId, tableName, options = {}) {
-    return this.searchSemantic(query, organizationId, {
-      ...options,
-      sourceTable: tableName
-    });
+    }
+    
+    // Bonus por coincidencias exactas
+    if (exactMatches === queryTerms.length) {
+      score *= 2;
+    }
+    
+    // Bonus por longitud del texto (preferir textos más largos)
+    score += Math.min(text.length / 100, 5);
+    
+    return score;
   }
 
   /**
@@ -325,16 +137,150 @@ class RAGSearchService {
       const stats = await this.db.get(`
         SELECT 
           COUNT(*) as total_embeddings,
-          COUNT(DISTINCT source_type) as content_types,
-          COUNT(DISTINCT source_id) as unique_sources
+          COUNT(DISTINCT content_type) as content_types,
+          COUNT(DISTINCT content_id) as unique_sources
         FROM rag_embeddings 
         WHERE organization_id = ?
       `, [organizationId]);
 
-      return stats;
+      return {
+        total_embeddings: stats.total_embeddings || 0,
+        content_types: stats.content_types || 0,
+        unique_sources: stats.unique_sources || 0
+      };
     } catch (error) {
-      console.error('Error getting search stats:', error);
-      return null;
+      console.error('Error obteniendo estadísticas:', error);
+      return {
+        total_embeddings: 0,
+        content_types: 0,
+        unique_sources: 0
+      };
+    }
+  }
+
+  /**
+   * Búsqueda por tipo de contenido específico
+   */
+  async searchByContentType(query, organizationId, contentType) {
+    try {
+      const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 2);
+      
+      if (searchTerms.length === 0) {
+        return [];
+      }
+
+      const conditions = searchTerms.map(term => 
+        `LOWER(chunk_text) LIKE '%${term}%'`
+      ).join(' AND ');
+
+      const sql = `
+        SELECT 
+          e.*,
+          json_extract(e.metadata, '$.titulo') as titulo,
+          json_extract(e.metadata, '$.nombre') as nombre,
+          json_extract(e.metadata, '$.codigo') as codigo,
+          json_extract(e.metadata, '$.source') as source
+        FROM rag_embeddings e
+        WHERE e.organization_id = ? 
+        AND e.content_type = ?
+        AND (${conditions})
+        ORDER BY 
+          CASE 
+            WHEN LOWER(chunk_text) LIKE '%${query.toLowerCase()}%' THEN 1
+            ELSE 2
+          END,
+          chunk_index ASC
+        LIMIT 10
+      `;
+
+      const results = await this.db.all(sql, [organizationId, contentType]);
+      
+      return results.map(result => ({
+        id: result.id,
+        content: result.chunk_text,
+        contentType: result.content_type,
+        contentId: result.content_id,
+        metadata: JSON.parse(result.metadata || '{}'),
+        score: this.calculateScore(query, result.chunk_text),
+        source: {
+          type: result.content_type,
+          id: result.content_id,
+          name: result.titulo || result.nombre || result.codigo || `ID: ${result.content_id}`,
+          source: result.source
+        }
+      }));
+    } catch (error) {
+      console.error(`Error en búsqueda por tipo ${contentType}:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Búsqueda avanzada con filtros
+   */
+  async advancedSearch(query, organizationId, filters = {}) {
+    try {
+      let sql = `
+        SELECT 
+          e.*,
+          json_extract(e.metadata, '$.titulo') as titulo,
+          json_extract(e.metadata, '$.nombre') as nombre,
+          json_extract(e.metadata, '$.codigo') as codigo,
+          json_extract(e.metadata, '$.source') as source
+        FROM rag_embeddings e
+        WHERE e.organization_id = ?
+      `;
+      
+      const params = [organizationId];
+      
+      // Aplicar filtros
+      if (filters.contentType) {
+        sql += ` AND e.content_type = ?`;
+        params.push(filters.contentType);
+      }
+      
+      if (filters.dateFrom) {
+        sql += ` AND e.created_at >= ?`;
+        params.push(filters.dateFrom);
+      }
+      
+      if (filters.dateTo) {
+        sql += ` AND e.created_at <= ?`;
+        params.push(filters.dateTo);
+      }
+      
+      // Aplicar búsqueda de texto
+      if (query && query.trim()) {
+        const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 2);
+        if (searchTerms.length > 0) {
+          const conditions = searchTerms.map(term => 
+            `LOWER(chunk_text) LIKE '%${term}%'`
+          ).join(' AND ');
+          sql += ` AND (${conditions})`;
+        }
+      }
+      
+      sql += ` ORDER BY e.created_at DESC LIMIT 50`;
+      
+      const results = await this.db.all(sql, params);
+      
+      return results.map(result => ({
+        id: result.id,
+        content: result.chunk_text,
+        contentType: result.content_type,
+        contentId: result.content_id,
+        metadata: JSON.parse(result.metadata || '{}'),
+        score: this.calculateScore(query || '', result.chunk_text),
+        source: {
+          type: result.content_type,
+          id: result.content_id,
+          name: result.titulo || result.nombre || result.codigo || `ID: ${result.content_id}`,
+          source: result.source
+        }
+      }));
+    } catch (error) {
+      console.error('Error en búsqueda avanzada:', error);
+      return [];
     }
   }
 }

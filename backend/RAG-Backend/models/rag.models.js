@@ -3,168 +3,416 @@
  * Definición de esquemas y estructuras de datos
  */
 
-// Esquema de configuración RAG por organización
-const ragConfigSchema = {
-  id: 'INTEGER PRIMARY KEY',
-  organization_id: 'INTEGER NOT NULL',
-  is_enabled: 'BOOLEAN DEFAULT FALSE',
-  model_provider: 'TEXT DEFAULT "local"',
-  model_name: 'TEXT DEFAULT "sentence-transformers/all-MiniLM-L6-v2"',
-  vector_db_type: 'TEXT DEFAULT "chromadb"',
-  last_indexed_at: 'DATETIME',
-  created_at: 'DATETIME DEFAULT CURRENT_TIMESTAMP',
-  updated_at: 'DATETIME DEFAULT CURRENT_TIMESTAMP'
-};
+const tursoClient = require('../../lib/tursoClient.js');
 
-// Esquema de embeddings
-const ragEmbeddingsSchema = {
-  id: 'TEXT PRIMARY KEY',
-  organization_id: 'INTEGER NOT NULL',
-  content_hash: 'TEXT NOT NULL',
-  content_text: 'TEXT NOT NULL',
-  content_metadata: 'TEXT', // JSON
-  embedding_vector: 'BLOB', // Vector serializado
-  source_type: 'TEXT', // structured, unstructured
-  source_id: 'TEXT',
-  source_table: 'TEXT',
-  created_at: 'DATETIME DEFAULT CURRENT_TIMESTAMP'
-};
-
-// Esquema de consultas RAG
-const ragQueriesSchema = {
-  id: 'TEXT PRIMARY KEY',
-  organization_id: 'INTEGER NOT NULL',
-  user_id: 'TEXT',
-  query_text: 'TEXT NOT NULL',
-  response_text: 'TEXT',
-  sources_used: 'TEXT', // JSON array
-  tokens_used: 'INTEGER',
-  processing_time_ms: 'INTEGER',
-  similarity_score: 'REAL',
-  created_at: 'DATETIME DEFAULT CURRENT_TIMESTAMP'
-};
-
-// Esquema de fuentes de datos
-const ragSourcesSchema = {
-  id: 'TEXT PRIMARY KEY',
-  organization_id: 'INTEGER NOT NULL',
-  source_name: 'TEXT NOT NULL',
-  source_type: 'TEXT NOT NULL', // table, document, file
-  source_path: 'TEXT',
-  last_indexed: 'DATETIME',
-  record_count: 'INTEGER',
-  status: 'TEXT DEFAULT "pending"', // pending, indexed, error
-  created_at: 'DATETIME DEFAULT CURRENT_TIMESTAMP'
-};
-
-// Tipos de contenido para indexación
-const CONTENT_TYPES = {
-  STRUCTURED: 'structured',
-  UNSTRUCTURED: 'unstructured',
-  DOCUMENT: 'document',
-  PROCESS: 'process',
-  OBJECTIVE: 'objective',
-  INDICATOR: 'indicator',
-  AUDIT: 'audit',
-  FINDING: 'finding',
-  ACTION: 'action',
-  PERSONNEL: 'personnel',
-  DEPARTMENT: 'department',
-  POSITION: 'position'
-};
-
-// Estados de indexación
-const INDEXING_STATUS = {
-  PENDING: 'pending',
-  IN_PROGRESS: 'in_progress',
-  COMPLETED: 'completed',
-  ERROR: 'error',
-  DISABLED: 'disabled'
-};
-
-// Tipos de consulta
-const QUERY_TYPES = {
-  SEMANTIC: 'semantic',
-  KEYWORD: 'keyword',
-  HYBRID: 'hybrid',
-  STRUCTURED: 'structured'
-};
-
-// Configuración de chunking por tipo de contenido
-const CHUNKING_CONFIG = {
-  [CONTENT_TYPES.STRUCTURED]: {
-    size: 500,
-    overlap: 100
-  },
-  [CONTENT_TYPES.UNSTRUCTURED]: {
-    size: 1000,
-    overlap: 200
-  },
-  [CONTENT_TYPES.DOCUMENT]: {
-    size: 1500,
-    overlap: 300
-  },
-  [CONTENT_TYPES.PROCESS]: {
-    size: 800,
-    overlap: 150
-  }
-};
-
-// Metadatos estándar para embeddings
-const createMetadata = (sourceType, sourceId, organizationId, additionalData = {}) => {
-  return {
-    source_type: sourceType,
-    source_id: sourceId,
-    organization_id: organizationId,
-    timestamp: new Date().toISOString(),
-    ...additionalData
-  };
-};
-
-// Validación de consultas
-const validateQuery = (query) => {
-  const errors = [];
+// Modelo para obtener todos los datos del sistema para RAG
+class RAGDataModel {
   
-  if (!query || typeof query !== 'string') {
-    errors.push('Query must be a non-empty string');
+  // Obtener todos los documentos del sistema
+  static async getAllDocuments(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'documento' as tipo,
+          id,
+          titulo as titulo,
+          descripcion as contenido,
+          version,
+          organization_id,
+          created_at,
+          updated_at
+        FROM documentos
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo documentos:', error);
+      return [];
+    }
   }
-  
-  if (query.length > 1000) {
-    errors.push('Query too long (max 1000 characters)');
-  }
-  
-  if (query.trim().length < 3) {
-    errors.push('Query too short (min 3 characters)');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
-};
 
-// Sanitización de contenido
-const sanitizeContent = (content) => {
-  if (typeof content !== 'string') {
-    return '';
+  // Obtener todas las normas ISO
+  static async getAllNormas(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'norma' as tipo,
+          id,
+          titulo,
+          descripcion as contenido,
+          codigo,
+          version,
+          tipo as categoria,
+          organization_id,
+          created_at,
+          updated_at
+        FROM normas
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE organization_id = ? OR organization_id = 0`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo normas:', error);
+      return [];
+    }
   }
-  
-  return content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<[^>]*>/g, '')
-    .trim();
-};
+
+  // Obtener información de personal y competencias
+  static async getPersonalInfo(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'personal' as tipo,
+          p.id,
+          p.nombres || ' ' || p.apellidos as titulo,
+          p.documento_identidad as codigo,
+          'Personal: ' || p.nombres || ' ' || p.apellidos || 
+          ' | Email: ' || p.email || 
+          ' | Departamento: ' || COALESCE(d.nombre, 'Sin asignar') ||
+          ' | Puesto: ' || COALESCE(pu.nombre, 'Sin asignar') as contenido,
+          p.organization_id,
+          p.created_at,
+          p.updated_at
+        FROM personal p
+        LEFT JOIN departamentos d ON p.id = d.responsable_id
+        LEFT JOIN puestos pu ON p.id = pu.id
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE p.organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo información de personal:', error);
+      return [];
+    }
+  }
+
+  // Obtener auditorías y hallazgos
+  static async getAuditoriasInfo(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'auditoria' as tipo,
+          a.id,
+          a.titulo,
+          a.objetivos || ' | ' || a.alcance || ' | ' || COALESCE(a.resultados, 'Sin resultados') as contenido,
+          a.codigo,
+          a.estado,
+          a.organization_id,
+          a.created_at,
+          a.updated_at
+        FROM auditorias a
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE a.organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo auditorías:', error);
+      return [];
+    }
+  }
+
+  // Obtener hallazgos y acciones
+  static async getHallazgosAcciones(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'hallazgo' as tipo,
+          h.id,
+          h.titulo,
+          h.descripcion || ' | Estado: ' || h.estado || ' | Prioridad: ' || COALESCE(h.prioridad, 'Sin definir') as contenido,
+          h.numeroHallazgo as codigo,
+          h.estado,
+          h.organization_id,
+          h.created_at,
+          h.updated_at
+        FROM hallazgos h
+        UNION ALL
+        SELECT 
+          'accion' as tipo,
+          ac.id,
+          'Acción: ' || ac.descripcion_accion as titulo,
+          ac.descripcion_accion || ' | Responsable: ' || COALESCE(ac.responsable_accion, 'Sin asignar') || 
+          ' | Estado: ' || ac.estado as contenido,
+          ac.numeroAccion as codigo,
+          ac.estado,
+          ac.organization_id,
+          ac.created_at,
+          ac.updated_at
+        FROM acciones ac
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo hallazgos y acciones:', error);
+      return [];
+    }
+  }
+
+  // Obtener indicadores y objetivos
+  static async getIndicadoresObjetivos(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'indicador' as tipo,
+          i.id,
+          i.nombre as titulo,
+          i.descripcion || ' | Meta: ' || COALESCE(i.meta, 'Sin definir') || ' | Fórmula: ' || COALESCE(i.formula, 'Sin fórmula') as contenido,
+          i.frecuencia_medicion as codigo,
+          'activo' as estado,
+          i.organization_id,
+          i.created_at,
+          i.updated_at
+        FROM indicadores i
+        UNION ALL
+        SELECT 
+          'objetivo' as tipo,
+          o.id,
+          o.nombre_objetivo as titulo,
+          o.descripcion || ' | Meta: ' || COALESCE(o.meta, 'Sin definir') || ' | Responsable: ' || COALESCE(o.responsable, 'Sin asignar') as contenido,
+          'objetivo_calidad' as codigo,
+          'activo' as estado,
+          o.organization_id,
+          '2024-01-01' as created_at,
+          '2024-01-01' as updated_at
+        FROM objetivos_calidad o
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo indicadores y objetivos:', error);
+      return [];
+    }
+  }
+
+  // Obtener procesos y departamentos
+  static async getProcesosDepartamentos(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'proceso' as tipo,
+          p.id,
+          p.nombre as titulo,
+          p.descripcion || ' | Responsable: ' || COALESCE(p.responsable, 'Sin asignar') as contenido,
+          'proceso_sgc' as codigo,
+          'activo' as estado,
+          p.organization_id,
+          p.created_at,
+          p.updated_at
+        FROM procesos p
+        UNION ALL
+        SELECT 
+          'departamento' as tipo,
+          d.id,
+          d.nombre as titulo,
+          d.descripcion || ' | Objetivos: ' || COALESCE(d.objetivos, 'Sin objetivos definidos') as contenido,
+          'departamento' as codigo,
+          'activo' as estado,
+          d.organization_id,
+          d.created_at,
+          d.updated_at
+        FROM departamentos d
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo procesos y departamentos:', error);
+      return [];
+    }
+  }
+
+  // Obtener capacitaciones
+  static async getCapacitaciones(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'capacitacion' as tipo,
+          c.id,
+          c.nombre as titulo,
+          c.descripcion || ' | Instructor: ' || COALESCE(c.instructor, 'Sin asignar') || 
+          ' | Duración: ' || COALESCE(c.duracion_horas, 0) || ' horas' as contenido,
+          c.estado as codigo,
+          c.estado,
+          c.organization_id,
+          c.created_at,
+          c.updated_at
+        FROM capacitaciones c
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE c.organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo capacitaciones:', error);
+      return [];
+    }
+  }
+
+  // Obtener minutas y comunicaciones
+  static async getMinutas(organizationId = null) {
+    try {
+      let query = `
+        SELECT 
+          'minuta' as tipo,
+          m.id,
+          m.titulo,
+          'Tipo: ' || COALESCE(m.tipo, 'Sin tipo') || 
+          ' | Lugar: ' || COALESCE(m.lugar, 'Sin lugar') ||
+          ' | Agenda: ' || COALESCE(m.agenda, 'Sin agenda') ||
+          ' | Conclusiones: ' || COALESCE(m.conclusiones, 'Sin conclusiones') as contenido,
+          'comunicacion' as codigo,
+          COALESCE(m.estado, 'activa') as estado,
+          COALESCE(m.organization_id, 1) as organization_id,
+          m.created_at,
+          m.updated_at
+        FROM minutas m
+      `;
+      
+      if (organizationId) {
+        query += ` WHERE m.organization_id = ?`;
+        const result = await tursoClient.execute({ sql: query, args: [organizationId] });
+        return result.rows;
+      } else {
+        const result = await tursoClient.execute(query);
+        return result.rows;
+      }
+    } catch (error) {
+      console.error('Error obteniendo minutas:', error);
+      return [];
+    }
+  }
+
+  // Obtener TODOS los datos del sistema para RAG
+  static async getAllSystemData(organizationId = null) {
+    try {
+      console.log('🔄 Obteniendo todos los datos del sistema para RAG...');
+      
+      const [
+        documentos,
+        normas,
+        personal,
+        auditorias,
+        hallazgosAcciones,
+        indicadoresObjetivos,
+        procesosDepartamentos,
+        capacitaciones,
+        minutas
+      ] = await Promise.all([
+        this.getAllDocuments(organizationId),
+        this.getAllNormas(organizationId),
+        this.getPersonalInfo(organizationId),
+        this.getAuditoriasInfo(organizationId),
+        this.getHallazgosAcciones(organizationId),
+        this.getIndicadoresObjetivos(organizationId),
+        this.getProcesosDepartamentos(organizationId),
+        this.getCapacitaciones(organizationId),
+        this.getMinutas(organizationId)
+      ]);
+
+      const allData = [
+        ...documentos,
+        ...normas,
+        ...personal,
+        ...auditorias,
+        ...hallazgosAcciones,
+        ...indicadoresObjetivos,
+        ...procesosDepartamentos,
+        ...capacitaciones,
+        ...minutas
+      ];
+
+      console.log(`✅ Total de registros obtenidos: ${allData.length}`);
+      console.log(`📊 Distribución por tipo:`);
+      
+      const stats = {};
+      allData.forEach(item => {
+        stats[item.tipo] = (stats[item.tipo] || 0) + 1;
+      });
+      
+      Object.entries(stats).forEach(([tipo, count]) => {
+        console.log(`   - ${tipo}: ${count} registros`);
+      });
+
+      return allData;
+    } catch (error) {
+      console.error('Error obteniendo todos los datos del sistema:', error);
+      return [];
+    }
+  }
+
+  // Buscar en todos los datos del sistema
+  static async searchInSystemData(query, organizationId = null) {
+    try {
+      const allData = await this.getAllSystemData(organizationId);
+      
+      // Búsqueda simple por texto (se puede mejorar con embeddings)
+      const searchTerm = query.toLowerCase();
+      const results = allData.filter(item => {
+        return (
+          (item.titulo && item.titulo.toLowerCase().includes(searchTerm)) ||
+          (item.contenido && item.contenido.toLowerCase().includes(searchTerm)) ||
+          (item.codigo && item.codigo.toLowerCase().includes(searchTerm))
+        );
+      });
+
+      return results.slice(0, 10); // Limitar a 10 resultados
+    } catch (error) {
+      console.error('Error buscando en datos del sistema:', error);
+      return [];
+    }
+  }
+}
 
 module.exports = {
-  ragConfigSchema,
-  ragEmbeddingsSchema,
-  ragQueriesSchema,
-  ragSourcesSchema,
-  CONTENT_TYPES,
-  INDEXING_STATUS,
-  QUERY_TYPES,
-  CHUNKING_CONFIG,
-  createMetadata,
-  validateQuery,
-  sanitizeContent
+  RAGDataModel
 }; 
