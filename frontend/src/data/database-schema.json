@@ -1,0 +1,3452 @@
+{
+  "lastUpdate": "2025-08-20T12:00:00.244Z",
+  "totalTables": 35,
+  "tables": {
+    "acciones": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "hallazgo_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "numeroAccion",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion_accion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable_accion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_plan_accion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "comentarios_ejecucion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_ejecucion_accion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "eficacia",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "observaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "hallazgo_id",
+          "referencesTable": "hallazgos",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_acciones_2",
+          "unique": true
+        },
+        {
+          "name": "sqlite_autoindex_acciones_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:01.032Z"
+    },
+    "auditoria_aspectos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "auditoria_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "proceso_id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "proceso_nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "documentacion_referenciada",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "auditor_nombre",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "observaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "conformidad",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "auditoria_id",
+          "referencesTable": "auditorias",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_auditoria_aspectos_proceso",
+          "unique": false
+        },
+        {
+          "name": "sqlite_autoindex_auditoria_aspectos_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:02.029Z"
+    },
+    "auditorias": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "codigo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "titulo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "area",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable_id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_programada",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_ejecucion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'planificada'",
+          "unique": false
+        },
+        {
+          "name": "objetivos",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "alcance",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "criterios",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "resultados",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "observaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_auditorias_2",
+          "unique": true
+        },
+        {
+          "name": "sqlite_autoindex_auditorias_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 2,
+      "lastAnalyzed": "2025-08-20T12:00:03.750Z"
+    },
+    "capacitacion_asistentes": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "capacitacion_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "empleado_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "asistencia",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "empleado_id",
+          "referencesTable": "personal",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        },
+        {
+          "column": "capacitacion_id",
+          "referencesTable": "capacitaciones",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_capacitacion_asistentes_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:04.739Z"
+    },
+    "capacitaciones": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_programada",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "duracion_horas",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "instructor",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'Programada'",
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [],
+      "recordCount": 2,
+      "lastAnalyzed": "2025-08-20T12:00:07.320Z"
+    },
+    "competencias": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'activa'",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [],
+      "recordCount": 6,
+      "lastAnalyzed": "2025-08-20T12:00:08.875Z"
+    },
+    "departamentos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable_id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "objetivos",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_departamentos_2",
+          "unique": true
+        },
+        {
+          "name": "sqlite_autoindex_departamentos_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 6,
+      "lastAnalyzed": "2025-08-20T12:00:09.760Z"
+    },
+    "documentos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "titulo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "version",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'1.0'",
+          "unique": false
+        },
+        {
+          "name": "archivo_nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "archivo_path",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "tipo_archivo",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "tamaño",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "idx_documentos_titulo",
+          "unique": false
+        },
+        {
+          "name": "idx_documentos_organization",
+          "unique": false
+        }
+      ],
+      "recordCount": 2,
+      "lastAnalyzed": "2025-08-20T12:00:10.538Z"
+    },
+    "encuestas": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "titulo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_creacion",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_cierre",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:11.352Z"
+    },
+    "evaluacion_programacion": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_inicio",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_fin",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "'borrador'",
+          "unique": false
+        },
+        {
+          "name": "fecha_creacion",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "fecha_actualizacion",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "usuario_creador",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [],
+      "recordCount": 3,
+      "lastAnalyzed": "2025-08-20T12:00:12.209Z"
+    },
+    "evaluaciones_competencias_detalle": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "evaluacion_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "competencia_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "puntaje",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "competencia_id",
+          "referencesTable": "competencias",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "evaluacion_id",
+          "referencesTable": "evaluaciones_individuales",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_evaluaciones_detalle_comp",
+          "unique": false
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:13.132Z"
+    },
+    "evaluaciones_individuales": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "empleado_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "evaluador_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_evaluacion",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "observaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "puntaje_total",
+          "type": "REAL",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "0",
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'pendiente'",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "evaluador_id",
+          "referencesTable": "usuarios",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "empleado_id",
+          "referencesTable": "personal",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_evaluaciones_org_empleado",
+          "unique": false
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:13.914Z"
+    },
+    "hallazgos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "numeroHallazgo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "titulo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "origen",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "tipo_hallazgo",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "prioridad",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_deteccion",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_cierre",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "proceso_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "requisito_incumplido",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "orden",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "proceso_id",
+          "referencesTable": "procesos",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_hallazgos_2",
+          "unique": true
+        },
+        {
+          "name": "sqlite_autoindex_hallazgos_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:14.755Z"
+    },
+    "indicadores": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "proceso_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "frecuencia_medicion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "meta",
+          "type": "REAL",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "formula",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "proceso_id",
+          "referencesTable": "procesos",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [],
+      "recordCount": 4,
+      "lastAnalyzed": "2025-08-20T12:00:15.498Z"
+    },
+    "limites_uso": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "tipo_recurso",
+          "type": "VARCHAR(50)",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "limite_actual",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "0",
+          "unique": false
+        },
+        {
+          "name": "limite_maximo",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_reset",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "periodo_reset",
+          "type": "VARCHAR(20)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'mensual'",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:16.287Z"
+    },
+    "mediciones": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "indicador_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "valor",
+          "type": "REAL",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_medicion",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "observaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_creacion",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "indicador_id",
+          "referencesTable": "indicadores",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_mediciones_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:17.115Z"
+    },
+    "minutas": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "titulo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [],
+      "recordCount": 6,
+      "lastAnalyzed": "2025-08-20T12:00:17.885Z"
+    },
+    "normas": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "codigo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "titulo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "version",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'2015'",
+          "unique": false
+        },
+        {
+          "name": "tipo",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'ISO 9001'",
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'activo'",
+          "unique": false
+        },
+        {
+          "name": "categoria",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_revision",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "observaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [],
+      "recordCount": 54,
+      "lastAnalyzed": "2025-08-20T12:00:18.665Z"
+    },
+    "objetivos_calidad": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre_objetivo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "proceso_id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "indicador_asociado_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "meta",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_inicio",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_fin",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "indicador_asociado_id",
+          "referencesTable": "indicadores",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "proceso_id",
+          "referencesTable": "procesos",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_objetivos_calidad_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 11,
+      "lastAnalyzed": "2025-08-20T12:00:19.430Z"
+    },
+    "organization_features": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "feature_name",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "is_enabled",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_organization_features_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 35,
+      "lastAnalyzed": "2025-08-20T12:00:20.180Z"
+    },
+    "organizations": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "name",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "email",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "phone",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "plan",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "'basic'",
+          "unique": false
+        },
+        {
+          "name": "is_active",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_organizations_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 6,
+      "lastAnalyzed": "2025-08-20T12:00:20.919Z"
+    },
+    "personal": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "2",
+          "unique": false
+        },
+        {
+          "name": "nombres",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "apellidos",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "email",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "telefono",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "documento_identidad",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_nacimiento",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nacionalidad",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "direccion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "telefono_emergencia",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_contratacion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "numero_legajo",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'Activo'",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "idx_personal_estado",
+          "unique": false
+        },
+        {
+          "name": "sqlite_autoindex_personal_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 9,
+      "lastAnalyzed": "2025-08-20T12:00:21.672Z"
+    },
+    "planes": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "VARCHAR(100)",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "precio_mensual",
+          "type": "DECIMAL(10,2)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "0.00",
+          "unique": false
+        },
+        {
+          "name": "precio_anual",
+          "type": "DECIMAL(10,2)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "0.00",
+          "unique": false
+        },
+        {
+          "name": "max_usuarios",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "10",
+          "unique": false
+        },
+        {
+          "name": "max_departamentos",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "5",
+          "unique": false
+        },
+        {
+          "name": "max_documentos",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "100",
+          "unique": false
+        },
+        {
+          "name": "max_auditorias",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "10",
+          "unique": false
+        },
+        {
+          "name": "max_hallazgos",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "50",
+          "unique": false
+        },
+        {
+          "name": "max_acciones",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "100",
+          "unique": false
+        },
+        {
+          "name": "caracteristicas",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "VARCHAR(20)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'activo'",
+          "unique": false
+        },
+        {
+          "name": "es_plan_gratuito",
+          "type": "BOOLEAN",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "FALSE",
+          "unique": false
+        },
+        {
+          "name": "orden_display",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "0",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [],
+      "recordCount": 4,
+      "lastAnalyzed": "2025-08-20T12:00:22.446Z"
+    },
+    "politica_calidad": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": "'ident_proc_' || lower(hex(randomblob(8)))",
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "politica_calidad",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "alcance",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "mapa_procesos",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organigrama",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now', 'localtime')",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now', 'localtime')",
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'activo'",
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_politica_calidad_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 4,
+      "lastAnalyzed": "2025-08-20T12:00:23.217Z"
+    },
+    "procesos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_procesos_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 5,
+      "lastAnalyzed": "2025-08-20T12:00:23.965Z"
+    },
+    "productos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "codigo",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "tipo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "categoria",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "'Borrador'",
+          "unique": false
+        },
+        {
+          "name": "version",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'1.0'",
+          "unique": false
+        },
+        {
+          "name": "fecha_creacion",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_revision",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "responsable",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "especificaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "requisitos_calidad",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "proceso_aprobacion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "documentos_asociados",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "observaciones",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "created_by",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_by",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "updated_by",
+          "referencesTable": "usuarios",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "created_by",
+          "referencesTable": "usuarios",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_productos_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 3,
+      "lastAnalyzed": "2025-08-20T12:00:24.721Z"
+    },
+    "productos_historial": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "producto_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "campo_modificado",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "valor_anterior",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "valor_nuevo",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "usuario_responsable",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_cambio",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        },
+        {
+          "column": "producto_id",
+          "referencesTable": "productos",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_productos_historial_organization",
+          "unique": false
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:25.471Z"
+    },
+    "puestos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "nombre",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion_responsabilidades",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "requisitos_experiencia",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "requisitos_formacion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "departamento_id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "reporta_a_id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_puestos_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 9,
+      "lastAnalyzed": "2025-08-20T12:00:26.226Z"
+    },
+    "refresh_tokens": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "user_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "token",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "expires_at",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "user_id",
+          "referencesTable": "usuarios",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_refresh_tokens_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 2,
+      "lastAnalyzed": "2025-08-20T12:00:26.987Z"
+    },
+    "relaciones_sgc": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "origen_tipo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "origen_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "destino_tipo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "destino_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_creacion",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "usuario_creador",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [
+        {
+          "name": "idx_relaciones_org",
+          "unique": false
+        },
+        {
+          "name": "sqlite_autoindex_relaciones_sgc_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 13,
+      "lastAnalyzed": "2025-08-20T12:00:27.758Z"
+    },
+    "sqlite_sequence": {
+      "columns": [
+        {
+          "name": "name",
+          "type": "",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "seq",
+          "type": "",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        }
+      ],
+      "relations": [],
+      "indexes": [],
+      "recordCount": 16,
+      "lastAnalyzed": "2025-08-20T12:00:28.540Z"
+    },
+    "suscripciones": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "plan_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "estado",
+          "type": "VARCHAR(20)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'activa'",
+          "unique": false
+        },
+        {
+          "name": "fecha_inicio",
+          "type": "DATE",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_fin",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "fecha_renovacion",
+          "type": "DATE",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "precio_pagado",
+          "type": "DECIMAL(10,2)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "moneda",
+          "type": "VARCHAR(3)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'USD'",
+          "unique": false
+        },
+        {
+          "name": "metodo_pago",
+          "type": "VARCHAR(50)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "periodo",
+          "type": "VARCHAR(20)",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "'mensual'",
+          "unique": false
+        },
+        {
+          "name": "cancelada_por_usuario",
+          "type": "BOOLEAN",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "FALSE",
+          "unique": false
+        },
+        {
+          "name": "motivo_cancelacion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "plan_id",
+          "referencesTable": "planes",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        },
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION"
+        }
+      ],
+      "indexes": [],
+      "recordCount": 5,
+      "lastAnalyzed": "2025-08-20T12:00:29.275Z"
+    },
+    "temas_capacitacion": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "capacitacion_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "titulo",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "descripcion",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "orden",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "0",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "CURRENT_TIMESTAMP",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "capacitacion_id",
+          "referencesTable": "capacitaciones",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_temas_capacitacion_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:30.015Z"
+    },
+    "usuarios": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "name",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "email",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "password_hash",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "role",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "'user'",
+          "unique": false
+        },
+        {
+          "name": "is_active",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_usuarios_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 5,
+      "lastAnalyzed": "2025-08-20T12:00:30.749Z"
+    },
+    "usuarios_backup": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": true,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "organization_id",
+          "type": "INTEGER",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "name",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "email",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "password_hash",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": null,
+          "unique": false
+        },
+        {
+          "name": "role",
+          "type": "TEXT",
+          "notNull": true,
+          "primaryKey": false,
+          "defaultValue": "'employee'",
+          "unique": false
+        },
+        {
+          "name": "is_active",
+          "type": "INTEGER",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "1",
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TEXT",
+          "notNull": false,
+          "primaryKey": false,
+          "defaultValue": "datetime('now')",
+          "unique": false
+        }
+      ],
+      "relations": [
+        {
+          "column": "organization_id",
+          "referencesTable": "organizations",
+          "referencesColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_usuarios_backup_1",
+          "unique": true
+        }
+      ],
+      "recordCount": 0,
+      "lastAnalyzed": "2025-08-20T12:00:31.485Z"
+    }
+  }
+}
