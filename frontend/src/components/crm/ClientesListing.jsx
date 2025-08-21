@@ -94,11 +94,11 @@ const ClientesListing = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
-          <p className="text-gray-600">Gestión de clientes y prospectos</p>
+          <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
+          <p className="text-gray-600 text-sm">Gestión de clientes y prospectos</p>
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex border rounded-lg">
@@ -106,7 +106,7 @@ const ClientesListing = () => {
               variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('table')}
-              className="rounded-r-none"
+              className="rounded-r-none text-xs"
             >
               Tabla
             </Button>
@@ -114,41 +114,41 @@ const ClientesListing = () => {
               variant={viewMode === 'cards' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('cards')}
-              className="rounded-l-none"
+              className="rounded-l-none text-xs"
             >
               Tarjetas
             </Button>
           </div>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
+          <Button size="sm">
+            <Plus className="w-3 h-3 mr-1" />
             Nuevo Cliente
           </Button>
         </div>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="space-y-1">
               <label className="text-sm font-medium">Buscar</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Nombre, empresa, email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-8 text-sm"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="text-sm font-medium">Tipo de Cliente</label>
               <Select value={selectedTipo} onValueChange={setSelectedTipo}>
-                <SelectTrigger>
+                <SelectTrigger className="text-sm">
                   <SelectValue placeholder="Todos los tipos" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,10 +162,10 @@ const ClientesListing = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="text-sm font-medium">Categoría</label>
               <Select value={selectedCategoria} onValueChange={setSelectedCategoria}>
-                <SelectTrigger>
+                <SelectTrigger className="text-sm">
                   <SelectValue placeholder="Todas las categorías" />
                 </SelectTrigger>
                 <SelectContent>

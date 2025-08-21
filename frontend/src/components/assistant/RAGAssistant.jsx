@@ -42,7 +42,7 @@ const RAGAssistant = ({ onClose, organizationId = 1 }) => {
 
   const checkRAGStatus = async () => {
     try {
-      const response = await fetch(`/api/rag/status/${organizationId}`, {
+      const response = await fetch(`/api/rag/status`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -79,8 +79,7 @@ const RAGAssistant = ({ onClose, organizationId = 1 }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          query: query.trim(),
-          organizationId: organizationId
+          query: query.trim()
         }),
       });
 
@@ -137,9 +136,9 @@ const RAGAssistant = ({ onClose, organizationId = 1 }) => {
 
     return (
       <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300">
-        <div className="font-medium mb-1 text-gray-900 dark:text-gray-100">📚 Fuentes:</div>
+        <div className="font-medium mb-1 text-black dark:text-white">📚 Fuentes:</div>
         {sources.map((source, index) => (
-          <div key={index} className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+          <div key={index} className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
             <FileText size={12} />
             <span>{source.titulo || source.tipo}</span>
           </div>
@@ -206,19 +205,19 @@ const RAGAssistant = ({ onClose, organizationId = 1 }) => {
             {conversation.length === 0 ? (
               <div className="text-center text-gray-600 dark:text-gray-400 py-8">
                 <Brain className="mx-auto h-12 w-12 opacity-20 mb-2 text-blue-600 dark:text-blue-400" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asistente RAG ISO 9001</h3>
-                <p className="text-sm mt-1 mb-4 text-gray-600 dark:text-gray-400">
+                <h3 className="text-lg font-semibold text-black dark:text-white">Asistente RAG ISO 9001</h3>
+                <p className="text-sm mt-1 mb-4 text-gray-700 dark:text-gray-300">
                   Consulta información específica de tu organización usando IA.
                 </p>
                 
                 {/* Suggestions */}
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">💡 Sugerencias:</p>
+                  <p className="text-xs font-medium text-black dark:text-white">💡 Sugerencias:</p>
                   {getSuggestions().map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => setQuery(suggestion)}
-                      className="block w-full text-left text-xs p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+                      className="block w-full text-left text-xs p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-black dark:text-white"
                     >
                       {suggestion}
                     </button>
@@ -237,7 +236,7 @@ const RAGAssistant = ({ onClose, organizationId = 1 }) => {
                     className={`max-w-[85%] rounded-lg p-3 ${
                       msg.role === "user"
                         ? "bg-blue-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        : "bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
                     }`}
                   >
                     <div className="relative">
@@ -250,7 +249,7 @@ const RAGAssistant = ({ onClose, organizationId = 1 }) => {
                           <Clipboard size={14} />
                         </button>
                       )}
-                      <div className="pr-6">
+                      <div className="pr-6 text-black dark:text-white">
                         {renderMessageContent(msg.content)}
                       </div>
                       {msg.role === "assistant" && renderSources(msg.sources)}

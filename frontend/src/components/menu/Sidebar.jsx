@@ -1,51 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
-  Building,
   ChevronDown,
   ChevronRight,
   X,
   Users,
   Briefcase,
-  GraduationCap,
-  ClipboardCheck,
-  ClipboardList,
-  FileText,
+  Target,
+  Activity,
   BarChart3,
-  ActivitySquare,
-  Bell,
-  TrendingUp,
+  DollarSign,
   Calendar,
   Settings,
-  Award,
-  User,
-  ListChecks,
-  Activity,
-  Target,
-  Package,
-  Database,
-  Star,
-  BookOpen,
-  HelpCircle,
-  Crown,
+  ArrowLeft,
   ArrowRight,
-  DollarSign,
+  Star,
+  TrendingUp,
+  MessageSquare,
+  FileText,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  Upload,
+  RefreshCw,
+  Eye,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  UserPlus,
+  Target as TargetIcon,
+  PieChart,
+  LineChart,
+  ActivitySquare,
+  Zap,
+  Award,
+  Crown,
+  Shield,
+  Heart,
+  ShoppingCart,
+  CreditCard,
+  Truck,
+  Package,
+  Tag,
+  Percent,
+  Hash,
+  Hash as HashIcon,
   Brain,
-  MessageSquare
+  Globe,
+  Lock,
+  Unlock,
+  Key,
+  Building2,
+  Database,
+  Cog,
+  UserCheck,
+  GraduationCap,
+  BookOpen,
+  ClipboardList,
+  AlertTriangle,
+  Info,
+  HelpCircle,
+  ExternalLink,
+  Menu,
+  Home,
+  LogOut,
+  User,
+  Bell,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
-import RAGAssistant from '@/components/assistant/RAGAssistant';
+import MainMenuCards from './MainMenuCards';
 
 const Sidebar = ({ isOpen, onClose, isMobile }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
-  const [expandedSections, setExpandedSections] = useState(['recursos-humanos', 'procesos']);
+  const [expandedSections, setExpandedSections] = useState(['dashboard', 'rh', 'procesos']);
   const [expandedSubmenus, setExpandedSubmenus] = useState({});
-  const [showRAGAssistant, setShowRAGAssistant] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showMainMenu, setShowMainMenu] = useState(false);
 
   const toggleSection = (sectionId) => {
     setExpandedSections(prev => 
@@ -66,298 +112,296 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
     }
   };
 
-  const handleSuperAdminAccess = () => {
-    navigate('/super-admin/dashboard');
+  const isActive = (path) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  // Colores para los módulos
-  const getColorClasses = (color, isActive = false) => {
-    const colors = {
-      emerald: isActive ? 'bg-emerald-600 text-white' : 'text-emerald-600 hover:bg-emerald-50',
-      blue: isActive ? 'bg-blue-600 text-white' : 'text-blue-600 hover:bg-blue-50',
-      purple: isActive ? 'bg-purple-600 text-white' : 'text-purple-600 hover:bg-purple-50',
-      orange: isActive ? 'bg-orange-600 text-white' : 'text-orange-600 hover:bg-orange-50',
-      red: isActive ? 'bg-red-600 text-white' : 'text-red-600 hover:bg-red-50',
-      yellow: isActive ? 'bg-yellow-600 text-white' : 'text-yellow-600 hover:bg-yellow-50',
-      pink: isActive ? 'bg-pink-600 text-white' : 'text-pink-600 hover:bg-pink-50',
-      indigo: isActive ? 'bg-indigo-600 text-white' : 'text-indigo-600 hover:bg-indigo-50',
-      teal: isActive ? 'bg-teal-600 text-white' : 'text-teal-600 hover:bg-teal-50',
-      cyan: isActive ? 'bg-cyan-600 text-white' : 'text-cyan-600 hover:bg-cyan-50',
-      lime: isActive ? 'bg-lime-600 text-white' : 'text-lime-600 hover:bg-lime-50',
-      amber: isActive ? 'bg-amber-600 text-white' : 'text-amber-600 hover:bg-amber-50',
-      rose: isActive ? 'bg-rose-600 text-white' : 'text-rose-600 hover:bg-rose-50',
-      violet: isActive ? 'bg-violet-600 text-white' : 'text-violet-600 hover:bg-violet-50',
-      fuchsia: isActive ? 'bg-fuchsia-600 text-white' : 'text-fuchsia-600 hover:bg-fuchsia-50',
-      sky: isActive ? 'bg-sky-600 text-white' : 'text-sky-600 hover:bg-sky-50',
-      slate: isActive ? 'bg-slate-600 text-white' : 'text-slate-600 hover:bg-slate-50',
-      gray: isActive ? 'bg-gray-600 text-white' : 'text-gray-600 hover:bg-gray-50',
-      zinc: isActive ? 'bg-zinc-600 text-white' : 'text-zinc-600 hover:bg-zinc-50',
-      neutral: isActive ? 'bg-neutral-600 text-white' : 'text-neutral-600 hover:bg-neutral-50',
-      stone: isActive ? 'bg-stone-600 text-white' : 'text-stone-600 hover:bg-stone-50'
-    };
-    return colors[color] || colors.emerald;
+  const handleMainMenuToggle = () => {
+    setShowMainMenu(!showMainMenu);
   };
 
-  // Definir departmentModules antes del return
-  const departmentModules = [
+  // Si estamos en el menú principal con tarjetas
+  if (showMainMenu) {
+    return <MainMenuCards onBackToSidebar={handleMainMenuToggle} />;
+  }
+
+  // Configuración de módulos del sistema
+  const systemModules = [
     {
-      id: 'planificacion-revision',
-      name: '1-PLAN - Planificación y Revisión',
-      icon: Target,
-      color: 'orange',
-      items: [
-        { name: 'Calendario', path: '/app/calendario', icon: Calendar },
-        { name: 'Planificación Estratégica', path: '/app/planificacion-estrategica', icon: Target },
-        { name: 'Política de Calidad', path: '/app/politica-calidad', icon: Target },
-        { name: 'Revisión por la Dirección', path: '/app/revision-direccion', icon: BarChart3 },
-        { name: 'Minutas', path: '/app/minutas', icon: FileText },
-        { name: 'Objetivos y Metas', path: '/app/objetivos-metas', icon: TrendingUp },
-      ]
+      id: 'dashboard',
+      name: '📊 Dashboard',
+      icon: BarChart3,
+      path: '/app/dashboard',
+      color: 'slate',
+      description: 'Vista general del sistema'
     },
     {
-      id: 'recursos-humanos',
-      name: '2-RH - Recursos Humanos',
+      id: 'crm',
+      name: '👥 CRM - Gestión de Clientes',
       icon: Users,
+      path: '/app/crm',
       color: 'emerald',
+      description: 'Sistema de gestión comercial',
+      badge: 'Nuevo'
+    },
+    {
+      id: 'rh',
+      name: '👨‍💼 2-RH - Recursos Humanos',
+      icon: UserCheck,
+      path: '/app/personal',
+      color: 'blue',
+      description: 'Gestión de personal y empleados',
       items: [
-        { name: 'Personal', path: '/app/personal', icon: Users },
-        { name: 'Departamentos', path: '/app/departamentos', icon: Building },
-        { name: 'Puestos', path: '/app/puestos', icon: Briefcase },
-        { name: 'Capacitaciones', path: '/app/capacitaciones', icon: GraduationCap },
-        { name: 'Competencias', path: '/app/competencias', icon: Award },
-        { name: 'Evaluación de Competencias', path: '/app/evaluacion-competencias', icon: ClipboardCheck },
+        { name: 'Personal', path: '/app/personal', icon: Users, description: 'Gestión de empleados' },
+        { name: 'Departamentos', path: '/app/departamentos', icon: Building2, description: 'Organización departamental' },
+        { name: 'Puestos', path: '/app/puestos', icon: Briefcase, description: 'Gestión de puestos de trabajo' },
+        { name: 'Capacitaciones', path: '/app/capacitaciones', icon: GraduationCap, description: 'Programas de formación' },
+        { name: 'Procesos', path: '/app/procesos', icon: ClipboardList, description: 'Procesos organizacionales' }
       ]
     },
     {
       id: 'procesos',
-      name: 'Procesos',
-      icon: ClipboardCheck,
-      color: 'blue',
+      name: '📋 3-Procesos',
+      icon: ClipboardList,
+      path: '/app/procesos',
+      color: 'purple',
+      description: 'Gestión de procesos internos',
       items: [
-        { name: 'Procesos', path: '/app/procesos', icon: ClipboardCheck },
-        { name: 'Objetivos de Calidad', path: '/app/objetivos-calidad', icon: Target },
-        { name: 'Indicadores', path: '/app/indicadores', icon: BarChart3 },
-        { name: 'Mediciones', path: '/app/mediciones', icon: TrendingUp },
+        { name: 'Procesos', path: '/app/procesos', icon: ClipboardList, description: 'Gestión de procesos' },
+        { name: 'Documentos', path: '/app/documentos', icon: FileText, description: 'Gestión documental' },
+        { name: 'Normas', path: '/app/normas', icon: Shield, description: 'Cumplimiento normativo' }
       ]
     },
-    { name: '2-DOC - Documentos', path: '/app/documentos', icon: FileText, single: true },
-    { name: 'Puntos de la Norma', path: '/app/normas', icon: ListChecks, single: true },
-    { name: '3-AUD - Auditorías', path: '/app/auditorias', icon: ClipboardCheck, single: true },
-    { name: 'Hallazgos', path: '/app/hallazgos', icon: ActivitySquare, single: true },
-    { name: 'Acciones', path: '/app/acciones', icon: Activity, single: true },
-    { name: '4-SAT - Satisfacción del Cliente', path: '/app/satisfaccion-cliente', icon: Award, single: true },
     {
-      id: 'administracion',
-      name: 'Administración',
-      icon: Settings,
+      id: 'calidad',
+      name: '🎯 4-Calidad',
+      icon: Target,
+      path: '/app/calidad',
       color: 'orange',
+      description: 'Sistema de gestión de calidad',
       items: [
-        { 
-          name: 'Admin de Organización', 
-          path: '/app/admin/organization', 
-          icon: Building, 
-          role: 'admin',
-          show: () => ['admin', 'super_admin'].includes(user?.role)
-        },
-        { name: 'Usuarios', path: '/app/usuarios', icon: Users },
-        { name: 'Planes', path: '/app/planes', icon: Star },
-        { 
-          name: 'Manual del Sistema', 
-          path: '/documentacion', 
-          icon: BookOpen,
-          show: () => true
-        },
-        { 
-          name: 'Ayuda y Soporte', 
-          path: '/app/ayuda', 
-          icon: HelpCircle,
-          show: () => true
-        },
+        { name: 'Auditorías', path: '/app/auditorias', icon: CheckCircle, description: 'Auditorías internas y externas' },
+        { name: 'Hallazgos', path: '/app/hallazgos', icon: AlertTriangle, description: 'Gestión de hallazgos' },
+        { name: 'Acciones', path: '/app/acciones', icon: TrendingUp, description: 'Acciones correctivas y preventivas' },
+        { name: 'Mejoras', path: '/app/mejoras', icon: Zap, description: 'Gestión de mejoras' }
       ]
     },
+    {
+      id: 'indicadores',
+      name: '📈 5-Indicadores',
+      icon: TrendingUp,
+      path: '/app/indicadores',
+      color: 'teal',
+      description: 'Métricas y KPIs del sistema',
+      items: [
+        { name: 'Indicadores', path: '/app/indicadores', icon: TrendingUp, description: 'Indicadores de gestión' },
+        { name: 'Mediciones', path: '/app/mediciones', icon: BarChart3, description: 'Mediciones y análisis' },
+        { name: 'Objetivos', path: '/app/objetivos', icon: Target, description: 'Objetivos de calidad' }
+      ]
+    },
+    {
+      id: 'comunicacion',
+      name: '💬 6-Comunicación',
+      icon: MessageSquare,
+      path: '/app/comunicacion',
+      color: 'indigo',
+      description: 'Comunicación interna y externa',
+      items: [
+        { name: 'Minutas', path: '/app/minutas', icon: FileText, description: 'Actas de reuniones' },
+        { name: 'Encuestas', path: '/app/encuestas', icon: ClipboardList, description: 'Encuestas y feedback' }
+      ]
+    },
+    {
+      id: 'productos',
+      name: '📦 7-Productos',
+      icon: Package,
+      path: '/app/productos',
+      color: 'pink',
+      description: 'Gestión de productos y servicios',
+      items: [
+        { name: 'Productos', path: '/app/productos', icon: Package, description: 'Catálogo de productos' }
+      ]
+    }
   ];
+
+  const filteredModules = systemModules.filter(module =>
+    module.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    module.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (module.items && module.items.some(item => 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ))
+  );
 
   return (
     <motion.div
       initial={{ x: -320 }}
       animate={{ x: 0 }}
-      className="h-full w-80 bg-slate-800 text-white flex flex-col shadow-sgc-lg border-r border-slate-700"
+      className="h-full w-80 bg-gradient-to-b from-slate-50 to-white text-slate-800 flex flex-col shadow-xl border-r border-slate-200"
     >
-      {/* Header */}
-      <div className="p-sgc-p border-b border-slate-700">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-emerald-500 rounded-sgc flex items-center justify-center">
-            <FileText className="w-5 h-5 text-white" />
+      {/* Header del Sistema */}
+      <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-100 to-white">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-lg">
+              <Star className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-800">9001app</h1>
+              <p className="text-xs text-slate-600 font-medium">Sistema de Gestión ISO 9001</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold">SGC Pro</h1>
-            <p className="text-xs text-slate-400">Sistema de Gestión ISO 9001</p>
-          </div>
+          {isMobile && (
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              className="text-slate-600 hover:bg-slate-100"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          )}
         </div>
-      </div>
 
-      {/* Botón CRM - Diseño estándar */}
-      <div className="p-4 border-b border-slate-700">
-        <Button
-          onClick={() => handleNavigation('/app/crm')}
-          className="w-full bg-slate-700 text-white hover:bg-red-600 border-2 border-slate-600 hover:border-red-500 font-semibold py-3 px-4 rounded-lg transition-all duration-200"
-        >
-          <Target className="w-5 h-5 mr-2" />
-          <div className="text-left flex-1">
-            <div className="font-semibold text-lg">CRM - Gestión de Clientes</div>
-            <div className="text-xs text-slate-300">Sistema de Gestión Comercial</div>
-          </div>
-          <ArrowRight className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
-
-      {/* Botón Asistente RAG */}
-      <div className="p-4 border-b border-slate-700">
-        <Button
-          onClick={() => setShowRAGAssistant(true)}
-          className="w-full bg-slate-700 text-white hover:bg-blue-600 border-2 border-slate-600 hover:border-blue-500 font-semibold py-3 px-4 rounded-lg transition-all duration-200"
-        >
-          <Brain className="w-5 h-5 mr-2" />
-          <div className="text-left flex-1">
-            <div className="font-semibold text-lg">🧠 Asistente IA</div>
-            <div className="text-xs text-slate-300">Consulta inteligente del SGC</div>
-          </div>
-          <MessageSquare className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
-
-      {/* Super Admin Button - Solo mostrar si es super admin */}
-      {user?.role === 'super_admin' && (
-        <div className="p-sgc-p border-b border-purple-700/50">
-          <Button
-            onClick={handleSuperAdminAccess}
-            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 rounded-sgc-lg shadow-sgc transition-all duration-300"
-          >
-            <Crown className="w-5 h-5 mr-2" />
-            <span>Panel Super Admin</span>
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-          <div className="text-xs text-purple-300 mt-2 text-center">
-            Acceso al panel de control global
-          </div>
-        </div>
-      )}
-
-      {/* Search */}
-      <div className="p-sgc-p">
+        {/* Barra de búsqueda */}
         <div className="relative">
-          <input
-            type="text"
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
             placeholder="Buscar en el sistema..."
-            className="w-full bg-slate-700 text-white placeholder-slate-400 rounded-sgc px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 border border-slate-600"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-white border-slate-300 focus:border-slate-500"
           />
-          <div className="absolute left-3 top-2.5">
-            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
         </div>
+
+        {/* Botón para acceder al menú de tarjetas */}
+        <Button
+          onClick={handleMainMenuToggle}
+          variant="outline"
+          className="w-full mt-3 bg-gradient-to-r from-slate-600 to-slate-700 border-slate-600 text-white hover:from-slate-700 hover:to-slate-800 transition-all duration-200"
+        >
+          <Home className="w-4 h-4 mr-2" />
+          Menú de Tarjetas
+        </Button>
       </div>
 
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto">
-        <nav className="px-sgc-p space-y-sgc-gap-sm">
-          {departmentModules.map((module, index) => {
-            // Si es un elemento único (single), renderizar directamente
-            if (module.single) {
-              const isActive = location.pathname === module.path;
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleNavigation(module.path)}
-                  className={`w-full flex items-center space-x-3 px-sgc-p-sm py-2 rounded-sgc text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-emerald-600 text-white shadow-sgc'
-                      : 'text-slate-300 hover:bg-slate-700 hover:shadow-sgc'
-                  }`}
-                >
-                  <module.icon className="w-5 h-5" />
-                  <span>{module.name}</span>
-                </button>
-              );
-            }
-
-            // Si es un módulo con submenús
-            const isExpanded = expandedSections.includes(module.id);
-            return (
-              <div key={module.id} className="space-y-sgc-gap-sm">
+      {/* Contenido del menú */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {filteredModules.map((module) => (
+          <div key={module.id} className="space-y-2">
+            {module.items ? (
+              // Módulo con submenús
+              <div>
                 <button
                   onClick={() => toggleSection(module.id)}
-                  className={`w-full flex items-center justify-between px-sgc-p-sm py-2 rounded-sgc text-sm font-medium transition-colors ${
-                    isExpanded
-                      ? 'bg-slate-700 text-white shadow-sgc'
-                      : 'text-slate-300 hover:bg-slate-700 hover:shadow-sgc'
+                  className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 ${
+                    isActive(module.path) 
+                      ? 'bg-gradient-to-r from-slate-700 to-slate-800 text-white border-slate-600 shadow-lg' 
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <module.icon className="w-5 h-5" />
-                    <span>{module.name}</span>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      isActive(module.path) 
+                        ? 'bg-slate-600 text-white' 
+                        : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      <module.icon className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-sm">{module.name}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">{module.description}</div>
+                    </div>
                   </div>
-                  {isExpanded ? (
-                    <ChevronDown className="w-4 h-4" />
+                  {expandedSections.includes(module.id) ? (
+                    <ChevronDown className="w-4 h-4 text-slate-500" />
                   ) : (
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 text-slate-500" />
                   )}
                 </button>
-
+                
                 <AnimatePresence>
-                  {isExpanded && (
+                  {expandedSections.includes(module.id) && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-sgc-gap-sm ml-8"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="ml-6 mt-2 space-y-2"
                     >
-                      {module.items.map((item) => {
-                        const isActive = location.pathname === item.path;
-                        return (
-                          <button
-                            key={item.path}
-                            onClick={() => handleNavigation(item.path)}
-                            className={`w-full flex items-center space-x-3 px-sgc-p-sm py-2 rounded-sgc text-sm font-medium transition-colors ${
-                              isActive
-                                ? 'bg-emerald-600 text-white shadow-sgc'
-                                : 'text-slate-400 hover:bg-slate-700 hover:text-white hover:shadow-sgc'
-                            }`}
-                          >
-                            <item.icon className="w-4 h-4" />
-                            <span>{item.name}</span>
-                          </button>
-                        );
-                      })}
+                      {module.items.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleNavigation(item.path)}
+                          className={`w-full flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 text-left ${
+                            isActive(item.path) 
+                              ? 'bg-gradient-to-r from-slate-700 to-slate-800 text-white border-slate-600 shadow-lg' 
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md'
+                          }`}
+                        >
+                          <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
+                            isActive(item.path) 
+                              ? 'bg-slate-600 text-white' 
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            <item.icon className="w-3 h-3" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{item.name}</div>
+                            <div className="text-xs text-slate-500 mt-0.5">{item.description}</div>
+                          </div>
+                        </button>
+                      ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            );
-          })}
-        </nav>
+            ) : (
+              // Módulo simple
+              <button
+                onClick={() => handleNavigation(module.path)}
+                className={`w-full flex items-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                  isActive(module.path) 
+                    ? 'bg-gradient-to-r from-slate-700 to-slate-800 text-white border-slate-600 shadow-lg' 
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  isActive(module.path) 
+                    ? 'bg-slate-600 text-white' 
+                    : 'bg-slate-100 text-slate-600'
+                }`}>
+                  <module.icon className="w-4 h-4" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-sm flex items-center space-x-2">
+                    <span>{module.name}</span>
+                    {module.badge && (
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 text-xs">
+                        {module.badge}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-xs text-slate-500 mt-0.5">{module.description}</div>
+                </div>
+              </button>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Footer */}
-      <div className="p-sgc-p border-t border-slate-700">
+      {/* Footer del Sistema */}
+      <div className="p-4 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-white">
         <div className="text-center">
-          <div className="text-xs text-slate-400 mb-2">
-            Sistema de Gestión de Calidad
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <Shield className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-semibold text-slate-700">SGC ISO 9001</span>
+            <Shield className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-xs text-slate-500">
-            © 2024 SGC Pro v11-8
-          </div>
+          <p className="text-xs text-slate-500">
+            Sistema de Coordinación de Agentes
+          </p>
         </div>
       </div>
-
-      {/* Asistente RAG */}
-      {showRAGAssistant && (
-        <RAGAssistant 
-          onClose={() => setShowRAGAssistant(false)}
-          organizationId={user?.organization_id || 1}
-        />
-      )}
     </motion.div>
   );
 };

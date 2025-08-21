@@ -45,12 +45,14 @@ const coordinacionRoutes = require('./routes/coordinacion.routes.js');
 const crmRoutes = require('./routes/crm.routes.js');
 const databaseRoutes = require('./routes/database.routes.js');
 
-// Importar rutas RAG si existe el módulo
+// Importar rutas RAG del nuevo sistema
 let ragRoutes = null;
 try {
-  ragRoutes = require('./RAG-Backend/routes/ragRoutes.js');
+  ragRoutes = require('./RAG-System/routes/ragRoutes.js');
+  console.log('✅ Nuevo sistema RAG cargado correctamente');
 } catch (error) {
-  console.log('⚠️  Módulo RAG no encontrado, continuando sin RAG...');
+  console.log('⚠️  Nuevo módulo RAG no encontrado, continuando sin RAG...');
+  console.log('Error:', error.message);
 }
 
 // Rutas de autenticación
@@ -142,6 +144,12 @@ if (ragRoutes) {
 
 // Rutas de productos (requieren autenticación)
 app.use('/api/productos', authMiddleware, productosRoutes);
+
+// ===== SISTEMAS ALTERNATIVOS DE BÚSQUEDA =====
+const alternativeSearchRoutes = require('./routes/alternativeSearch.routes');
+app.use('/api/alternative', alternativeSearchRoutes);
+// ===== FIN SISTEMAS ALTERNATIVOS =====
+
 
 // Ruta de prueba
 app.get('/api/test', (req, res) => {

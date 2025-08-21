@@ -24,7 +24,7 @@ const CoordinacionAgentesViewer = () => {
       setContent(data);
       setLastUpdate(new Date().toLocaleString('es-ES'));
     } catch (err) {
-      setError('Error al cargar el documento de coordinación');
+      setError('Error al cargar la bitácora de agentes');
       console.error('Error loading document:', err);
     } finally {
       setIsLoading(false);
@@ -55,13 +55,16 @@ const CoordinacionAgentesViewer = () => {
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       
-      // Listas con mejor formato para la bitácora
+      // Listas con mejor formato para la bitácora (incluyendo nuevos campos de archivos)
       .replace(/^- 📅 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">📅</span> <span class="font-medium">$1</span></li>')
       .replace(/^- ⏰ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">⏰</span> <span class="font-medium">$1</span></li>')
       .replace(/^- 🖊️ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-purple-600 mr-2">🖊️</span> <span class="font-medium">$1</span></li>')
       .replace(/^- 🎯 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-orange-600 mr-2">🎯</span> <span class="font-medium">$1</span></li>')
       .replace(/^- 🔄 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">🔄</span> <span class="font-medium">$1</span></li>')
       .replace(/^- 📦 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">📦</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 📁 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">📁</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 📄 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">📄</span> <span class="font-medium">$1</span></li>')
+      .replace(/^- 🗑️ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-red-600 mr-2">🗑️</span> <span class="font-medium">$1</span></li>')
       .replace(/^- 📑 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-purple-600 mr-2">📑</span> <span class="font-medium">$1</span></li>')
       .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1">• $1</li>')
       
@@ -104,10 +107,10 @@ const CoordinacionAgentesViewer = () => {
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold text-purple-600 flex items-center gap-3">
                   <RefreshCw className="w-8 h-8" />
-                  Coordinación de Agentes
+                  Bitácora de Agentes
                 </h1>
                 <p className="text-slate-600">
-                  Documento de coordinación en tiempo real
+                  Registro de actividades y tareas de agentes en tiempo real
                 </p>
               </div>
               
@@ -168,7 +171,7 @@ const CoordinacionAgentesViewer = () => {
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <RefreshCw className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-4" />
-                  <p className="text-slate-600">Cargando documento de coordinación...</p>
+                  <p className="text-slate-600">Cargando bitácora de agentes...</p>
                 </div>
               </div>
             ) : error ? (

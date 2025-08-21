@@ -35,7 +35,7 @@ const CRMLayout = ({ children }) => {
   };
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-red-50 via-white to-red-50 flex">
+    <div className="h-screen w-full bg-gradient-to-br from-slate-50 via-white to-slate-50 flex">
       {/* Overlay para móvil */}
       <AnimatePresence>
         {sidebarOpen && isMobile && (
@@ -49,7 +49,7 @@ const CRMLayout = ({ children }) => {
         )}
       </AnimatePresence>
 
-      {/* Sidebar CRM - Siempre visible en desktop */}
+      {/* Sidebar CRM - Optimizado para reducir márgenes */}
       <div className="fixed inset-y-0 left-0 z-50 lg:relative lg:translate-x-0 lg:block">
         <CRMMenu 
           isOpen={true} 
@@ -58,60 +58,60 @@ const CRMLayout = ({ children }) => {
         />
       </div>
 
-      {/* Contenido principal */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-80">
-        {/* TopBar personalizado para CRM */}
-        <div className="bg-white border-b-2 border-red-200 shadow-sm">
+      {/* Contenido principal - Optimizado para mejor uso del espacio */}
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
+        {/* TopBar personalizado para CRM - Reducido padding */}
+        <div className="bg-white border-b border-slate-200 shadow-sm">
           <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <Button
                 onClick={toggleSidebar}
                 variant="ghost"
                 size="sm"
-                className="lg:hidden text-red-600 hover:bg-red-50"
+                className="lg:hidden text-slate-600 hover:bg-slate-100"
               >
                 {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
               
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">C</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-800 rounded-lg flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-xs">C</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-red-700">CRM Pro</h1>
-                  <p className="text-xs text-red-500">Sistema de Gestión Comercial</p>
+                  <h1 className="text-base font-bold text-slate-800">CRM Pro</h1>
+                  <p className="text-xs text-slate-600 font-medium">Sistema de Gestión Comercial</p>
                 </div>
               </div>
             </div>
 
-            {/* Botón de regreso al SGC */}
+            {/* Botón de regreso al SGC - Compacto */}
             <Button
               onClick={() => navigate('/app/dashboard')}
               variant="outline"
               size="sm"
-              className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50"
+              className="flex items-center space-x-1 text-slate-700 border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 text-xs"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3 h-3" />
               <span>Volver al SGC</span>
             </Button>
           </div>
         </div>
 
-        {/* Área de contenido */}
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-red-50/50 to-white">
-          <div className="p-6">
+        {/* Área de contenido - Reducido padding para mejor uso del espacio */}
+        <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50/30 to-white">
+          <div className="p-4">
             {children}
           </div>
         </div>
       </div>
 
-      {/* Indicador de que estamos en el CRM */}
+      {/* Indicador de que estamos en el CRM - Compacto */}
       {!sidebarOpen && (
-        <div className="fixed top-4 left-4 z-30 lg:hidden">
+        <div className="fixed top-3 left-3 z-30 lg:hidden">
           <Button
             onClick={toggleSidebar}
             size="sm"
-            className="bg-red-600 text-white hover:bg-red-700 shadow-lg"
+            className="bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:from-slate-700 hover:to-slate-800 shadow-lg transition-all duration-200"
           >
             <Menu className="w-4 h-4" />
           </Button>

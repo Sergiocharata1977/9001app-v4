@@ -55,7 +55,7 @@ const RegisterPage = () => {
       await register(registerData);
       
       setIsSubmitted(true);
-      toast.success('¡Registro exitoso! Bienvenido a ISO Flow');
+      toast.success('¡Registro exitoso! Bienvenido a 9001app');
       
       setTimeout(() => {
         navigate('/app/departamentos');
@@ -118,7 +118,7 @@ const RegisterPage = () => {
             ¡Cuenta creada exitosamente!
           </h2>
           <p className="text-slate-600 mb-4">
-            Tu cuenta gratuita de ISO Flow está lista
+            Tu cuenta gratuita de 9001app está lista
           </p>
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6">
             <p className="text-sm text-emerald-800">
@@ -153,7 +153,7 @@ const RegisterPage = () => {
                 <Building2 className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">ISO Flow</h1>
+                <h1 className="text-3xl font-bold">9001app</h1>
                 <p className="text-emerald-300">Sistema de Gestión de Calidad</p>
               </div>
             </div>
@@ -240,7 +240,7 @@ const RegisterPage = () => {
                   <Building2 className="w-7 h-7 text-white" />
                 </div>
                 <div className="text-white">
-                  <h1 className="text-2xl font-bold">ISO Flow</h1>
+                  <h1 className="text-2xl font-bold">9001app</h1>
                   <p className="text-emerald-300 text-sm">Sistema de Gestión de Calidad</p>
                 </div>
               </div>
@@ -252,7 +252,7 @@ const RegisterPage = () => {
                   Crea tu cuenta
                 </h2>
                 <p className="text-slate-600">
-                  Únete a ISO Flow y transforma tu organización
+                  Únete a 9001app y transforma tu organización
                 </p>
               </div>
 

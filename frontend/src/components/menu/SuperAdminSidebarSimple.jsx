@@ -57,9 +57,9 @@ const SuperAdminSidebarSimple = ({ isOpen, onClose, isMobile }) => {
       subItems: [
         {
           id: 'coordinacion-documento',
-          label: '📄 Documento de Coordinación',
+          label: '📄 Bitácora de Agentes',
           path: '/super-admin/coordinacion-documento',
-          description: 'Documento MD en tiempo real',
+          description: 'Registro de actividades en tiempo real',
           icon: FileText,
           color: 'text-blue-500'
         }

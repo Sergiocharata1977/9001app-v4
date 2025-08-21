@@ -96,7 +96,7 @@ const WebHome = () => {
             className="text-center"
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              ISO Flow
+              9001app
             </h1>
             <p className="text-xl md:text-2xl text-slate-200 mb-8 max-w-3xl mx-auto">
               Sistema de Gestión de Calidad integral para organizaciones que buscan la excelencia operativa
@@ -236,7 +236,7 @@ const WebHome = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              Ve ISO Flow en Acción
+              Ve 9001app en Acción
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
               Explora nuestro sistema con datos de ejemplo de "Los Señores del Agro", 
@@ -319,13 +319,13 @@ const WebHome = () => {
       <footer className="bg-slate-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h3 className="text-2xl font-bold mb-4">ISO Flow</h3>
+            <h3 className="text-2xl font-bold mb-4">9001app</h3>
             <p className="text-slate-400 mb-6">
               Transformando la gestión de calidad con tecnología de vanguardia
             </p>
             <div className="border-t border-slate-700 pt-6">
               <p className="text-slate-400">
-                © 2024 ISO Flow. Todos los derechos reservados.
+                © 2024 9001app. Todos los derechos reservados.
               </p>
             </div>
           </div>

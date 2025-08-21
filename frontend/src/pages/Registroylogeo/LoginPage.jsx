@@ -65,7 +65,7 @@ const LoginPage = () => {
         >
           <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            ¡Bienvenido a ISO Flow!
+            ¡Bienvenido a 9001app!
           </h2>
           <p className="text-slate-600 mb-6">
             Redirigiendo al sistema...
@@ -99,13 +99,13 @@ const LoginPage = () => {
                 <Building2 className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">ISO Flow</h1>
+                <h1 className="text-3xl font-bold">9001app</h1>
                 <p className="text-emerald-300">Sistema de Gestión de Calidad</p>
               </div>
             </div>
 
             <h2 className="text-4xl font-bold mb-6">
-              Transforma tu organización con ISO Flow
+              Transforma tu organización con 9001app
             </h2>
             <p className="text-xl text-slate-300 mb-8">
               La plataforma integral de gestión de calidad que simplifica el cumplimiento de ISO 9001
@@ -129,7 +129,7 @@ const LoginPage = () => {
             </div>
 
             <div className="mt-12 p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20">
-              <h3 className="text-lg font-semibold mb-2">¿Nuevo en ISO Flow?</h3>
+              <h3 className="text-lg font-semibold mb-2">¿Nuevo en 9001app?</h3>
               <p className="text-slate-300 mb-4">
                 Regístrate gratis y obtén 7 días de prueba completa
               </p>
@@ -159,7 +159,7 @@ const LoginPage = () => {
                   <Building2 className="w-7 h-7 text-white" />
                 </div>
                 <div className="text-white">
-                  <h1 className="text-2xl font-bold">ISO Flow</h1>
+                  <h1 className="text-2xl font-bold">9001app</h1>
                   <p className="text-emerald-300 text-sm">Sistema de Gestión de Calidad</p>
                 </div>
               </div>
@@ -171,7 +171,7 @@ const LoginPage = () => {
                   Bienvenido de vuelta
                 </h2>
                 <p className="text-slate-600">
-                  Inicia sesión en tu cuenta de ISO Flow
+                  Inicia sesión en tu cuenta de 9001app
                 </p>
               </div>
 

@@ -7,14 +7,19 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 // Middleware de autenticación para sistema SAAS multi-tenant
 const authMiddleware = async (req, res, next) => {
   try {
+    console.log('🔐 DEBUG - authMiddleware llamado para:', req.path);
+    
     // Obtener token del header Authorization
     const authHeader = req.headers.authorization;
+    console.log('🔐 DEBUG - authHeader:', authHeader ? 'Presente' : 'Ausente');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ DEBUG - Token no válido en header');
       return res.status(401).json({ message: 'Token de acceso requerido.' });
     }
 
     const token = authHeader.split(' ')[1];
+    console.log('🔐 DEBUG - Token extraído:', token.substring(0, 20) + '...');
 
     // Verificar token JWT
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -25,6 +30,7 @@ const authMiddleware = async (req, res, next) => {
     // Aceptar tanto 'id' como 'userId' en el token
     const userId = decoded.id || decoded.userId;
     if (!userId || (typeof userId !== 'string' && typeof userId !== 'number')) {
+      console.log('❌ DEBUG - Token sin ID de usuario válido');
       return res.status(401).json({ message: 'Token sin ID de usuario válido.' });
     }
     
@@ -39,6 +45,7 @@ const authMiddleware = async (req, res, next) => {
     });
 
     if (userResult.rows.length === 0) {
+      console.log('❌ DEBUG - Usuario no encontrado en BD');
       return res.status(401).json({ message: 'Usuario no válido o inactivo.' });
     }
 
@@ -47,9 +54,11 @@ const authMiddleware = async (req, res, next) => {
 
     // Agregar usuario al request para uso en controladores
     req.user = user;
+    console.log('✅ DEBUG - Usuario agregado a req.user');
     next();
 
   } catch (error) {
+    console.error('❌ DEBUG - Error en authMiddleware:', error.message);
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({ message: 'Token inválido.' });
     }

@@ -18,7 +18,7 @@ const RAGToggle = ({ organizationId = 1 }) => {
 
   const loadRAGStatus = async () => {
     try {
-      const response = await fetch(`/api/rag/status/${organizationId}`, {
+      const response = await fetch(`/api/rag/status`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -44,7 +44,6 @@ const RAGToggle = ({ organizationId = 1 }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          organizationId,
           enabled
         })
       });
@@ -83,9 +82,7 @@ const RAGToggle = ({ organizationId = 1 }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-          organizationId
-        })
+        body: JSON.stringify({})
       });
 
       const data = await response.json();
