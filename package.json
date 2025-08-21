@@ -61,7 +61,22 @@
     "db-schema:update": "node backend/scripts/database-schema-updater.js",
     "db-schema:start": "node backend/scripts/database-schema-updater.js --continuous",
     "db-schema:stop": "pkill -f database-schema-updater",
-    "db-schema:status": "node backend/scripts/database-schema-status.js"
+    "db-schema:status": "node backend/scripts/database-schema-status.js",
+    "file-structure:update": "node backend/scripts/file-structure-updater.js update",
+    "file-structure:excel": "node backend/scripts/file-structure-updater.js excel",
+    "file-structure:both": "node backend/scripts/file-structure-updater.js both",
+    "file-structure:start": "node backend/scripts/file-structure-updater.js continuous",
+    "file-structure:stop": "pkill -f file-structure-updater",
+    "file-structure:status": "echo 'Estado del sistema de archivos disponible en docs-esenciales/10-estructura-archivos-sistema-20-08-2025.md'",
+    "file-structure:scheduler:start": "node backend/scripts/file-structure-scheduler.js start",
+    "file-structure:scheduler:stop": "node backend/scripts/file-structure-scheduler.js stop",
+    "file-structure:scheduler:status": "node backend/scripts/file-structure-scheduler.js status",
+    "file-structure:scheduler:update": "node backend/scripts/file-structure-scheduler.js update",
+    "file-structure:scheduler:pm2-start": "pm2 start backend/scripts/pm2-file-structure-scheduler.config.js",
+    "file-structure:scheduler:pm2-stop": "pm2 stop file-structure-scheduler",
+    "file-structure:scheduler:pm2-restart": "pm2 restart file-structure-scheduler",
+    "file-structure:scheduler:pm2-logs": "pm2 logs file-structure-scheduler",
+    "file-structure:scheduler:pm2-status": "pm2 show file-structure-scheduler"
   },
   "dependencies": {
     "@libsql/client": "^0.15.12",

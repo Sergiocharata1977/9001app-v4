@@ -1,4 +1,24 @@
 {
-    "cursor.composer.cmdPFilePicker2": true,
-    "cursor.composer.shouldAllowCustomModes": true
+    "cursor.autoApproveCommands": true,
+    "cursor.autoApproveFileChanges": true,
+    "cursor.autoApproveTerminalCommands": true,
+    "cursor.autoApproveGitOperations": true,
+    "cursor.autoApprovePackageInstalls": true,
+    "cursor.autoApproveScriptExecution": true,
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        }
+    },
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "javascript.preferences.includePackageJsonAutoImports": "on"
 }

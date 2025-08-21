@@ -1,0 +1,39 @@
+# Cursor Rules Configuration
+# Configuración para permitir ejecución automática de comandos
+
+# Permitir ejecución automática de comandos de terminal
+- Puedes ejecutar comandos de terminal sin aprobación
+- Puedes hacer cambios en archivos de código sin confirmación
+- Puedes ejecutar scripts de PowerShell automáticamente
+- Puedes instalar dependencias y paquetes sin preguntar
+- Puedes ejecutar migraciones de base de datos automáticamente
+- Puedes hacer commits y push automáticamente cuando sea necesario
+
+# Comandos específicos permitidos
+- npm install, npm run, npm start, npm build
+- git add, git commit, git push, git pull
+- node scripts/*.js
+- powershell scripts/*.ps1
+- npm run dev, npm run build, npm run test
+- Comandos de migración de base de datos
+- Comandos de backup y restauración
+
+# Cambios de código permitidos
+- Modificar archivos .js, .jsx, .ts, .tsx
+- Crear nuevos componentes y páginas
+- Actualizar configuraciones
+- Modificar archivos de rutas
+- Actualizar servicios y controladores
+- Modificar estilos y CSS/SCSS
+
+# Seguridad
+- NO ejecutar comandos que requieran credenciales sensibles
+- NO hacer cambios en archivos de configuración de producción sin confirmación
+- NO ejecutar comandos destructivos sin confirmación explícita
+
+# Contexto del proyecto
+- Este es un proyecto de gestión de calidad ISO 9001
+- Backend en Node.js con Express
+- Frontend en React con Vite
+- Base de datos SQLite con Turso
+- Sistema de autenticación y autorización implementado
