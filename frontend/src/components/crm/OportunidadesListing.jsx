@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { crmService } from '@/services/crmService';
 import { ETAPAS_OPORTUNIDAD, formatearMoneda } from '@/types/crm';
+import OportunidadModal from './OportunidadModal';
 
 const OportunidadesListing = () => {
   const [oportunidades, setOportunidades] = useState([]);
@@ -34,6 +35,11 @@ const OportunidadesListing = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEtapa, setSelectedEtapa] = useState('all');
   const [selectedVendedor, setSelectedVendedor] = useState('all');
+  
+  // Estados del modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState('create');
+  const [selectedOportunidad, setSelectedOportunidad] = useState(null);
 
   useEffect(() => {
     cargarDatos();
@@ -87,6 +93,34 @@ const OportunidadesListing = () => {
     return etapaInfo?.label || etapa;
   };
 
+  // Funciones del modal
+  const handleOpenModal = (mode, oportunidad = null) => {
+    setModalMode(mode);
+    setSelectedOportunidad(oportunidad);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedOportunidad(null);
+    setModalMode('create');
+  };
+
+  const handleModalSave = (data) => {
+    if (data.deleted) {
+      // Oportunidad eliminada
+      setOportunidades(prev => prev.filter(o => o.id !== data.id));
+    } else if (modalMode === 'create') {
+      // Oportunidad creada
+      setOportunidades(prev => [...prev, data]);
+    } else if (modalMode === 'edit') {
+      // Oportunidad actualizada
+      setOportunidades(prev => prev.map(o => o.id === data.id ? data : o));
+    }
+    
+    handleCloseModal();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -105,7 +139,7 @@ const OportunidadesListing = () => {
           <h1 className="text-3xl font-bold text-gray-900">Oportunidades</h1>
           <p className="text-gray-600">Pipeline de ventas y oportunidades comerciales</p>
         </div>
-        <Button>
+        <Button onClick={() => handleOpenModal('create')}>
           <Plus className="w-4 h-4 mr-2" />
           Nueva Oportunidad
         </Button>
@@ -244,13 +278,25 @@ const OportunidadesListing = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-1">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleOpenModal('view', oportunidad)}
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleOpenModal('edit', oportunidad)}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleOpenModal('delete', oportunidad)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -268,6 +314,15 @@ const OportunidadesListing = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Oportunidad */}
+      <OportunidadModal
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        onSave={handleModalSave}
+        oportunidad={selectedOportunidad}
+        mode={modalMode}
+      />
     </div>
   );
 };
