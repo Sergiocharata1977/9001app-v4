@@ -1,17 +1,30 @@
-import React, { lazy, Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import useAuthStore from "../store/authStore";
-import MainLayout from "../components/layout/MainLayout";
-import ProtectedRoute, { SuperAdminRoute, OrganizationAdminRoute } from "./ProtectedRoute";
-import SuperAdminRoutes from "./SuperAdminRoutes";
-import CRMLayout from '@/layouts/CRMLayout';
+import ActividadesListing from '@/components/crm/ActividadesListing';
 import CRMDashboard from '@/components/crm/CRMDashboard';
+import CRMSimpleTest from '@/components/crm/CRMSimpleTest';
+import CRMTestComponent from '@/components/crm/CRMTestComponent';
 import ClientesListing from '@/components/crm/ClientesListing';
 import OportunidadesListing from '@/components/crm/OportunidadesListing';
-import ActividadesListing from '@/components/crm/ActividadesListing';
 import VendedoresListing from '@/components/crm/VendedoresListing';
-import CRMTestComponent from '@/components/crm/CRMTestComponent';
-import CRMSimpleTest from '@/components/crm/CRMSimpleTest';
+import CRMSatisfaccionMenu from '@/components/menu/CRMSatisfaccionMenu';
+import CalidadMenu from '@/components/menu/CalidadMenu';
+import MainMenuCards from '@/components/menu/MainMenuCards';
+import ProcesosMenu from '@/components/menu/ProcesosMenu';
+import RRHHMenu from '@/components/menu/RRHHMenu';
+import CRMLayout from '@/layouts/CRMLayout';
+import React, { lazy, Suspense } from "react";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import MainLayout from "../components/layout/MainLayout";
+import MenuCardsLayout from "../components/layout/MenuCardsLayout";
+import SecondLevelLayout from "../components/layout/SecondLevelLayout";
+import useAuthStore from "../store/authStore";
+import ProtectedRoute, { OrganizationAdminRoute, SuperAdminRoute } from "./ProtectedRoute";
+import SuperAdminRoutes from "./SuperAdminRoutes";
+
+// Páginas de Acceso Directo Temporal
+import AccessDirectoCRM from '../pages/AccessDirectoCRM';
+import AccessDirectoProcesos from '../pages/AccessDirectoProcesos';
+import AccessDirectoRRHH from '../pages/AccessDirectoRRHH';
+import AccessDirectoCalidad from '../pages/AccessDirectoCalidad';
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -39,8 +52,8 @@ const WebFeatures = lazy(() => import("../pages/Web/WebFeatures"));
 const WebContact = lazy(() => import("../pages/Web/WebContact"));
 
 // Documentación - IMPORTACIÓN DIRECTA PARA DEBUG
-import DocumentacionLayout from "../pages/Documentacion/DocumentacionLayout";
 import DocumentacionHome from "../pages/Documentacion/DocumentacionHome";
+import DocumentacionLayout from "../pages/Documentacion/DocumentacionLayout";
 const CasosUsoPage = lazy(() => import("../pages/Documentacion/CasosUsoPage"));
 const ManualUsuarioPage = lazy(() => import("../pages/Documentacion/funcional/ManualUsuarioPage"));
 const SoportePage = lazy(() => import("../pages/Documentacion/funcional/SoportePage"));
@@ -144,7 +157,8 @@ const PoliticaCalidadPage = lazy(() => import("../pages/PoliticaCalidadPage"));
 
 const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  
+  const navigate = useNavigate();
+
   console.log('🛣️ AppRoutes - Renderizando, isAuthenticated:', isAuthenticated);
 
   return (
@@ -161,7 +175,7 @@ const AppRoutes = () => {
         <Route path="/contacto" element={<WebContact />} />
 
         {/* Rutas Protegidas de la aplicación (con /app prefix) */}
-        <Route 
+        <Route
           path="/app/*"
           element={
             <ProtectedRoute>
@@ -169,7 +183,36 @@ const AppRoutes = () => {
                 <Routes>
                   {/* Dashboard - COMENTADO PARA PRUEBAS */}
                   {/* <Route path="tablero" element={<DashboardPage />} /> */}
-                  
+
+                  {/* Menú Principal de Tarjetas */}
+                  <Route path="menu-cards" element={
+                    <MenuCardsLayout>
+                      <MainMenuCards />
+                    </MenuCardsLayout>
+                  } />
+
+                  {/* Menús Especializados por Módulo */}
+                  <Route path="calidad" element={
+                    <SecondLevelLayout moduleType="calidad" onBackToMainMenu={() => navigate('/app/menu-cards')}>
+                      <CalidadMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
+                    </SecondLevelLayout>
+                  } />
+                  <Route path="rrhh" element={
+                    <SecondLevelLayout moduleType="rrhh" onBackToMainMenu={() => navigate('/app/menu-cards')}>
+                      <RRHHMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
+                    </SecondLevelLayout>
+                  } />
+                  <Route path="procesos" element={
+                    <SecondLevelLayout moduleType="procesos" onBackToMainMenu={() => navigate('/app/menu-cards')}>
+                      <ProcesosMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
+                    </SecondLevelLayout>
+                  } />
+                  <Route path="crm-satisfaccion" element={
+                    <SecondLevelLayout moduleType="crm-satisfaccion" onBackToMainMenu={() => navigate('/app/menu-cards')}>
+                      <CRMSatisfaccionMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
+                    </SecondLevelLayout>
+                  } />
+
                   {/* Páginas principales */}
                   <Route path="calendario" element={<CalendarPage />} />
                   <Route path="comunicaciones" element={<ComunicacionesPage />} />
@@ -178,20 +221,20 @@ const AppRoutes = () => {
                   <Route path="planificacion-revision" element={<PlanificacionDireccionPage />} />
                   <Route path="tratamientos" element={<TratamientosPage />} />
                   <Route path="verificaciones" element={<VerificacionesPage />} />
-                  
+
                   {/* Planificación y Revisión */}
                   <Route path="planificacion-estrategica" element={<PlanificacionEstrategicaPage />} />
                   <Route path="revision-direccion" element={<RevisionDireccionPage />} />
                   <Route path="objetivos-metas" element={<ObjetivosMetasPage />} />
                   <Route path="minutas" element={<MinutasPage />} />
-                  
+
                   {/* Recursos Humanos */}
                   <Route path="departamentos" element={<DepartamentosPage />} />
                   <Route path="puestos" element={<PuestosPage />} />
                   <Route path="personal/:id" element={<PersonalSingle />} />
                   <Route path="personal" element={<PersonalPage />} />
                   <Route path="capacitaciones" element={<CapacitacionesPage />} />
-                  
+
                   {/* Sistema de Gestión */}
                   <Route path="auditorias" element={<AuditoriasPage />} />
                   <Route path="auditorias/nueva" element={<AuditoriaFormPage />} />
@@ -208,24 +251,24 @@ const AppRoutes = () => {
                   <Route path="indicadores" element={<IndicadoresPage />} />
                   <Route path="indicadores/:id" element={<IndicadorSingle />} />
 
-                   {/* AMFE */}
-                   <Route path="amfe" element={<AMFEPage />} />
-                  
+                  {/* AMFE */}
+                  <Route path="amfe" element={<AMFEPage />} />
+
                   {/* Mejora */}
                   <Route path="hallazgos" element={<HallazgosPage />} />
                   <Route path="hallazgos/:id" element={<HallazgoSingle />} />
                   <Route path="acciones" element={<AccionesPage />} />
                   <Route path="acciones/:id" element={<AccionSingle />} />
-                  
+
                   {/* Menu Piramidal ISO 9001 */}
                   <Route path="procesos-iso" element={<ProcesosISO />} />
-                  
+
                   {/* Otros */}
                   <Route path="productos" element={<ProductosPage />} />
-                  
+
                   {/* RUTA DE PRUEBA: Nuevo componente con TypeScript */}
                   <Route path="productos-test" element={<ProductosListingNEW />} />
-                  
+
                   <Route path="tickets" element={<TicketsPage />} />
                   <Route path="encuestas" element={<EncuestasPage />} />
                   <Route path="satisfaccion-cliente" element={<SatisfaccionClientePage />} />
@@ -234,16 +277,16 @@ const AppRoutes = () => {
                   {/* <Route path="evalcompe-programacion/:id" element={<EvalcompeProgramacionSingle />} /> */}
                   <Route path="competencias" element={<CompetenciasListing />} />
                   <Route path="competencias/:id" element={<CompetenciaSingle />} />
-                  
+
                   {/* Evaluaciones de Competencias Individuales */}
                   <Route path="evaluaciones-individuales" element={<EvaluacionesIndividualesPage />} />
                   <Route path="evaluaciones-individuales-list" element={<EvaluacionesIndividualesList />} />
                   <Route path="evaluaciones-dashboard" element={<EvaluacionesDashboard />} />
-                  
+
                   {/* Evaluaciones de Programas (Temporalmente deshabilitado) */}
                   {/* <Route path="evaluacion-competencias" element={<ProgramacionCompetenciasList />} /> */}
                   {/* <Route path="evaluacion-competencias-modal" element={<ProgramacionCompetenciasModal />} /> */}
-                  
+
                   {/* Administración */}
                   <Route path="usuarios" element={<UsersPage />} />
                   <Route path="usuarios-single" element={<UsuariosSingle />} />
@@ -320,14 +363,14 @@ const AppRoutes = () => {
 
 
                   {/* Redirección por defecto dentro del layout */}
-                  <Route path="/" element={<Navigate to="/app/personal" replace />} />
-                  <Route path="*" element={<Navigate to="/app/personal" replace />} />
+                  <Route path="/" element={<Navigate to="/app/menu-cards" replace />} />
+                  <Route path="*" element={<Navigate to="/app/menu-cards" replace />} />
                 </Routes>
               </MainLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        
+
         {/* CRM - Gestión de Clientes (Layout independiente) */}
         <Route path="/app/crm/*" element={
           <ProtectedRoute>
@@ -351,6 +394,13 @@ const AppRoutes = () => {
             <SuperAdminRoutes />
           </SuperAdminRoute>
         } />
+
+        {/* Rutas de Acceso Directo Temporal */}
+        <Route path="/access-crm" element={<AccessDirectoCRM />} />
+        <Route path="/access-rrhh" element={<AccessDirectoRRHH />} />
+        <Route path="/access-procesos" element={<AccessDirectoProcesos />} />
+        <Route path="/access-calidad" element={<AccessDirectoCalidad />} />
+
       </Routes>
     </Suspense>
   );

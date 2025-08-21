@@ -28,7 +28,7 @@ export const useAuthInitializer = () => {
           
           // Si está en la página de login y ya está autenticado, redirigir
           if (currentPath === '/app/login' || currentPath === '/login') {
-            const redirectPath = isSuperAdmin() ? '/super-admin/dashboard' : '/app/personal';
+            const redirectPath = isSuperAdmin() ? '/super-admin/dashboard' : '/app/menu-cards';
             navigate(redirectPath, { replace: true });
           }
         }

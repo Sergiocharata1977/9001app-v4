@@ -36,7 +36,7 @@ const LoginPage = () => {
       toast.success('¡Inicio de sesión exitoso!');
       
       // Redirección inteligente basada en el rol
-      const redirectPath = isSuperAdmin() ? '/super-admin/dashboard' : '/app/personal';
+      const redirectPath = isSuperAdmin() ? '/super-admin/dashboard' : '/app/menu-cards';
       navigate(redirectPath);
     } catch (error) {
       toast.error(error.message || 'Error al iniciar sesión');
