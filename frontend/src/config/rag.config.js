@@ -5,7 +5,7 @@
 
 export const RAG_CONFIG = {
   // 🎛️ CONTROL PRINCIPAL - Cambia esto para activar/desactivar RAG
-  ENABLED: true,
+  ENABLED: false, // RAG DESHABILITADO - Comentado temporalmente
   
   // 🏢 Configuración de organización
   ORGANIZATION_ID: 1,

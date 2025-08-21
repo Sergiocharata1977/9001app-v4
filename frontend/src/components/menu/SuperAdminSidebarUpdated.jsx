@@ -167,6 +167,13 @@ const SuperAdminSidebarUpdated = ({ isOpen, onClose, isMobile }) => {
           color: 'text-blue-500'
         },
         {
+          id: 'file-structure',
+          label: '📁 Estructura de Archivos',
+          path: '/super-admin/database/file-structure',
+          icon: FileText,
+          color: 'text-purple-500'
+        },
+        {
           id: 'backup',
           label: '💾 Backup',
           path: '/super-admin/database/backup',

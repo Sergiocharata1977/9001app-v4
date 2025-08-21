@@ -21,6 +21,7 @@ import AccessAudit from '../pages/SuperAdmin/AccessAudit';
 import PlansManagement from '../pages/SuperAdmin/PlansManagement';
 import MaintenanceMode from '../pages/SuperAdmin/MaintenanceMode';
 import ProjectStructure from '../pages/SuperAdmin/ProjectStructure';
+import FileStructure from '../pages/SuperAdmin/FileStructure';
 
 const SuperAdminRoutes = () => {
   return (
@@ -50,6 +51,7 @@ const SuperAdminRoutes = () => {
         <Route path="/database/docs" element={<DatabaseSchema />} />
         <Route path="/database/backup" element={<BackupRestore />} />
         <Route path="/database/structure" element={<ProjectStructure />} />
+        <Route path="/database/file-structure" element={<FileStructure />} />
         
         {/* Sistema */}
         <Route path="/config" element={<SystemConfig />} />

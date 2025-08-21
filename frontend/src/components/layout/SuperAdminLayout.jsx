@@ -80,7 +80,7 @@ const SuperAdminLayout = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <div className={`transition-all duration-300 ${isMobile ? 'pl-0' : 'pl-80'}`}>
+      <div className={`transition-all duration-300 ${isMobile ? 'pl-0' : 'pl-64'}`}>
         {/* Top navigation */}
         <header className="bg-white shadow-sm border-b border-slate-200">
           <div className="flex items-center justify-between px-4 py-3 lg:px-6">

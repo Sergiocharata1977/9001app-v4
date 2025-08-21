@@ -1,21 +1,25 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Sidebar from '../menu/Sidebar';
-import TopBar from '../menu/TopBar';
 import SuperAdminRedirect from '../common/SuperAdminRedirect';
+import SecondLevelSidebar from '../menu/SecondLevelSidebar';
+import TopBar from '../menu/TopBar';
 
-const MainLayout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const MainLayout = ({ children, moduleType, onBackToMainMenu }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   React.useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
+      // Mantener el sidebar cerrado por defecto en todos los casos
       if (mobile) {
         setSidebarOpen(false);
       }
     };
+
+    // Ejecutar al montar el componente
+    handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -29,10 +33,10 @@ const MainLayout = ({ children }) => {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Componente de redirección automática para Super Admins */}
       <SuperAdminRedirect />
-      
+
       {/* Sidebar */}
       <AnimatePresence mode="wait">
-        {(sidebarOpen || !isMobile) && (
+        {sidebarOpen && (
           <motion.div
             initial={{ x: -280 }}
             animate={{ x: 0 }}
@@ -40,14 +44,13 @@ const MainLayout = ({ children }) => {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className={`
               ${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'}
-              ${sidebarOpen ? 'w-72' : 'w-0'}
+              w-72
               transition-all duration-300 ease-in-out
             `}
           >
-            <Sidebar 
-              isOpen={sidebarOpen} 
-              onClose={() => setSidebarOpen(false)}
-              isMobile={isMobile}
+            <SecondLevelSidebar
+              moduleType={moduleType}
+              onBackToMainMenu={onBackToMainMenu}
             />
           </motion.div>
         )}
@@ -67,7 +70,7 @@ const MainLayout = ({ children }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <TopBar 
+        <TopBar
           onToggleSidebar={toggleSidebar}
           sidebarOpen={sidebarOpen}
         />
