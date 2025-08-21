@@ -21,8 +21,8 @@ router.get('/clientes', async (req, res) => {
     
     const result = await tursoClient.execute({
       sql: `SELECT c.*, 
-            v.nombre as vendedor_nombre, v.email as vendedor_email,
-            s.nombre as supervisor_nombre
+            (v.nombres || ' ' || v.apellidos) as vendedor_nombre, v.email as vendedor_email,
+            (s.nombres || ' ' || s.apellidos) as supervisor_nombre
             FROM clientes c
             LEFT JOIN personal v ON c.vendedor_asignado_id = v.id
             LEFT JOIN personal s ON c.supervisor_comercial_id = s.id
@@ -60,8 +60,8 @@ router.get('/clientes/:id', async (req, res) => {
     
     const result = await tursoClient.execute({
       sql: `SELECT c.*, 
-            v.nombre as vendedor_nombre, v.email as vendedor_email,
-            s.nombre as supervisor_nombre
+            (v.nombres || ' ' || v.apellidos) as vendedor_nombre, v.email as vendedor_email,
+            (s.nombres || ' ' || s.apellidos) as supervisor_nombre
             FROM clientes c
             LEFT JOIN personal v ON c.vendedor_asignado_id = v.id
             LEFT JOIN personal s ON c.supervisor_comercial_id = s.id
@@ -247,8 +247,8 @@ router.get('/oportunidades', async (req, res) => {
     const result = await tursoClient.execute({
       sql: `SELECT o.*, 
             c.nombre as cliente_nombre, c.tipo_cliente as cliente_tipo,
-            v.nombre as vendedor_nombre, v.email as vendedor_email,
-            s.nombre as supervisor_nombre
+            (v.nombres || ' ' || v.apellidos) as vendedor_nombre, v.email as vendedor_email,
+            (s.nombres || ' ' || s.apellidos) as supervisor_nombre
             FROM oportunidades o
             LEFT JOIN clientes c ON o.cliente_id = c.id
             LEFT JOIN personal v ON o.vendedor_id = v.id
@@ -288,8 +288,8 @@ router.get('/oportunidades/:id', async (req, res) => {
     const result = await tursoClient.execute({
       sql: `SELECT o.*, 
             c.nombre as cliente_nombre, c.tipo_cliente as cliente_tipo,
-            v.nombre as vendedor_nombre, v.email as vendedor_email,
-            s.nombre as supervisor_nombre
+            (v.nombres || ' ' || v.apellidos) as vendedor_nombre, v.email as vendedor_email,
+            (s.nombres || ' ' || s.apellidos) as supervisor_nombre
             FROM oportunidades o
             LEFT JOIN clientes c ON o.cliente_id = c.id
             LEFT JOIN personal v ON o.vendedor_id = v.id
@@ -439,7 +439,7 @@ router.get('/actividades', async (req, res) => {
       sql: `SELECT a.*, 
             c.nombre as cliente_nombre,
             o.titulo as oportunidad_titulo,
-            v.nombre as vendedor_nombre, v.email as vendedor_email
+            (v.nombres || ' ' || v.apellidos) as vendedor_nombre, v.email as vendedor_email
             FROM actividades_crm a
             LEFT JOIN clientes c ON a.cliente_id = c.id
             LEFT JOIN oportunidades o ON a.oportunidad_id = o.id
@@ -610,9 +610,9 @@ router.get('/vendedores', async (req, res) => {
             LEFT JOIN clientes c ON p.id = c.vendedor_asignado_id AND c.is_active = 1
             LEFT JOIN oportunidades o ON p.id = o.vendedor_id AND o.is_active = 1
             WHERE p.organization_id = ? 
-            AND (p.puesto LIKE '%comercial%' OR p.puesto LIKE '%vendedor%' OR p.departamento LIKE '%ventas%')
+            AND (p.tipo_personal = 'vendedor' OR p.especialidad_ventas IS NOT NULL)
             GROUP BY p.id
-            ORDER BY p.nombre`,
+            ORDER BY p.nombres`,
       args: [orgId]
     });
     
@@ -649,9 +649,9 @@ router.get('/personal/comercial', async (req, res) => {
             LEFT JOIN clientes c ON p.id = c.vendedor_asignado_id AND c.is_active = 1
             LEFT JOIN oportunidades o ON p.id = o.vendedor_id AND o.is_active = 1
             WHERE p.organization_id = ? 
-            AND (p.puesto LIKE '%comercial%' OR p.puesto LIKE '%vendedor%' OR p.departamento LIKE '%ventas%')
+            AND (p.tipo_personal = 'vendedor' OR p.especialidad_ventas IS NOT NULL)
             GROUP BY p.id
-            ORDER BY p.nombre`,
+            ORDER BY p.nombres`,
       args: [orgId]
     });
     

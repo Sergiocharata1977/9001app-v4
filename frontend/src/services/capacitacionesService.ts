@@ -1,4 +1,6 @@
-import { apiClient } from './api/apiClient';
+import { createApiClient } from './apiService';
+
+const apiClient = createApiClient('/capacitaciones');
 import { Capacitacion, CapacitacionFilters, CreateCapacitacionData, UpdateCapacitacionData } from '@/types/capacitaciones';
 
 class CapacitacionesService {

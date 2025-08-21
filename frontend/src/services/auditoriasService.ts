@@ -1,4 +1,6 @@
-import { apiClient } from './api/apiClient';
+import { createApiClient } from './apiService';
+
+const apiClient = createApiClient('/auditorias');
 import { Auditoria, AuditoriaFilters, CreateAuditoriaData, UpdateAuditoriaData } from '@/types/auditorias';
 
 class AuditoriasService {
