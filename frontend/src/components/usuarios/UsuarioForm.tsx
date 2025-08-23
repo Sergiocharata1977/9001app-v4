@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { UsuarioFormData } from '../../types/forms';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { Label } from '../../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 export interface UsuarioFormProps {
     onSubmit: (data: UsuarioFormData) => void;
