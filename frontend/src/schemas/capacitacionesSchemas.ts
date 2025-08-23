@@ -255,8 +255,6 @@ export const capacitacionBaseSchema = z.object({
 
 // Esquema para crear capacitación
 export const createCapacitacionSchema = capacitacionBaseSchema.omit({
-  id: true,
-  estado: true,
   fecha_creacion: true,
   fecha_actualizacion: true,
   actualizado_por: true,
@@ -270,7 +268,6 @@ export const createCapacitacionSchema = capacitacionBaseSchema.omit({
 
 // Esquema para actualizar capacitación
 export const updateCapacitacionSchema = capacitacionBaseSchema.partial().omit({
-  id: true,
   fecha_creacion: true,
   historial_cambios: true
 });
