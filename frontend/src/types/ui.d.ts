@@ -1,111 +1,6 @@
-// Tipos para componentes UI
+// Tipos generales para componentes UI
 
 import { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
-
-// Declaraciones para manejar imports con diferentes casings
-declare module '@/components/ui/button' {
-  export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    size?: 'default' | 'sm' | 'lg' | 'icon';
-    loading?: boolean;
-    children: ReactNode;
-  }
-  export const Button: React.FC<ButtonProps>;
-}
-
-declare module '@/components/ui/Button' {
-  export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    size?: 'default' | 'sm' | 'lg' | 'icon';
-    loading?: boolean;
-    children: ReactNode;
-  }
-  export const Button: React.FC<ButtonProps>;
-}
-
-declare module '@/components/ui/input' {
-  export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-    label?: string;
-    error?: string;
-    helperText?: string;
-    leftIcon?: ReactNode;
-    rightIcon?: ReactNode;
-  }
-  export const Input: React.FC<InputProps>;
-}
-
-declare module '@/components/ui/Input' {
-  export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-    label?: string;
-    error?: string;
-    helperText?: string;
-    leftIcon?: ReactNode;
-    rightIcon?: ReactNode;
-  }
-  export const Input: React.FC<InputProps>;
-}
-
-declare module '@/components/ui/card' {
-  export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-    title?: string;
-    subtitle?: string;
-    children: ReactNode;
-    variant?: 'default' | 'outlined' | 'elevated';
-  }
-  export const Card: React.FC<CardProps>;
-  export const CardHeader: React.FC<HTMLAttributes<HTMLDivElement>>;
-  export const CardTitle: React.FC<HTMLAttributes<HTMLHeadingElement>>;
-  export const CardDescription: React.FC<HTMLAttributes<HTMLParagraphElement>>;
-  export const CardContent: React.FC<HTMLAttributes<HTMLDivElement>>;
-  export const CardFooter: React.FC<HTMLAttributes<HTMLDivElement>>;
-}
-
-declare module '@/components/ui/Card' {
-  export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-    title?: string;
-    subtitle?: string;
-    children: ReactNode;
-    variant?: 'default' | 'outlined' | 'elevated';
-  }
-  export const Card: React.FC<CardProps>;
-  export const CardHeader: React.FC<HTMLAttributes<HTMLDivElement>>;
-  export const CardTitle: React.FC<HTMLAttributes<HTMLHeadingElement>>;
-  export const CardDescription: React.FC<HTMLAttributes<HTMLParagraphElement>>;
-  export const CardContent: React.FC<HTMLAttributes<HTMLDivElement>>;
-  export const CardFooter: React.FC<HTMLAttributes<HTMLDivElement>>;
-}
-
-declare module '@/components/ui/badge' {
-  export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-    variant?: 'default' | 'secondary' | 'destructive' | 'outline';
-    children: ReactNode;
-  }
-  export const Badge: React.FC<BadgeProps>;
-}
-
-declare module '@/components/ui/Badge' {
-  export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-    variant?: 'default' | 'secondary' | 'destructive' | 'outline';
-    children: ReactNode;
-  }
-  export const Badge: React.FC<BadgeProps>;
-}
-
-declare module '@/components/ui/progress' {
-  export interface ProgressProps extends HTMLAttributes<HTMLDivElement> {
-    value?: number;
-    max?: number;
-  }
-  export const Progress: React.FC<ProgressProps>;
-}
-
-declare module '@/components/ui/Progress' {
-  export interface ProgressProps extends HTMLAttributes<HTMLDivElement> {
-    value?: number;
-    max?: number;
-  }
-  export const Progress: React.FC<ProgressProps>;
-}
 
 // Tipos para Modal
 export interface ModalProps {
@@ -285,60 +180,6 @@ declare module '@/components/ui/alert' {
   export const AlertDescription: React.FC<AlertDescriptionProps>;
 }
 
-// Declaraciones para Alert-Dialog
-declare module '@/components/ui/alert-dialog' {
-  import { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
-  
-  export interface AlertDialogProps {
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
-    children?: ReactNode;
-  }
-  
-  export interface AlertDialogTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    children?: ReactNode;
-    asChild?: boolean;
-  }
-  
-  export interface AlertDialogContentProps extends HTMLAttributes<HTMLDivElement> {
-    children?: ReactNode;
-  }
-  
-  export interface AlertDialogHeaderProps extends HTMLAttributes<HTMLDivElement> {
-    children?: ReactNode;
-  }
-  
-  export interface AlertDialogTitleProps extends HTMLAttributes<HTMLHeadingElement> {
-    children?: ReactNode;
-  }
-  
-  export interface AlertDialogDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {
-    children?: ReactNode;
-  }
-  
-  export interface AlertDialogFooterProps extends HTMLAttributes<HTMLDivElement> {
-    children?: ReactNode;
-  }
-  
-  export interface AlertDialogActionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    children?: ReactNode;
-  }
-  
-  export interface AlertDialogCancelProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    children?: ReactNode;
-  }
-  
-  export const AlertDialog: React.FC<AlertDialogProps>;
-  export const AlertDialogTrigger: React.FC<AlertDialogTriggerProps>;
-  export const AlertDialogContent: React.FC<AlertDialogContentProps>;
-  export const AlertDialogHeader: React.FC<AlertDialogHeaderProps>;
-  export const AlertDialogTitle: React.FC<AlertDialogTitleProps>;
-  export const AlertDialogDescription: React.FC<AlertDialogDescriptionProps>;
-  export const AlertDialogFooter: React.FC<AlertDialogFooterProps>;
-  export const AlertDialogAction: React.FC<AlertDialogActionProps>;
-  export const AlertDialogCancel: React.FC<AlertDialogCancelProps>;
-}
-
 // Declaraciones para Separator
 declare module '@/components/ui/separator' {
   import { HTMLAttributes } from 'react';
@@ -371,34 +212,6 @@ declare module '@/components/ui/avatar' {
   export const Avatar: React.FC<AvatarProps>;
   export const AvatarImage: React.FC<AvatarImageProps>;
   export const AvatarFallback: React.FC<AvatarFallbackProps>;
-}
-
-// Declaraciones para Skeleton
-declare module '@/components/ui/skeleton' {
-  import { HTMLAttributes, ReactNode } from 'react';
-  
-  export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
-    className?: string;
-    children?: ReactNode;
-  }
-  
-  export const Skeleton: React.FC<SkeletonProps>;
-  
-  // Skeleton components específicos
-  export const PersonalCardSkeleton: React.FC<{ cards?: number }>;
-  export const PersonalListSkeleton: React.FC<{ rows?: number }>;
-  export const PersonalSingleSkeleton: React.FC;
-  export const TableSkeleton: React.FC<{ rows?: number; columns?: number }>;
-  export const HeaderSkeleton: React.FC;
-  export const FormSkeleton: React.FC;
-  export const PuestoCardSkeleton: React.FC<{ cards?: number }>;
-  export const AuditoriaSkeleton: React.FC;
-  export const AuditoriaFormSkeleton: React.FC;
-  export const CapacitacionSkeleton: React.FC;
-  export const CapacitacionFormSkeleton: React.FC;
-  export const HallazgoSkeleton: React.FC;
-  export const HallazgoFormSkeleton: React.FC;
-  export const DocumentoFormSkeleton: React.FC;
 }
 
 export { };
