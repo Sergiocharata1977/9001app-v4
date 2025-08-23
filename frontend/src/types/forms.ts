@@ -231,22 +231,8 @@ export interface BaseFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface AuditoriaFilters extends BaseFilters {
-  estado?: string[];
-  tipo?: string[];
-  fecha_inicio?: string;
-  fecha_fin?: string;
-  auditor_responsable?: string;
-  departamento?: string;
-}
-
-export interface CapacitacionFilters extends BaseFilters {
-  estado?: string[];
-  tipo?: string[];
-  fecha_inicio?: string;
-  fecha_fin?: string;
-  instructor?: string;
-}
+// Note: AuditoriaFilters and CapacitacionFilters are defined in their respective type files
+// to avoid duplication and maintain consistency
 
 export interface HallazgoFilters extends BaseFilters {
   tipo?: string[];

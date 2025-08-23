@@ -81,9 +81,16 @@ export interface AuditoriaFilters {
   fechaDesde?: string;
   fechaHasta?: string;
   auditor?: string;
-  searchTerm?: string;
-  filterEstado?: string;
-  filterTipo?: string;
+  departamento?: string;
+  prioridad?: string;
+  proceso_sgc?: number;
+  norma?: number;
+  es_recurrente?: boolean;
+  activo?: boolean;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type AuditoriaViewMode = 'kanban' | 'grid' | 'list';

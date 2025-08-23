@@ -108,8 +108,14 @@ export interface CapacitacionFilters {
   fechaHasta?: string;
   instructor?: string;
   departamento?: string;
-  searchTerm?: string;
-  filterEstado?: string;
+  modalidad?: string;
+  proceso_sgc?: number;
+  norma?: number;
+  activo?: boolean;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type ViewMode = 'grid' | 'list';
