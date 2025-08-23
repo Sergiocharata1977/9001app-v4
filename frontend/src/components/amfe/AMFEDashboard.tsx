@@ -237,7 +237,7 @@ const AMFEDashboard: React.FC<AMFEDashboardProps> = ({ records }) => {
                   <p className="text-xs text-gray-500">NPR</p>
                 </div>
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRiskLevelColor(record.riskLevel)}`}>
-                  {record.riskLevel.toUpperCase()}
+                  {getRiskLevelText(record.riskLevel)}
                 </span>
               </div>
             </div>

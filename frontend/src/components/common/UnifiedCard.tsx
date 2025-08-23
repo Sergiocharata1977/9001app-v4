@@ -123,10 +123,13 @@ const UnifiedCard: React.FC<UnifiedCardProps> = ({
   const handleCardClick = (e: React.MouseEvent) => {
     console.log('🖱️ UnifiedCard onClick INICIADO');
     console.log('🎯 Target:', e.target);
-    console.log('🎯 Closest button:', e.target.closest('button'));
     
     // Evitar que el click se propague a los botones de acción
-    if (e.target.closest('button')) {
+    const target = e.target as Element;
+    const closestButton = target.closest('button');
+    console.log('🎯 Closest button:', closestButton);
+    
+    if (closestButton) {
       console.log('❌ UnifiedCard: Click en botón, ignorando');
       return;
     }

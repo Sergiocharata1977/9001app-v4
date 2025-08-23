@@ -1,26 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { hallazgosService } from '@/services/hallazgosService';
-import { toast } from 'react-toastify';
+import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Clock, CheckCircle, AlertTriangle, List, Trello, BarChart, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { FileText, Clock, CheckCircle, AlertTriangle, BarChart, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import HallazgoForm from './HallazgoForm';
 import HallazgoWorkflowManager from './HallazgoWorkflowManager';
 import HallazgoStatCard from './HallazgoStatCard';
-import DashboardView from '@/components/mejoras/DashboardView';
-import DataTable from '../shared/DataTable/DataTable';
+import { DataTable, Column, Action, KanbanColumn } from '../shared/DataTable/DataTable';
 import { 
   Hallazgo, 
   HallazgoEstado, 
   HallazgoPrioridad, 
   HallazgoStats, 
   HallazgoFormData, 
-  DataTableColumn, 
-  DataTableAction, 
-  KanbanColumn, 
   WorkflowFormData 
 } from '@/types/hallazgos';
 
@@ -36,6 +31,7 @@ const HallazgosListingNEW: React.FC = () => {
   const [selectedHallazgo, setSelectedHallazgo] = useState<Hallazgo | null>(null);
   const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const fetchHallazgos = useCallback(async (): Promise<void> => {
     try {
@@ -46,11 +42,11 @@ const HallazgosListingNEW: React.FC = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'No se pudieron cargar los hallazgos.'; 
       setError(errorMessage);
-      toast.error(errorMessage);
+      toast({ variant: "destructive", title: "Error", description: errorMessage });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     fetchHallazgos();
@@ -67,13 +63,13 @@ const HallazgosListingNEW: React.FC = () => {
     try {
       const dataToUpdate = { ...formData, estado: nextState };
       await hallazgosService.updateHallazgo(selectedHallazgo.id, dataToUpdate);
-      toast.success('Hallazgo actualizado con éxito');
+      toast({ title: "Éxito", description: "Hallazgo actualizado con éxito" });
       setIsWorkflowModalOpen(false);
       setSelectedHallazgo(null);
       fetchHallazgos();
     } catch (error: any) {
       console.error('Error al actualizar el hallazgo:', error);
-      toast.error(error.response?.data?.message || 'No se pudo actualizar el hallazgo.');
+      toast({ variant: "destructive", title: "Error", description: error.response?.data?.message || 'No se pudo actualizar el hallazgo.' });
     }
   };
 
@@ -90,11 +86,11 @@ const HallazgosListingNEW: React.FC = () => {
     if (window.confirm('¿Está seguro de que desea eliminar este hallazgo?')) {
       try {
         await hallazgosService.deleteHallazgo(hallazgo.id);
-        toast.success('Hallazgo eliminado con éxito');
+        toast({ title: "Éxito", description: "Hallazgo eliminado con éxito" });
         fetchHallazgos();
       } catch (error: any) {
         console.error('Error al eliminar el hallazgo:', error);
-        toast.error('No se pudo eliminar el hallazgo.');
+        toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el hallazgo." });
       }
     }
   };
@@ -112,16 +108,41 @@ const HallazgosListingNEW: React.FC = () => {
         fecha_deteccion: new Date().toISOString()
       };
       await hallazgosService.createHallazgo(newHallazgoData);
-      toast.success('Hallazgo registrado con éxito');
+      toast({ title: "Éxito", description: "Hallazgo registrado con éxito" });
       setIsModalOpen(false);
       fetchHallazgos();
     } catch (error: any) {
       console.error('Error al crear el hallazgo:', error);
-      toast.error(error.response?.data?.message || 'No se pudo registrar el hallazgo.');
+      toast({ variant: "destructive", title: "Error", description: error.response?.data?.message || 'No se pudo registrar el hallazgo.' });
     }
   };
 
-  const handleHallazgoStateChange = async (hallazgoId: number, newEstado: HallazgoEstado): Promise<void> => {
+  const handleHallazgoStateChange = (hallazgo: Hallazgo, fromColumn: string, toColumn: string): void => {
+    // Implementar lógica de cambio de estado basado en las columnas
+    const newEstado = getEstadoFromColumn(toColumn);
+    if (newEstado) {
+      updateHallazgoEstado(hallazgo.id, newEstado);
+    }
+  };
+
+  const getEstadoFromColumn = (columnKey: string): HallazgoEstado | null => {
+    switch (columnKey) {
+      case 'deteccion':
+        return 'deteccion';
+      case 'planificacion':
+        return 'planificacion_ai';
+      case 'ejecucion':
+        return 'ejecucion_ai';
+      case 'analisis':
+        return 'analisis_plan_accion';
+      case 'verificacion_cierre':
+        return 'verificacion_cierre';
+      default:
+        return null;
+    }
+  };
+
+  const updateHallazgoEstado = async (hallazgoId: number, newEstado: HallazgoEstado): Promise<void> => {
     const originalHallazgos = [...hallazgos];
     const updatedHallazgos = hallazgos.map(h =>
       h.id === hallazgoId ? { ...h, estado: newEstado } : h
@@ -130,10 +151,10 @@ const HallazgosListingNEW: React.FC = () => {
 
     try {
       await hallazgosService.updateHallazgo(hallazgoId, { estado: newEstado });
-      toast.success('Estado del hallazgo actualizado.');
+      toast({ title: "Éxito", description: "Estado del hallazgo actualizado." });
     } catch (error: any) {
       console.error('Error al actualizar el estado del hallazgo:', error);
-      toast.error('No se pudo actualizar el estado.');
+      toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar el estado." });
       setHallazgos(originalHallazgos);
     }
   };
@@ -209,14 +230,14 @@ const HallazgosListingNEW: React.FC = () => {
   };
 
   // Definición de columnas para el DataTable
-  const columns: DataTableColumn[] = [
+  const columns: Column[] = [
     {
       key: 'numeroHallazgo',
       label: 'Número',
       sortable: true,
       filterable: true,
       width: '120px',
-      render: (value: any, row: Hallazgo) => (
+      render: (value: any) => (
         <div className="font-bold text-lg text-blue-600">
           {value || 'N/A'}
         </div>
@@ -243,7 +264,7 @@ const HallazgosListingNEW: React.FC = () => {
       sortable: true,
       filterable: true,
       width: '150px',
-      render: (value: any, row: Hallazgo) => {
+      render: (value: any) => {
         const StatusIcon = getEstadoIcon(value as HallazgoEstado);
         return (
           <div className="flex items-center">
@@ -261,7 +282,7 @@ const HallazgosListingNEW: React.FC = () => {
       sortable: true,
       filterable: true,
       width: '150px',
-      render: (value: any, row: Hallazgo) => (
+      render: (value: any) => (
         <div className="text-sm">
           {formatDate(value)}
         </div>
@@ -273,7 +294,7 @@ const HallazgosListingNEW: React.FC = () => {
       sortable: true,
       filterable: true,
       width: '150px',
-      render: (value: any, row: Hallazgo) => (
+      render: (value: any) => (
         <div className="text-sm">
           {value || 'No asignado'}
         </div>
@@ -285,7 +306,7 @@ const HallazgosListingNEW: React.FC = () => {
       sortable: true,
       filterable: true,
       width: '120px',
-      render: (value: any, row: Hallazgo) => {
+      render: (value: any) => {
         const getPrioridadColor = (prioridad: HallazgoPrioridad | undefined): string => {
           switch (prioridad?.toLowerCase()) {
             case 'alta':
@@ -308,7 +329,7 @@ const HallazgosListingNEW: React.FC = () => {
   ];
 
   // Definición de acciones
-  const actions: DataTableAction[] = [
+  const actions: Action[] = [
     {
       icon: Eye,
       label: 'Ver',
@@ -367,7 +388,7 @@ const HallazgosListingNEW: React.FC = () => {
   ];
 
   // Renderizado personalizado para tarjetas
-  const renderCard = (hallazgo: Hallazgo, actions: DataTableAction[]): React.ReactNode => {
+  const renderCard = (hallazgo: Hallazgo, actions: Action[]): React.ReactNode => {
     const StatusIcon = getEstadoIcon(hallazgo.estado);
 
     return (
@@ -456,7 +477,7 @@ const HallazgosListingNEW: React.FC = () => {
   };
 
   // Renderizado personalizado para tarjetas Kanban
-  const renderKanbanCard = (hallazgo: Hallazgo, actions: DataTableAction[]): React.ReactNode => {
+  const renderKanbanCard = (hallazgo: Hallazgo, actions: Action[]): React.ReactNode => {
     const StatusIcon = getEstadoIcon(hallazgo.estado);
 
     return (

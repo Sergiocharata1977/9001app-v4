@@ -20,8 +20,8 @@ import { GraduationCap, FileText, Calendar, Activity, X } from "lucide-react";
 import { Capacitacion, CapacitacionFormData } from "@/types/capacitaciones";
 
 interface CapacitacionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSave: (formData: CapacitacionFormData) => Promise<void>;
   capacitacion?: Capacitacion | null;
 }
@@ -38,7 +38,7 @@ interface FormErrors {
   [key: string]: string | undefined;
 }
 
-function CapacitacionModal({ isOpen, onClose, onSave, capacitacion }: CapacitacionModalProps): JSX.Element {
+function CapacitacionModal({ open, onOpenChange, onSave, capacitacion }: CapacitacionModalProps): JSX.Element {
   const [formData, setFormData] = useState<CapacitacionFormData>({
     nombre: "",
     descripcion: "",
@@ -110,7 +110,7 @@ function CapacitacionModal({ isOpen, onClose, onSave, capacitacion }: Capacitaci
       setTemas([]);
     }
     setErrors({});
-  }, [capacitacion, isOpen]);
+  }, [capacitacion, open]);
 
   const validateForm = (): FormErrors => {
     const newErrors: FormErrors = {};
@@ -179,7 +179,7 @@ function CapacitacionModal({ isOpen, onClose, onSave, capacitacion }: Capacitaci
     setIsSubmitting(true);
     try {
       await onSave(formData);
-      onClose();
+      onOpenChange(false);
     } catch (error) {
       console.error('Error al guardar capacitación:', error);
     } finally {
@@ -188,7 +188,7 @@ function CapacitacionModal({ isOpen, onClose, onSave, capacitacion }: Capacitaci
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[70vw] max-w-[70vw] bg-slate-800 border-slate-700 text-white">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="text-xl font-semibold text-white">
@@ -197,7 +197,7 @@ function CapacitacionModal({ isOpen, onClose, onSave, capacitacion }: Capacitaci
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={onClose} 
+            onClick={() => onOpenChange(false)} 
             className="text-white hover:bg-slate-700"
           >
             <X className="h-4 w-4" />
@@ -469,7 +469,7 @@ function CapacitacionModal({ isOpen, onClose, onSave, capacitacion }: Capacitaci
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={() => onOpenChange(false)}
                 className="border-slate-600 text-white hover:bg-slate-700"
               >
                 Cancelar
