@@ -66,6 +66,10 @@ export interface MinutaFiltros {
   fecha_desde?: string;
   fecha_hasta?: string;
   organizador_id?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 // Dashboard de minutas SGC
