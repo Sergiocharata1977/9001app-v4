@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Plus, 
   Calendar, 
-  BookOpen, 
   Trash2, 
   Edit, 
   User, 
@@ -34,7 +33,7 @@ const Capacitaciones: React.FC = () => {
     departamento: ''
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const queryClient = useQueryClient();
