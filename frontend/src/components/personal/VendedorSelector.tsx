@@ -61,7 +61,7 @@ const VendedorSelector: React.FC<VendedorSelectorProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRol, setSelectedRol] = useState<RolComercial>('vendedor');
   const [selectedZona, setSelectedZona] = useState<ZonaVenta>('');
-  const [selectedEspecialidad, setSelectedEspecialidad] = useState<EspecialidadAgro>('');
+  const [selectedEspecialidad, setSelectedEspecialidad] = useState<EspecialidadAgro | ''>('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Simular datos de estadísticas (en producción vendría de la API)
@@ -181,8 +181,9 @@ const VendedorSelector: React.FC<VendedorSelectorProps> = ({
       };
       
       // Calcular porcentaje de cumplimiento
-      stats[vendedor.id].porcentaje_cumplimiento = Math.round(
-        (stats[vendedor.id].ventas_mes / stats[vendedor.id].meta_mes) * 100
+      const entry = stats[vendedor.id]!;
+      entry.porcentaje_cumplimiento = Math.round(
+        (entry.ventas_mes / entry.meta_mes) * 100
       );
     });
     
