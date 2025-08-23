@@ -285,13 +285,14 @@ class AMFEService {
           return;
         }
 
-        const updatedRecord = { ...this.data[index], ...recordData };
+        const currentRecord = this.data[index]!;
+        const updatedRecord: AMFERecord = { ...currentRecord, ...recordData };
         
         // Recalcular NPR y riskLevel si se modificaron severity, occurrence o detection
-        if (recordData.severity || recordData.occurrence || recordData.detection) {
-          const severity = recordData.severity ?? this.data[index].severity;
-          const occurrence = recordData.occurrence ?? this.data[index].occurrence;
-          const detection = recordData.detection ?? this.data[index].detection;
+        if (recordData.severity !== undefined || recordData.occurrence !== undefined || recordData.detection !== undefined) {
+          const severity = recordData.severity ?? currentRecord.severity;
+          const occurrence = recordData.occurrence ?? currentRecord.occurrence;
+          const detection = recordData.detection ?? currentRecord.detection;
           
           updatedRecord.npr = calculateNPR(severity, occurrence, detection);
           updatedRecord.riskLevel = calculateRiskLevel(updatedRecord.npr);
@@ -333,7 +334,8 @@ class AMFEService {
         let filtered = [...this.data];
         
         if (filters.process) {
-          filtered = filtered.filter(r => r.process.toLowerCase().includes(filters.process!.toLowerCase()));
+          const proc = filters.process.toLowerCase();
+          filtered = filtered.filter(r => r.process.toLowerCase().includes(proc));
         }
         
         if (filters.status) {

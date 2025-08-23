@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, AxiosProgressEvent, InternalAxiosRequestConfig } from 'axios';
+// @ts-ignore - módulo JS sin tipos
 import useAuthStore from '../store/authStore';
 
 // Tipos para configuración
@@ -6,20 +7,7 @@ interface RuntimeConfig {
   API_BASE_URL?: string;
 }
 
-interface ApiConfig {
-  baseURL: string;
-  timeout: number;
-  headers: Record<string, string>;
-}
-
-interface UploadProgressEvent {
-  loaded: number;
-  total: number;
-}
-
-interface ApiRequestConfig extends AxiosRequestConfig {
-  _retry?: boolean;
-}
+// Tipos locales
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -45,8 +33,8 @@ const getApiBaseUrl = (): string => {
     return window.__RUNTIME_CONFIG__.API_BASE_URL;
   }
   // Fallback a variables de entorno de Vite (para desarrollo)
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
   // Valor por defecto
   return 'http://localhost:5000/api';
@@ -66,13 +54,15 @@ const apiClient: AxiosInstance = axios.create({
 
 // Interceptor para agregar token a las peticiones
 apiClient.interceptors.request.use(
-  async (config: ApiRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
     const { getValidToken } = useAuthStore.getState();
     const token = await getValidToken();
     
     if (token) {
-      config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = {
+        ...(config.headers as any),
+        Authorization: `Bearer ${token}`,
+      } as any;
     }
     
     return config;
@@ -86,7 +76,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as ApiRequestConfig;
+    const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean });
     
     // Si es un error 401 y no hemos intentado refrescar el token aún
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -99,8 +89,10 @@ apiClient.interceptors.response.use(
         
         if (newToken) {
           // Reintentar la petición original con el nuevo token
-          originalRequest.headers = originalRequest.headers || {};
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          originalRequest.headers = {
+            ...(originalRequest.headers as any),
+            Authorization: `Bearer ${newToken}`,
+          } as any;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
@@ -188,9 +180,9 @@ export const apiService = {
 
   // Método para subir archivos
   uploadFile: async <T = any>(
-    endpoint: string, 
-    formData: FormData, 
-    onUploadProgress?: (progressEvent: UploadProgressEvent) => void
+    endpoint: string,
+    formData: FormData,
+    onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
   ): Promise<T> => {
     return apiService.request<T>({
       method: 'POST',

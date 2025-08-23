@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Pencil, Trash2, Eye, MoreHorizontal, FileText } from 'lucide-react';
+import { CardContent, CardFooter } from '@/components/ui/card';
+import { Pencil, Trash2, Eye, FileText } from 'lucide-react';
 
 export interface CardField {
   label?: string;
@@ -120,26 +120,12 @@ const UnifiedCard: React.FC<UnifiedCardProps> = ({
     }
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    console.log('🖱️ UnifiedCard onClick INICIADO');
-    console.log('🎯 Target:', e.target);
-    console.log('🎯 Closest button:', e.target.closest('button'));
-    
-    // Evitar que el click se propague a los botones de acción
-    if (e.target.closest('button')) {
-      console.log('❌ UnifiedCard: Click en botón, ignorando');
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as Element;
+    if (target instanceof Element && target.closest('button')) {
       return;
     }
-    
-    console.log('✅ UnifiedCard: Click válido, llamando onView');
-    console.log('🔧 onView function:', onView);
-    
-    if (onView) {
-      onView();
-      console.log('✅ UnifiedCard: onView ejecutado');
-    } else {
-      console.log('❌ UnifiedCard: onView no está definido');
-    }
+    onView?.();
   };
 
   return (
