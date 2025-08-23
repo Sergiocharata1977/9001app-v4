@@ -68,6 +68,10 @@ const MinutasPage: React.FC<MinutasPageProps> = () => {
   const [filtros, setFiltros] = useState<MinutaFiltros>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showModalCrear, setShowModalCrear] = useState<boolean>(false);
+  const [showModalDetalle, setShowModalDetalle] = useState<boolean>(false);
+  const [showModalEditar, setShowModalEditar] = useState<boolean>(false);
+  const [minutaSeleccionada, setMinutaSeleccionada] = useState<Minuta | null>(null);
 
   useEffect(() => {
     cargarMinutas();
