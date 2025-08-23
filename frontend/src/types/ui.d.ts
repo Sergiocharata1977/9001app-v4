@@ -263,5 +263,143 @@ export interface DataTableFiltering {
   filterOptions?: Record<string, { value: string; label: string }[]>;
 }
 
+// Declaraciones para Alert
+declare module '@/components/ui/alert' {
+  import { HTMLAttributes, ReactNode } from 'react';
+  
+  export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
+    variant?: 'default' | 'destructive' | 'success';
+    children?: ReactNode;
+  }
+  
+  export interface AlertTitleProps extends HTMLAttributes<HTMLHeadingElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AlertDescriptionProps extends HTMLAttributes<HTMLDivElement> {
+    children?: ReactNode;
+  }
+  
+  export const Alert: React.FC<AlertProps>;
+  export const AlertTitle: React.FC<AlertTitleProps>;
+  export const AlertDescription: React.FC<AlertDescriptionProps>;
+}
+
+// Declaraciones para Alert-Dialog
+declare module '@/components/ui/alert-dialog' {
+  import { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+  
+  export interface AlertDialogProps {
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    children?: ReactNode;
+  }
+  
+  export interface AlertDialogTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    children?: ReactNode;
+    asChild?: boolean;
+  }
+  
+  export interface AlertDialogContentProps extends HTMLAttributes<HTMLDivElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AlertDialogHeaderProps extends HTMLAttributes<HTMLDivElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AlertDialogTitleProps extends HTMLAttributes<HTMLHeadingElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AlertDialogDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AlertDialogFooterProps extends HTMLAttributes<HTMLDivElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AlertDialogActionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AlertDialogCancelProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    children?: ReactNode;
+  }
+  
+  export const AlertDialog: React.FC<AlertDialogProps>;
+  export const AlertDialogTrigger: React.FC<AlertDialogTriggerProps>;
+  export const AlertDialogContent: React.FC<AlertDialogContentProps>;
+  export const AlertDialogHeader: React.FC<AlertDialogHeaderProps>;
+  export const AlertDialogTitle: React.FC<AlertDialogTitleProps>;
+  export const AlertDialogDescription: React.FC<AlertDialogDescriptionProps>;
+  export const AlertDialogFooter: React.FC<AlertDialogFooterProps>;
+  export const AlertDialogAction: React.FC<AlertDialogActionProps>;
+  export const AlertDialogCancel: React.FC<AlertDialogCancelProps>;
+}
+
+// Declaraciones para Separator
+declare module '@/components/ui/separator' {
+  import { HTMLAttributes } from 'react';
+  
+  export interface SeparatorProps extends HTMLAttributes<HTMLDivElement> {
+    orientation?: 'horizontal' | 'vertical';
+    decorative?: boolean;
+  }
+  
+  export const Separator: React.FC<SeparatorProps>;
+}
+
+// Declaraciones para Avatar
+declare module '@/components/ui/avatar' {
+  import { HTMLAttributes, ImgHTMLAttributes, ReactNode } from 'react';
+  
+  export interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
+    children?: ReactNode;
+  }
+  
+  export interface AvatarImageProps extends ImgHTMLAttributes<HTMLImageElement> {
+    src?: string;
+    alt?: string;
+  }
+  
+  export interface AvatarFallbackProps extends HTMLAttributes<HTMLDivElement> {
+    children?: ReactNode;
+  }
+  
+  export const Avatar: React.FC<AvatarProps>;
+  export const AvatarImage: React.FC<AvatarImageProps>;
+  export const AvatarFallback: React.FC<AvatarFallbackProps>;
+}
+
+// Declaraciones para Skeleton
+declare module '@/components/ui/skeleton' {
+  import { HTMLAttributes, ReactNode } from 'react';
+  
+  export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
+    className?: string;
+    children?: ReactNode;
+  }
+  
+  export const Skeleton: React.FC<SkeletonProps>;
+  
+  // Skeleton components específicos
+  export const PersonalCardSkeleton: React.FC<{ cards?: number }>;
+  export const PersonalListSkeleton: React.FC<{ rows?: number }>;
+  export const PersonalSingleSkeleton: React.FC;
+  export const TableSkeleton: React.FC<{ rows?: number; columns?: number }>;
+  export const HeaderSkeleton: React.FC;
+  export const FormSkeleton: React.FC;
+  export const PuestoCardSkeleton: React.FC<{ cards?: number }>;
+  export const AuditoriaSkeleton: React.FC;
+  export const AuditoriaFormSkeleton: React.FC;
+  export const CapacitacionSkeleton: React.FC;
+  export const CapacitacionFormSkeleton: React.FC;
+  export const HallazgoSkeleton: React.FC;
+  export const HallazgoFormSkeleton: React.FC;
+  export const DocumentoFormSkeleton: React.FC;
+}
+
 export { };
 
