@@ -41,7 +41,7 @@ import {
   CapacitacionField 
 } from "@/types/capacitaciones";
 
-export default function CapacitacionesListing(): JSX.Element {
+export default function CapacitacionesListing(): React.JSX.Element {
   const { toast } = useToast();
   const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -214,7 +214,7 @@ export default function CapacitacionesListing(): JSX.Element {
 
   const stats = getStats();
 
-  const renderGridView = (): JSX.Element => {
+  const renderGridView = (): React.JSX.Element => {
     if (loading) {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -248,7 +248,6 @@ export default function CapacitacionesListing(): JSX.Element {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredCapacitaciones.map((capacitacion: Capacitacion) => {
-          const StatusIcon = getEstadoIcon(capacitacion.estado);
           const fields: CapacitacionField[] = [
             ...(capacitacion.instructor ? [{ 
               icon: User, 
@@ -292,7 +291,7 @@ export default function CapacitacionesListing(): JSX.Element {
     );
   };
 
-  const renderListView = (): JSX.Element => {
+  const renderListView = (): React.JSX.Element => {
     if (loading) {
       return (
         <div className="flex items-center justify-center p-8">
@@ -407,32 +406,61 @@ export default function CapacitacionesListing(): JSX.Element {
       <UnifiedHeader
         title="Capacitaciones"
         description="Gestiona las capacitaciones del personal"
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onNew={handleCreate}
+        onExport={handleExport}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
         icon={GraduationCap}
         primaryColor="emerald"
-        stats={[
-          { label: "Total", value: stats.total, icon: Target },
-          { label: "Planificadas", value: stats.planificadas, icon: Calendar },
-          { label: "En Preparación", value: stats.enPreparacion, icon: BookOpen },
-          { label: "Completadas", value: stats.completadas, icon: CheckCircle }
-        ]}
-        actions={[
-          { label: "Nueva Capacitación", onClick: handleCreate, icon: Plus },
-          { label: "Exportar", onClick: handleExport, icon: Download }
-        ]}
+        totalCount={stats.total}
+        newButtonText="Nueva Capacitación"
       />
 
-      {/* Filtros y búsqueda */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-1 gap-4 items-center">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Buscar capacitaciones..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <Target className="h-8 w-8 text-emerald-500 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
+            </div>
           </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <Calendar className="h-8 w-8 text-blue-500 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Planificadas</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.planificadas}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <BookOpen className="h-8 w-8 text-yellow-500 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">En Preparación</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.enPreparacion}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <CheckCircle className="h-8 w-8 text-green-500 mr-3" />
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completadas</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.completadas}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros y búsqueda */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
+        <div className="flex flex-1 gap-4 items-center">
           <Select value={filterEstado} onValueChange={setFilterEstado}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filtrar por estado" />
