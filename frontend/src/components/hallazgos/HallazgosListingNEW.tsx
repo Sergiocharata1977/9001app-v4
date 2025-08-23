@@ -2,15 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { hallazgosService } from '@/services/hallazgosService';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Clock, CheckCircle, AlertTriangle, List, Trello, BarChart, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { FileText, Clock, CheckCircle, AlertTriangle, BarChart, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import HallazgoForm from './HallazgoForm';
 import HallazgoWorkflowManager from './HallazgoWorkflowManager';
 import HallazgoStatCard from './HallazgoStatCard';
-import DashboardView from '@/components/mejoras/DashboardView';
 import DataTable from '../shared/DataTable/DataTable';
 import { 
   Hallazgo, 
