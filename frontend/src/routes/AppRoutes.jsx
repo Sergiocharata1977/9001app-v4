@@ -1,16 +1,17 @@
-import ActividadesListing from '@/components/crm/ActividadesListing';
 import CRMDashboard from '@/components/crm/CRMDashboard';
-import CRMSimpleTest from '@/components/crm/CRMSimpleTest';
-import CRMTestComponent from '@/components/crm/CRMTestComponent';
-import ClientesListing from '@/components/crm/ClientesListing';
-import OportunidadesListing from '@/components/crm/OportunidadesListing';
+import ClienteAgroSingle from '@/components/crm/ClienteAgroSingle';
+import OportunidadAgroSingle from '@/components/crm/OportunidadAgroSingle';
+import TestClientes from '@/components/crm/TestClientes';
 import VendedoresListing from '@/components/crm/VendedoresListing';
-import CRMSatisfaccionMenu from '@/components/menu/CRMSatisfaccionMenu';
 import CalidadMenu from '@/components/menu/CalidadMenu';
 import MainMenuCards from '@/components/menu/MainMenuCards';
 import ProcesosMenu from '@/components/menu/ProcesosMenu';
 import RRHHMenu from '@/components/menu/RRHHMenu';
 import CRMLayout from '@/layouts/CRMLayout';
+import ActividadesAgroPage from '@/pages/CRM/ActividadesAgroPage';
+import ClientesAgroPage from '@/pages/CRM/ClientesAgroPage';
+import ContactosPage from '@/pages/CRM/ContactosPage';
+import OportunidadesAgroPage from '@/pages/CRM/OportunidadesAgroPage';
 import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
@@ -22,9 +23,9 @@ import SuperAdminRoutes from "./SuperAdminRoutes";
 
 // Páginas de Acceso Directo Temporal
 import AccessDirectoCRM from '../pages/AccessDirectoCRM';
+import AccessDirectoCalidad from '../pages/AccessDirectoCalidad';
 import AccessDirectoProcesos from '../pages/AccessDirectoProcesos';
 import AccessDirectoRRHH from '../pages/AccessDirectoRRHH';
-import AccessDirectoCalidad from '../pages/AccessDirectoCalidad';
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -207,11 +208,7 @@ const AppRoutes = () => {
                       <ProcesosMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
                     </SecondLevelLayout>
                   } />
-                  <Route path="crm-satisfaccion" element={
-                    <SecondLevelLayout moduleType="crm-satisfaccion" onBackToMainMenu={() => navigate('/app/menu-cards')}>
-                      <CRMSatisfaccionMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
-                    </SecondLevelLayout>
-                  } />
+
 
                   {/* Páginas principales */}
                   <Route path="calendario" element={<CalendarPage />} />
@@ -377,12 +374,17 @@ const AppRoutes = () => {
             <CRMLayout>
               <Routes>
                 <Route index element={<CRMDashboard />} />
-                <Route path="clientes" element={<ClientesListing />} />
-                <Route path="oportunidades" element={<OportunidadesListing />} />
-                <Route path="actividades" element={<ActividadesListing />} />
+                <Route path="contactos" element={<ContactosPage />} />
+                <Route path="clientes" element={<ClientesAgroPage />} />
+                <Route path="clientes/:id" element={<ClienteAgroSingle />} />
+                <Route path="oportunidades" element={<OportunidadesAgroPage />} />
+                <Route path="oportunidades/:id" element={<OportunidadAgroSingle />} />
+                <Route path="actividades" element={<ActividadesAgroPage />} />
+                <Route path="test-clientes" element={<TestClientes />} />
                 <Route path="vendedores" element={<VendedoresListing />} />
-                <Route path="test" element={<CRMTestComponent />} />
-                <Route path="test-simple" element={<CRMSimpleTest />} />
+                <Route path="satisfaccion" element={<SatisfaccionClientePage />} />
+                <Route path="reportes" element={<CRMDashboard />} />
+                <Route path="analytics" element={<CRMDashboard />} />
               </Routes>
             </CRMLayout>
           </ProtectedRoute>

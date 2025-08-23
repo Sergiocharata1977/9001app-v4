@@ -1,4 +1,4 @@
-# 🗄️ Estructura Completa de Base de Datos - SGC ISO 9001
+ bc bj# 🗄️ Estructura Completa de Base de Datos - SGC ISO 9001
 **📅 Última Actualización:** 20/8/2025, 9:00:00
 **📊 Total de Tablas:** 35
 

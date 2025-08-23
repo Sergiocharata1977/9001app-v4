@@ -59,13 +59,13 @@ const ActividadesListing = () => {
   };
 
   const filtrarActividades = () => {
-    let filtered = [...actividades];
+    let filtered = [...(actividades || [])];
 
     if (searchTerm) {
       filtered = filtered.filter(actividad =>
         actividad.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        actividad.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        actividad.cliente_nombre?.toLowerCase().includes(searchTerm.toLowerCase())
+        actividad.cliente_nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        actividad.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -217,7 +217,7 @@ const ActividadesListing = () => {
       <Card>
         <CardHeader>
           <CardTitle>
-            Actividades ({filteredActividades.length} de {actividades.length})
+            Actividades ({(filteredActividades || []).length} de {(actividades || []).length})
           </CardTitle>
         </CardHeader>
         <CardContent>

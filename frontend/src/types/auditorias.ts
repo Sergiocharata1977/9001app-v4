@@ -34,6 +34,36 @@ export interface AuditoriaFormData {
   areas_auditadas: string;
 }
 
+export interface CreateAuditoriaData {
+  codigo: string;
+  titulo: string;
+  descripcion: string;
+  auditor_lider: string;
+  equipo_auditor: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  estado: string;
+  tipo: string;
+  alcance: string;
+  criterios: string;
+  areas_auditadas: string;
+}
+
+export interface UpdateAuditoriaData {
+  codigo?: string;
+  titulo?: string;
+  descripcion?: string;
+  auditor_lider?: string;
+  equipo_auditor?: string;
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  estado?: string;
+  tipo?: string;
+  alcance?: string;
+  criterios?: string;
+  areas_auditadas?: string;
+}
+
 export interface AuditoriaStats {
   total: number;
   planificacion: number;
@@ -45,9 +75,15 @@ export interface AuditoriaStats {
 }
 
 export interface AuditoriaFilters {
-  searchTerm: string;
-  filterEstado: string;
-  filterTipo: string;
+  search?: string;
+  estado?: string;
+  tipo?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  auditor?: string;
+  searchTerm?: string;
+  filterEstado?: string;
+  filterTipo?: string;
 }
 
 export type AuditoriaViewMode = 'kanban' | 'grid' | 'list';

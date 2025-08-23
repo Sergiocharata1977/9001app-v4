@@ -1,35 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Calendar, 
-  User, 
-  Target,
-  List,
-  Grid3X3,
-  BarChart3,
-  Clock,
-  Building,
-  Search,
-  CheckCircle
-} from 'lucide-react';
-import { auditoriasService } from '../../services/auditoriasService.js';
-import { Button } from '../ui/button.jsx';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
-import { Badge } from '../ui/badge.jsx';
-import { Input } from '../ui/input.jsx';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '../ui/use-toast.js';
-import AuditoriaKanbanBoard from './AuditoriaKanbanBoard.jsx';
-import { 
-  Auditoria, 
-  AuditoriaViewMode, 
-  AuditoriaEstado, 
-  EstadoConfig,
-  AuditoriaCardProps 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+    Auditoria,
+    AuditoriaCardProps,
+    AuditoriaEstado,
+    AuditoriaViewMode,
+    EstadoConfig
 } from '@/types/auditorias';
+import {
+    BarChart3,
+    Building,
+    Calendar,
+    CheckCircle,
+    Clock,
+    Edit,
+    Eye,
+    Grid3X3,
+    List,
+    Plus,
+    Search,
+    Target,
+    Trash2,
+    User
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { auditoriasService } from '../../services/auditoriasService.js';
+import { useToast } from '../ui/use-toast';
+import AuditoriaKanbanBoard from './AuditoriaKanbanBoard.jsx';
 
 // ===============================================
 // COMPONENTE DE LISTADO DE AUDITORÍAS v2 - SGC PRO

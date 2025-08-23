@@ -236,69 +236,58 @@ export const moduleConfigurations = {
         color: 'blue'
       },
       {
-        id: 'clientes',
-        name: '👥 2. Gestión de Clientes',
+        id: 'contactos',
+        name: '📞 2. Contactos',
         icon: 'Users',
-        path: '/app/crm/clientes',
-        description: 'Gestión integral de clientes',
+        path: '/app/crm/contactos',
+        description: 'Gestión de contactos y prospectos',
         priority: 2,
-        color: 'blue',
-        items: [
-          { name: 'Clientes', path: '/app/crm/clientes', icon: 'Users', description: 'Base de datos de clientes', priority: 1 },
-          { name: 'Categorías', path: '/app/crm/categorias', icon: 'Tag', description: 'Categorización de clientes', priority: 2 }
-        ]
+        color: 'blue'
+      },
+      {
+        id: 'clientes',
+        name: '👥 3. Gestión de Clientes',
+        icon: 'Building',
+        path: '/app/crm/clientes',
+        description: 'Gestión integral de clientes agro',
+        priority: 3,
+        color: 'blue'
       },
       {
         id: 'oportunidades',
-        name: '💼 3. Oportunidades',
+        name: '💼 4. Oportunidades',
         icon: 'Target',
         path: '/app/crm/oportunidades',
         description: 'Pipeline de ventas',
-        priority: 3,
-        color: 'blue',
-        items: [
-          { name: 'Oportunidades', path: '/app/crm/oportunidades', icon: 'Target', description: 'Gestión de oportunidades', priority: 1 },
-          { name: 'Pipeline', path: '/app/crm/pipeline', icon: 'TrendingUp', description: 'Vista de pipeline', priority: 2 }
-        ]
+        priority: 4,
+        color: 'blue'
       },
       {
         id: 'actividades',
-        name: '📅 4. Actividades',
+        name: '📅 5. Actividades',
         icon: 'Calendar',
         path: '/app/crm/actividades',
         description: 'Gestión de actividades comerciales',
-        priority: 4,
-        color: 'blue',
-        items: [
-          { name: 'Actividades', path: '/app/crm/actividades', icon: 'Calendar', description: 'Actividades comerciales', priority: 1 },
-          { name: 'Calendario', path: '/app/crm/calendario', icon: 'Clock', description: 'Calendario de actividades', priority: 2 }
-        ]
+        priority: 5,
+        color: 'blue'
       },
       {
         id: 'vendedores',
-        name: '👨‍💼 5. Vendedores',
+        name: '👨‍💼 6. Vendedores',
         icon: 'UserCheck',
         path: '/app/crm/vendedores',
         description: 'Gestión del equipo comercial',
-        priority: 5,
-        color: 'blue',
-        items: [
-          { name: 'Vendedores', path: '/app/crm/vendedores', icon: 'UserCheck', description: 'Equipo de ventas', priority: 1 },
-          { name: 'Métricas', path: '/app/crm/metricas', icon: 'PieChart', description: 'Métricas de rendimiento', priority: 2 }
-        ]
+        priority: 6,
+        color: 'blue'
       },
       {
         id: 'reportes',
-        name: '📊 6. Reportes',
-        icon: 'FileText',
+        name: '📊 7. Reportes',
+        icon: 'BarChart3',
         path: '/app/crm/reportes',
         description: 'Reportes y análisis',
-        priority: 6,
-        color: 'blue',
-        items: [
-          { name: 'Reportes', path: '/app/crm/reportes', icon: 'FileText', description: 'Reportes comerciales', priority: 1 },
-          { name: 'Analytics', path: '/app/crm/analytics', icon: 'LineChart', description: 'Análisis avanzado', priority: 2 }
-        ]
+        priority: 7,
+        color: 'blue'
       }
     ]
   }

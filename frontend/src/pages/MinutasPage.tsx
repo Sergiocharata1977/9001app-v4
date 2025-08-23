@@ -64,15 +64,9 @@ interface MinutasPageProps {
 
 const MinutasPage: React.FC<MinutasPageProps> = () => {
   const [minutas, setMinutas] = useState<Minuta[]>([]);
-  const [minutaSeleccionada, setMinutaSeleccionada] = useState<Minuta | null>(null);
   const [filtros, setFiltros] = useState<MinutaFiltros>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Estados para modales
-  const [showModalCrear, setShowModalCrear] = useState<boolean>(false);
-  const [showModalEditar, setShowModalEditar] = useState<boolean>(false);
-  const [showModalDetalle, setShowModalDetalle] = useState<boolean>(false);
 
   useEffect(() => {
     cargarMinutas();

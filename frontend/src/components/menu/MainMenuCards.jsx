@@ -83,7 +83,7 @@ const MainMenuCards = ({ onBackToSidebar }) => {
       color: 'indigo',
       gradient: 'from-indigo-500 to-indigo-600',
       hoverGradient: 'from-indigo-600 to-indigo-700',
-      path: '/app/crm-satisfaccion',
+      path: '/app/crm',
       metrics: {
         clientes: '45',
         oportunidades: '12',

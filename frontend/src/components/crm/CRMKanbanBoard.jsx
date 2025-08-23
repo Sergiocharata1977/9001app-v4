@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plus, Users, DollarSign, Calendar, Target } from 'lucide-react';
-import { crmService, crmUtils } from '@/services/crmService';
+import { crmService } from '@/services/crmService';
 import { toast } from 'sonner';
 
 // Configuración de etapas del pipeline de ventas
@@ -52,6 +52,13 @@ const ETAPAS_OPORTUNIDADES = {
 const OportunidadCard = ({ oportunidad, onClick }) => {
   const etapa = ETAPAS_OPORTUNIDADES[oportunidad.etapa];
   
+  const formatearMoneda = (valor) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN'
+    }).format(valor || 0);
+  };
+  
   return (
     <Card 
       className="mb-3 cursor-pointer hover:shadow-md transition-shadow"
@@ -59,35 +66,37 @@ const OportunidadCard = ({ oportunidad, onClick }) => {
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h4 className="font-medium text-sm truncate">{oportunidad.titulo}</h4>
+          <h4 className="font-medium text-sm truncate">{oportunidad.descripcion || 'Sin descripción'}</h4>
           <Badge variant="outline" className="text-xs">
-            {crmUtils.formatearMoneda(oportunidad.valor_estimado)}
+            {formatearMoneda(oportunidad.valor_estimado)}
           </Badge>
         </div>
         
         <div className="space-y-1 text-xs text-gray-600">
           <div className="flex items-center">
             <Users className="w-3 h-3 mr-1" />
-            <span>{oportunidad.cliente_nombre}</span>
+            <span>{oportunidad.cliente_nombre || 'Cliente no especificado'}</span>
           </div>
           <div className="flex items-center">
             <Target className="w-3 h-3 mr-1" />
-            <span>{oportunidad.vendedor_nombre}</span>
+            <span>{oportunidad.vendedor_nombre || 'Vendedor no asignado'}</span>
           </div>
-          <div className="flex items-center">
-            <Calendar className="w-3 h-3 mr-1" />
-            <span>{new Date(oportunidad.fecha_cierre_esperada).toLocaleDateString()}</span>
-          </div>
+          {oportunidad.fecha_cierre_esperada && (
+            <div className="flex items-center">
+              <Calendar className="w-3 h-3 mr-1" />
+              <span>{new Date(oportunidad.fecha_cierre_esperada).toLocaleDateString()}</span>
+            </div>
+          )}
         </div>
         
         <div className="mt-2">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-blue-600 h-2 rounded-full" 
-              style={{ width: `${oportunidad.probabilidad}%` }}
+              style={{ width: `${oportunidad.probabilidad || 0}%` }}
             ></div>
           </div>
-          <span className="text-xs text-gray-500">{oportunidad.probabilidad}%</span>
+          <span className="text-xs text-gray-500">{oportunidad.probabilidad || 0}%</span>
         </div>
       </CardContent>
     </Card>
@@ -210,7 +219,12 @@ const CRMKanbanBoard = ({ oportunidades = [], onOportunidadClick, onEstadoChange
               <DollarSign className="w-8 h-8 text-green-600 mr-3" />
               <div>
                 <p className="text-sm text-gray-600">Valor Total</p>
-                <p className="text-2xl font-bold">{crmUtils.formatearMoneda(valorTotal)}</p>
+                <p className="text-2xl font-bold">
+                  {new Intl.NumberFormat('es-MX', {
+                    style: 'currency',
+                    currency: 'MXN'
+                  }).format(valorTotal)}
+                </p>
               </div>
             </div>
           </CardContent>

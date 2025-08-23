@@ -221,3 +221,7 @@ export interface MinutaEstadisticas {
   acuerdos_completados: number;
   acuerdos_pendientes: number;
 }
+
+// Tipos adicionales para TypeScript
+export type MinutaTipo = 'reunion' | 'auditoria' | 'revision' | 'capacitacion';
+export type MinutaEstado = 'programada' | 'en_proceso' | 'completada' | 'cancelada';

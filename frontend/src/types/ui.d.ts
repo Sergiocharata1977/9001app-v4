@@ -1,209 +1,267 @@
-// Declaraciones de tipos para componentes UI de Radix
+// Tipos para componentes UI
+
+import { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
+
+// Declaraciones para manejar imports con diferentes casings
 declare module '@/components/ui/button' {
-  import { ComponentProps, ReactNode } from 'react';
-  
-  interface ButtonProps extends ComponentProps<'button'> {
+  export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
     size?: 'default' | 'sm' | 'lg' | 'icon';
-    asChild?: boolean;
+    loading?: boolean;
     children: ReactNode;
   }
-  
+  export const Button: React.FC<ButtonProps>;
+}
+
+declare module '@/components/ui/Button' {
+  export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    size?: 'default' | 'sm' | 'lg' | 'icon';
+    loading?: boolean;
+    children: ReactNode;
+  }
   export const Button: React.FC<ButtonProps>;
 }
 
 declare module '@/components/ui/input' {
-  import { ComponentProps } from 'react';
-  
-  interface InputProps extends ComponentProps<'input'> {
-    type?: string;
+  export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+    label?: string;
+    error?: string;
+    helperText?: string;
+    leftIcon?: ReactNode;
+    rightIcon?: ReactNode;
   }
-  
+  export const Input: React.FC<InputProps>;
+}
+
+declare module '@/components/ui/Input' {
+  export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+    label?: string;
+    error?: string;
+    helperText?: string;
+    leftIcon?: ReactNode;
+    rightIcon?: ReactNode;
+  }
   export const Input: React.FC<InputProps>;
 }
 
 declare module '@/components/ui/card' {
-  import { ComponentProps, ReactNode } from 'react';
-  
-  interface CardProps extends ComponentProps<'div'> {
+  export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+    title?: string;
+    subtitle?: string;
     children: ReactNode;
+    variant?: 'default' | 'outlined' | 'elevated';
   }
-  
-  interface CardHeaderProps extends ComponentProps<'div'> {
-    children: ReactNode;
-  }
-  
-  interface CardTitleProps extends ComponentProps<'h3'> {
-    children: ReactNode;
-  }
-  
-  interface CardDescriptionProps extends ComponentProps<'p'> {
-    children: ReactNode;
-  }
-  
-  interface CardContentProps extends ComponentProps<'div'> {
-    children: ReactNode;
-  }
-  
-  interface CardFooterProps extends ComponentProps<'div'> {
-    children: ReactNode;
-  }
-  
   export const Card: React.FC<CardProps>;
-  export const CardHeader: React.FC<CardHeaderProps>;
-  export const CardTitle: React.FC<CardTitleProps>;
-  export const CardDescription: React.FC<CardDescriptionProps>;
-  export const CardContent: React.FC<CardContentProps>;
-  export const CardFooter: React.FC<CardFooterProps>;
+  export const CardHeader: React.FC<HTMLAttributes<HTMLDivElement>>;
+  export const CardTitle: React.FC<HTMLAttributes<HTMLHeadingElement>>;
+  export const CardDescription: React.FC<HTMLAttributes<HTMLParagraphElement>>;
+  export const CardContent: React.FC<HTMLAttributes<HTMLDivElement>>;
+  export const CardFooter: React.FC<HTMLAttributes<HTMLDivElement>>;
+}
+
+declare module '@/components/ui/Card' {
+  export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+    title?: string;
+    subtitle?: string;
+    children: ReactNode;
+    variant?: 'default' | 'outlined' | 'elevated';
+  }
+  export const Card: React.FC<CardProps>;
+  export const CardHeader: React.FC<HTMLAttributes<HTMLDivElement>>;
+  export const CardTitle: React.FC<HTMLAttributes<HTMLHeadingElement>>;
+  export const CardDescription: React.FC<HTMLAttributes<HTMLParagraphElement>>;
+  export const CardContent: React.FC<HTMLAttributes<HTMLDivElement>>;
+  export const CardFooter: React.FC<HTMLAttributes<HTMLDivElement>>;
 }
 
 declare module '@/components/ui/badge' {
-  import { ComponentProps, ReactNode } from 'react';
-  
-  interface BadgeProps extends ComponentProps<'div'> {
+  export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
     variant?: 'default' | 'secondary' | 'destructive' | 'outline';
     children: ReactNode;
   }
-  
   export const Badge: React.FC<BadgeProps>;
 }
 
-declare module '@/components/ui/select' {
-  import { ComponentProps, ReactNode } from 'react';
-  
-  interface SelectProps extends ComponentProps<'div'> {
-    value?: string;
-    onValueChange?: (value: string) => void;
+declare module '@/components/ui/Badge' {
+  export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+    variant?: 'default' | 'secondary' | 'destructive' | 'outline';
     children: ReactNode;
   }
-  
-  interface SelectTriggerProps extends ComponentProps<'button'> {
-    children: ReactNode;
-  }
-  
-  interface SelectValueProps extends ComponentProps<'span'> {
-    placeholder?: string;
-  }
-  
-  interface SelectContentProps extends ComponentProps<'div'> {
-    children: ReactNode;
-  }
-  
-  interface SelectItemProps extends ComponentProps<'div'> {
-    value: string;
-    children: ReactNode;
-  }
-  
-  export const Select: React.FC<SelectProps>;
-  export const SelectTrigger: React.FC<SelectTriggerProps>;
-  export const SelectValue: React.FC<SelectValueProps>;
-  export const SelectContent: React.FC<SelectContentProps>;
-  export const SelectItem: React.FC<SelectItemProps>;
-}
-
-declare module '@/components/ui/dialog' {
-  import { ComponentProps, ReactNode } from 'react';
-  
-  interface DialogProps extends ComponentProps<'div'> {
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
-    children: ReactNode;
-  }
-  
-  interface DialogTriggerProps extends ComponentProps<'button'> {
-    children: ReactNode;
-  }
-  
-  interface DialogContentProps extends ComponentProps<'div'> {
-    children: ReactNode;
-  }
-  
-  interface DialogHeaderProps extends ComponentProps<'div'> {
-    children: ReactNode;
-  }
-  
-  interface DialogTitleProps extends ComponentProps<'h2'> {
-    children: ReactNode;
-  }
-  
-  interface DialogDescriptionProps extends ComponentProps<'p'> {
-    children: ReactNode;
-  }
-  
-  interface DialogFooterProps extends ComponentProps<'div'> {
-    children: ReactNode;
-  }
-  
-  export const Dialog: React.FC<DialogProps>;
-  export const DialogTrigger: React.FC<DialogTriggerProps>;
-  export const DialogContent: React.FC<DialogContentProps>;
-  export const DialogHeader: React.FC<DialogHeaderProps>;
-  export const DialogTitle: React.FC<DialogTitleProps>;
-  export const DialogDescription: React.FC<DialogDescriptionProps>;
-  export const DialogFooter: React.FC<DialogFooterProps>;
-}
-
-declare module '@/components/ui/label' {
-  import { ComponentProps, ReactNode } from 'react';
-  
-  interface LabelProps extends ComponentProps<'label'> {
-    children: ReactNode;
-  }
-  
-  export const Label: React.FC<LabelProps>;
-}
-
-declare module '@/components/ui/textarea' {
-  import { ComponentProps } from 'react';
-  
-  interface TextareaProps extends ComponentProps<'textarea'> {
-    placeholder?: string;
-  }
-  
-  export const Textarea: React.FC<TextareaProps>;
+  export const Badge: React.FC<BadgeProps>;
 }
 
 declare module '@/components/ui/progress' {
-  import { ComponentProps } from 'react';
-  
-  interface ProgressProps extends ComponentProps<'div'> {
+  export interface ProgressProps extends HTMLAttributes<HTMLDivElement> {
     value?: number;
     max?: number;
   }
-  
   export const Progress: React.FC<ProgressProps>;
 }
 
-declare module '@/components/ui/skeleton' {
-  import { ComponentProps } from 'react';
-  
-  interface SkeletonProps extends ComponentProps<'div'> {
-    className?: string;
+declare module '@/components/ui/Progress' {
+  export interface ProgressProps extends HTMLAttributes<HTMLDivElement> {
+    value?: number;
+    max?: number;
   }
-  
-  export const Skeleton: React.FC<SkeletonProps>;
+  export const Progress: React.FC<ProgressProps>;
 }
 
-declare module '@/components/ui/use-toast' {
-  export interface Toast {
-    id: string;
-    title?: string;
-    description?: string;
-    action?: React.ReactNode;
-  }
-  
-  export interface ToastActionElement {
-    altText?: string;
-    action?: React.ReactNode;
-  }
-  
-  export function useToast(): {
-    toast: (props: {
-      title?: string;
-      description?: string;
-      action?: ToastActionElement;
-      variant?: 'default' | 'destructive';
-    }) => void;
-    dismiss: (toastId?: string) => void;
-  };
+// Tipos para Modal
+export interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  children: ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
+
+// Tipos para Table
+export interface TableProps<T = any> {
+  data: T[];
+  columns: ColumnDef<T>[];
+  loading?: boolean;
+  pagination?: PaginationProps;
+  onRowClick?: (row: T) => void;
+}
+
+export interface ColumnDef<T = any> {
+  key: string;
+  header: string;
+  accessorKey?: keyof T;
+  cell?: (value: any, row: T) => ReactNode;
+  sortable?: boolean;
+  width?: string | number;
+}
+
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+}
+
+// Tipos para Form
+export interface FormFieldProps {
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'password' | 'number' | 'date' | 'select' | 'textarea';
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
+  options?: { value: string; label: string }[];
+}
+
+// Tipos para Loading
+export interface LoadingProps {
+  size?: 'sm' | 'md' | 'lg';
+  text?: string;
+  variant?: 'spinner' | 'dots' | 'skeleton';
+}
+
+// Tipos para Alert
+export interface AlertProps {
+  type: 'success' | 'error' | 'warning' | 'info';
+  title?: string;
+  message: string;
+  onClose?: () => void;
+  action?: ReactNode;
+}
+
+// Tipos para Tooltip
+export interface TooltipProps {
+  content: string;
+  children: ReactNode;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  delay?: number;
+}
+
+// Tipos para Dropdown
+export interface DropdownProps {
+  trigger: ReactNode;
+  items: DropdownItem[];
+  align?: 'start' | 'center' | 'end';
+}
+
+export interface DropdownItem {
+  label: string;
+  onClick: () => void;
+  icon?: ReactNode;
+  disabled?: boolean;
+  divider?: boolean;
+}
+
+// Tipos para Tabs
+export interface TabsProps {
+  tabs: TabItem[];
+  activeTab: string;
+  onTabChange: (tabId: string) => void;
+}
+
+export interface TabItem {
+  id: string;
+  label: string;
+  content: ReactNode;
+  disabled?: boolean;
+}
+
+// Tipos para Accordion
+export interface AccordionProps {
+  items: AccordionItem[];
+  allowMultiple?: boolean;
+}
+
+export interface AccordionItem {
+  id: string;
+  title: string;
+  content: ReactNode;
+  defaultOpen?: boolean;
+}
+
+// Tipos para DataTable
+export interface DataTableProps<T = any> {
+  data: T[];
+  columns: DataTableColumn<T>[];
+  loading?: boolean;
+  pagination?: DataTablePagination;
+  sorting?: DataTableSorting;
+  filtering?: DataTableFiltering;
+  onRowSelect?: (rows: T[]) => void;
+  onRowClick?: (row: T) => void;
+}
+
+export interface DataTableColumn<T = any> {
+  key: string;
+  header: string;
+  accessorKey?: keyof T;
+  cell?: (value: any, row: T) => ReactNode;
+  sortable?: boolean;
+  filterable?: boolean;
+  width?: string | number;
+  align?: 'left' | 'center' | 'right';
+}
+
+export interface DataTablePagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (itemsPerPage: number) => void;
+}
+
+export interface DataTableSorting {
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+  onSort: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
+}
+
+export interface DataTableFiltering {
+  filters: Record<string, any>;
+  onFilterChange: (filters: Record<string, any>) => void;
+  filterOptions?: Record<string, { value: string; label: string }[]>;
+}
+
+export { };
+

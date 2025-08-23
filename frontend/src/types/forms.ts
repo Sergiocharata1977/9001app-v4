@@ -1,399 +1,353 @@
-// ========== TIPOS DE FORMULARIOS ==========
+// ========== TIPOS BASE PARA FORMULARIOS ==========
 
-// Campo de formulario genérico
-export interface FormField {
+export interface BaseFormData {
+  id?: string | number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// ========== TIPOS PARA USUARIOS ==========
+
+export interface UsuarioFormData extends BaseFormData {
   name: string;
-  label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'multiselect' | 'textarea' | 'date' | 'datetime' | 'checkbox' | 'radio' | 'file' | 'rich_text';
-  required?: boolean;
-  placeholder?: string;
-  help_text?: string;
-  validation?: FieldValidation;
-  options?: FormOption[];
-  depends_on?: string; // Campo del que depende
-  depends_value?: any; // Valor requerido para mostrar
-  disabled?: boolean;
-  readonly?: boolean;
-  hidden?: boolean;
-  order: number;
+  email: string;
+  password?: string;
+  role: 'employee' | 'manager' | 'admin';
+  is_active?: boolean;
 }
 
-// Opción para campos select/multiselect
-export interface FormOption {
-  value: string | number;
-  label: string;
-  disabled?: boolean;
-  group?: string;
+// ========== TIPOS PARA AUDITORÍAS ==========
+
+export interface AuditoriaFormData extends BaseFormData {
+  titulo: string;
+  descripcion?: string;
+  fecha_inicio: string;
+  fecha_fin?: string;
+  tipo: 'interna' | 'externa' | 'seguimiento';
+  estado: 'planificada' | 'en_progreso' | 'completada' | 'cancelada';
+  auditor_responsable?: string;
+  departamento?: string;
+  alcance?: string;
+  criterios?: string;
+  observaciones?: string;
 }
 
-// Validación de campo
-export interface FieldValidation {
-  required?: boolean;
-  min_length?: number;
-  max_length?: number;
-  min_value?: number;
-  max_value?: number;
-  pattern?: string;
-  custom?: (value: any) => string | null; // Retorna mensaje de error o null si es válido
+// ========== TIPOS PARA CAPACITACIONES ==========
+
+export interface CapacitacionFormData extends BaseFormData {
+  titulo: string;
+  descripcion?: string;
+  fecha_inicio: string;
+  fecha_fin?: string;
+  tipo: 'presencial' | 'virtual' | 'mixta';
+  estado: 'planificada' | 'en_progreso' | 'completada' | 'cancelada';
+  instructor?: string;
+  participantes?: string[];
+  duracion_horas?: number;
+  lugar?: string;
+  materiales?: string;
+  evaluacion?: string;
 }
 
-// Formulario completo
-export interface Form {
-  id: string;
-  name: string;
-  description?: string;
-  fields: FormField[];
-  submit_button_text?: string;
-  cancel_button_text?: string;
-  success_message?: string;
-  error_message?: string;
-  redirect_url?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+// ========== TIPOS PARA HALLAZGOS ==========
+
+export interface HallazgoFormData extends BaseFormData {
+  titulo: string;
+  descripcion: string;
+  tipo: 'no_conformidad' | 'observacion' | 'oportunidad_mejora';
+  severidad: 'baja' | 'media' | 'alta' | 'crítica';
+  estado: 'abierto' | 'en_analisis' | 'en_correccion' | 'verificado' | 'cerrado';
+  departamento_responsable?: string;
+  responsable?: string;
+  fecha_limite?: string;
+  accion_correctiva?: string;
+  evidencia?: string;
+  auditoria_id?: string | number;
 }
 
-// Estado del formulario
-export interface FormState<T = Record<string, any>> {
-  values: T;
-  errors: Record<string, string>;
-  touched: Record<string, boolean>;
-  isSubmitting: boolean;
-  isValid: boolean;
-  isDirty: boolean;
+// ========== TIPOS PARA ACCIONES ==========
+
+export interface AccionFormData extends BaseFormData {
+  titulo: string;
+  descripcion: string;
+  tipo: 'correctiva' | 'preventiva' | 'mejora';
+  estado: 'pendiente' | 'en_progreso' | 'completada' | 'verificada' | 'cancelada';
+  prioridad: 'baja' | 'media' | 'alta' | 'urgente';
+  responsable?: string;
+  fecha_inicio?: string;
+  fecha_limite?: string;
+  fecha_completado?: string;
+  recursos?: string;
+  costo_estimado?: number;
+  costo_real?: number;
+  hallazgo_id?: string | number;
 }
 
-// ========== TIPOS DE VALIDACIÓN ==========
+// ========== TIPOS PARA PROCESOS ==========
 
-// Esquema de validación
-export interface ValidationSchema {
-  [field: string]: ValidationRule[];
+export interface ProcesoFormData extends BaseFormData {
+  nombre: string;
+  descripcion?: string;
+  codigo?: string;
+  responsable?: string;
+  departamento?: string;
+  estado: 'activo' | 'inactivo' | 'en_revision';
+  version?: string;
+  fecha_ultima_revision?: string;
+  documentos_relacionados?: string[];
+  indicadores?: string[];
+  riesgos?: string[];
 }
 
-// Regla de validación
-export interface ValidationRule {
-  type: 'required' | 'min' | 'max' | 'pattern' | 'email' | 'url' | 'custom';
-  value?: any;
+// ========== TIPOS PARA DOCUMENTOS ==========
+
+export interface DocumentoFormData extends BaseFormData {
+  titulo: string;
+  descripcion?: string;
+  tipo: 'procedimiento' | 'instruccion' | 'formulario' | 'registro' | 'manual' | 'politica';
+  codigo?: string;
+  version: string;
+  estado: 'borrador' | 'en_revision' | 'aprobado' | 'obsoleto';
+  autor?: string;
+  revisor?: string;
+  aprobador?: string;
+  fecha_aprobacion?: string;
+  fecha_vencimiento?: string;
+  proceso_id?: string | number;
+  archivo_url?: string;
+  tags?: string[];
+}
+
+// ========== TIPOS PARA PERSONAL ==========
+
+export interface PersonalFormData extends BaseFormData {
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono?: string;
+  puesto: string;
+  departamento?: string;
+  fecha_ingreso?: string;
+  fecha_nacimiento?: string;
+  estado: 'activo' | 'inactivo' | 'vacaciones' | 'licencia';
+  supervisor?: string;
+  competencias?: string[];
+  capacitaciones?: string[];
+  evaluaciones?: string[];
+}
+
+// ========== TIPOS PARA PRODUCTOS ==========
+
+export interface ProductoFormData extends BaseFormData {
+  nombre: string;
+  descripcion?: string;
+  codigo?: string;
+  categoria?: string;
+  estado: 'activo' | 'inactivo' | 'en_desarrollo';
+  version?: string;
+  especificaciones?: string;
+  requisitos?: string[];
+  proceso_id?: string | number;
+  responsable?: string;
+  fecha_lanzamiento?: string;
+  fecha_retiro?: string;
+}
+
+// ========== TIPOS PARA MINUTAS ==========
+
+export interface MinutaFormData extends BaseFormData {
+  titulo: string;
+  fecha: string;
+  hora_inicio?: string;
+  hora_fin?: string;
+  tipo: 'reunion' | 'auditoria' | 'revision' | 'capacitacion';
+  participantes?: string[];
+  agenda?: string;
+  acuerdos?: string;
+  acciones?: string;
+  proxima_reunion?: string;
+  estado: 'borrador' | 'finalizada' | 'aprobada';
+  moderador?: string;
+  secretario?: string;
+}
+
+// ========== TIPOS PARA CRM ==========
+
+export interface ClienteFormData extends BaseFormData {
+  nombre: string;
+  tipo: 'empresa' | 'individual';
+  email?: string;
+  telefono?: string;
+  direccion?: string;
+  ciudad?: string;
+  estado?: string;
+  codigo_postal?: string;
+  pais?: string;
+  industria?: string;
+  tamano?: 'pequena' | 'mediana' | 'grande';
+  estado_cliente: 'prospecto' | 'activo' | 'inactivo' | 'perdido';
+  fuente?: string;
+  vendedor_asignado?: string;
+  notas?: string;
+}
+
+export interface OportunidadFormData extends BaseFormData {
+  titulo: string;
+  descripcion?: string;
+  cliente_id: string | number;
+  tipo: 'nuevo_servicio' | 'renovacion' | 'upgrade' | 'consulta';
+  valor_estimado?: number;
+  probabilidad: number; // 0-100
+  estado: 'prospecto' | 'calificado' | 'propuesta' | 'negociacion' | 'ganada' | 'perdida';
+  fecha_cierre_esperada?: string;
+  fecha_cierre_real?: string;
+  vendedor_asignado?: string;
+  actividades?: string[];
+  notas?: string;
+}
+
+export interface ActividadFormData extends BaseFormData {
+  titulo: string;
+  descripcion?: string;
+  tipo: 'llamada' | 'email' | 'reunion' | 'visita' | 'propuesta' | 'seguimiento';
+  cliente_id?: string | number;
+  oportunidad_id?: string | number;
+  fecha_planificada: string;
+  fecha_realizada?: string;
+  duracion_minutos?: number;
+  resultado?: string;
+  proxima_accion?: string;
+  responsable?: string;
+  estado: 'planificada' | 'en_progreso' | 'completada' | 'cancelada';
+}
+
+// ========== TIPOS PARA FILTROS ==========
+
+export interface BaseFilters {
+  search?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface AuditoriaFilters extends BaseFilters {
+  estado?: string[];
+  tipo?: string[];
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  auditor_responsable?: string;
+  departamento?: string;
+}
+
+export interface CapacitacionFilters extends BaseFilters {
+  estado?: string[];
+  tipo?: string[];
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  instructor?: string;
+}
+
+export interface HallazgoFilters extends BaseFilters {
+  tipo?: string[];
+  severidad?: string[];
+  estado?: string[];
+  departamento_responsable?: string;
+  responsable?: string;
+  fecha_limite_inicio?: string;
+  fecha_limite_fin?: string;
+}
+
+export interface AccionFilters extends BaseFilters {
+  tipo?: string[];
+  estado?: string[];
+  prioridad?: string[];
+  responsable?: string;
+  fecha_limite_inicio?: string;
+  fecha_limite_fin?: string;
+}
+
+// ========== TIPOS PARA VALIDACIÓN ==========
+
+export interface ValidationError {
+  field: string;
   message: string;
-  condition?: (values: Record<string, any>) => boolean;
 }
 
-// Resultado de validación
 export interface ValidationResult {
   isValid: boolean;
-  errors: Record<string, string>;
+  errors: ValidationError[];
 }
 
-// ========== TIPOS DE FORMULARIOS ESPECÍFICOS ==========
+// ========== TIPOS PARA RESPUESTAS DE API ==========
 
-// Formulario de login
-export interface LoginForm {
-  email: string;
-  password: string;
-  remember_me?: boolean;
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  errors?: ValidationError[];
 }
 
-// Formulario de registro
-export interface RegisterForm {
-  name: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-  terms_accepted: boolean;
-}
-
-// Formulario de perfil de usuario
-export interface UserProfileForm {
-  name: string;
-  last_name?: string;
-  email: string;
-  phone?: string;
-  avatar?: File;
-  position?: string;
-  department_id?: string;
-}
-
-// Formulario de cambio de contraseña
-export interface ChangePasswordForm {
-  current_password: string;
-  new_password: string;
-  new_password_confirmation: string;
-}
-
-// Formulario de organización
-export interface OrganizationForm {
-  name: string;
-  legal_name: string;
-  tax_id?: string;
-  address: AddressForm;
-  contact_info: ContactInfoForm;
-  industry?: string;
-  size?: 'small' | 'medium' | 'large';
-}
-
-// Formulario de dirección
-export interface AddressForm {
-  street: string;
-  city: string;
-  state?: string;
-  postal_code: string;
-  country: string;
-}
-
-// Formulario de información de contacto
-export interface ContactInfoForm {
-  email: string;
-  phone?: string;
-  website?: string;
-}
-
-// Formulario de auditoría
-export interface AuditForm {
-  title: string;
-  description?: string;
-  type: 'internal' | 'external' | 'supplier' | 'certification';
-  scope: string;
-  objectives: string[];
-  criteria: string[];
-  start_date: string;
-  end_date: string;
-  lead_auditor_id: string;
-  team_member_ids: string[];
-  auditee_id: string;
-  department_id?: string;
-}
-
-// Formulario de hallazgo
-export interface FindingForm {
-  title: string;
-  description: string;
-  type: 'non_conformity' | 'observation' | 'opportunity';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  clause?: string;
-  requirement?: string;
-  evidence?: string;
-  responsible_id?: string;
-  due_date?: string;
-}
-
-// Formulario de acción correctiva/preventiva
-export interface ActionForm {
-  title: string;
-  description: string;
-  type: 'corrective' | 'preventive' | 'improvement';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  source_type: 'audit' | 'complaint' | 'incident' | 'review' | 'other';
-  source_id?: string;
-  responsible_id: string;
-  assigned_to_id?: string;
-  department_id?: string;
-  due_date?: string;
-  cost?: number;
-}
-
-// Formulario de documento
-export interface DocumentForm {
-  title: string;
-  description?: string;
-  type: 'policy' | 'procedure' | 'work_instruction' | 'form' | 'record' | 'manual';
-  category: string;
-  version: string;
-  keywords: string[];
-  effective_date?: string;
-  review_date?: string;
-  file: File;
-  related_document_ids: string[];
-}
-
-// Formulario de proceso
-export interface ProcessForm {
-  name: string;
-  description: string;
-  type: 'core' | 'support' | 'management';
-  owner_id: string;
-  department_id?: string;
-  inputs: string[];
-  outputs: string[];
-}
-
-// Formulario de capacitación
-export interface TrainingForm {
-  title: string;
-  description: string;
-  type: 'internal' | 'external' | 'online' | 'workshop';
-  category: string;
-  duration: number;
-  provider?: string;
-  instructor_id?: string;
-  objectives: string[];
-  requirements?: string[];
-  max_participants?: number;
-  cost?: number;
-}
-
-// Formulario de encuesta
-export interface SurveyForm {
-  title: string;
-  description: string;
-  type: 'satisfaction' | 'feedback' | 'assessment' | 'research';
-  target_audience: string[];
-  anonymous: boolean;
-  allow_multiple_responses: boolean;
-  start_date?: string;
-  end_date?: string;
-  questions: SurveyQuestionForm[];
-}
-
-// Formulario de pregunta de encuesta
-export interface SurveyQuestionForm {
-  text: string;
-  type: 'text' | 'number' | 'select' | 'multiselect' | 'rating' | 'boolean';
-  required: boolean;
-  options?: string[];
-  min_value?: number;
-  max_value?: number;
-  order: number;
-}
-
-// ========== TIPOS DE WIZARD/MULTI-STEP FORMS ==========
-
-// Paso de wizard
-export interface WizardStep {
-  id: string;
-  title: string;
-  description?: string;
-  fields: FormField[];
-  validation?: ValidationSchema;
-  is_completed: boolean;
-  is_required: boolean;
-  order: number;
-}
-
-// Wizard completo
-export interface Wizard {
-  id: string;
-  name: string;
-  description?: string;
-  steps: WizardStep[];
-  current_step: number;
-  is_completed: boolean;
-  allow_back: boolean;
-  allow_skip: boolean;
-  show_progress: boolean;
-}
-
-// Estado del wizard
-export interface WizardState {
-  current_step: number;
-  completed_steps: Set<number>;
-  form_data: Record<string, any>;
-  errors: Record<string, string>;
-  is_submitting: boolean;
-}
-
-// ========== TIPOS DE FORMULARIOS DINÁMICOS ==========
-
-// Campo dinámico
-export interface DynamicField extends FormField {
-  dynamic_options?: (formData: Record<string, any>) => FormOption[];
-  dynamic_validation?: (formData: Record<string, any>) => FieldValidation;
-  dynamic_visibility?: (formData: Record<string, any>) => boolean;
-}
-
-// Formulario dinámico
-export interface DynamicForm extends Form {
-  fields: DynamicField[];
-  dynamic_logic?: DynamicLogic[];
-}
-
-// Lógica dinámica
-export interface DynamicLogic {
-  trigger_field: string;
-  trigger_value: any;
-  action: 'show' | 'hide' | 'enable' | 'disable' | 'set_value' | 'clear_value';
-  target_field: string;
-  target_value?: any;
-}
-
-// ========== TIPOS DE FORMULARIOS DE BÚSQUEDA ==========
-
-// Campo de búsqueda
-export interface SearchField {
-  name: string;
-  label: string;
-  type: 'text' | 'select' | 'multiselect' | 'date_range' | 'number_range' | 'boolean';
-  placeholder?: string;
-  options?: FormOption[];
-  default_value?: any;
-  operator?: 'equals' | 'contains' | 'starts_with' | 'ends_with' | 'greater_than' | 'less_than' | 'between' | 'in' | 'not_in';
-}
-
-// Formulario de búsqueda
-export interface SearchForm {
-  fields: SearchField[];
-  default_sort?: string;
-  default_order?: 'asc' | 'desc';
-  page_size?: number;
-  allow_export?: boolean;
-  allow_save_search?: boolean;
-}
-
-// Parámetros de búsqueda
-export interface SearchParams {
-  search?: string;
-  filters: Record<string, any>;
-  sort_by?: string;
-  sort_order?: 'asc' | 'desc';
-  page?: number;
-  per_page?: number;
-}
-
-// ========== TIPOS DE FORMULARIOS DE IMPORTACIÓN ==========
-
-// Campo de mapeo de importación
-export interface ImportMappingField {
-  source_column: string;
-  target_field: string;
-  required: boolean;
-  data_type: 'string' | 'number' | 'date' | 'boolean' | 'email';
-  transformation?: (value: any) => any;
-  validation?: FieldValidation;
-}
-
-// Formulario de importación
-export interface ImportForm {
-  file: File;
-  mapping: ImportMappingField[];
-  options: {
-    skip_header: boolean;
-    update_existing: boolean;
-    create_missing: boolean;
-    validate_only: boolean;
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
   };
 }
 
-// Resultado de importación
-export interface ImportResult {
-  total_rows: number;
-  imported_rows: number;
-  skipped_rows: number;
-  error_rows: number;
-  errors: ImportError[];
-  warnings: ImportWarning[];
+// ========== TIPOS PARA ESTADOS DE FORMULARIOS ==========
+
+export interface FormState<T> {
+  data: T;
+  isLoading: boolean;
+  isSubmitting: boolean;
+  errors: ValidationError[];
+  isDirty: boolean;
+  isValid: boolean;
 }
 
-// Error de importación
-export interface ImportError {
-  row: number;
-  column: string;
-  value: any;
-  message: string;
+// ========== TIPOS PARA EVENTOS DE FORMULARIOS ==========
+
+export interface FormEventHandlers<T> {
+  onSubmit: (data: T) => void;
+  onCancel?: () => void;
+  onDelete?: (id: string | number) => void;
+  onValidate?: (data: T) => ValidationResult;
+  onChange?: (data: T) => void;
 }
 
-// Advertencia de importación
-export interface ImportWarning {
-  row: number;
-  column: string;
-  value: any;
-  message: string;
+// ========== TIPOS PARA CONFIGURACIÓN DE FORMULARIOS ==========
+
+export interface FormField {
+  name: string;
+  label: string;
+  type: 'text' | 'email' | 'password' | 'number' | 'date' | 'datetime' | 'select' | 'textarea' | 'checkbox' | 'radio' | 'file';
+  required?: boolean;
+  placeholder?: string;
+  options?: Array<{ value: string; label: string }>;
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+    custom?: (value: any) => string | null;
+  };
+  disabled?: boolean;
+  hidden?: boolean;
+  className?: string;
+}
+
+export interface FormConfig<T> {
+  fields: FormField[];
+  initialData?: Partial<T>;
+  validationSchema?: any; // Zod schema
+  submitButtonText?: string;
+  cancelButtonText?: string;
+  deleteButtonText?: string;
+  showDeleteButton?: boolean;
+  showCancelButton?: boolean;
+  layout?: 'vertical' | 'horizontal' | 'grid';
+  columns?: number;
 }

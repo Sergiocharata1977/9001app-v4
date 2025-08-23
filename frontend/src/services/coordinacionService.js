@@ -1,6 +1,19 @@
-import apiClient from './apiClient';
+import { createApiClient } from './apiService.js';
+
+const apiClient = createApiClient('/coordinacion');
 
 class CoordinacionService {
+  
+  // Leer el archivo de log de tareas
+  async leerLogTareas() {
+    try {
+      const response = await apiClient.get('/api/coordinacion/log-tareas');
+      return response.data;
+    } catch (error) {
+      console.error('Error leyendo log de tareas:', error);
+      throw error;
+    }
+  }
   
   // Obtener todas las tareas
   async obtenerTareas(limit = 50, offset = 0) {

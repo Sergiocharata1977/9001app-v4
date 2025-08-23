@@ -30,7 +30,7 @@ const CRMSatisfaccionMenu = ({ onBackToMainMenu }) => {
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600',
             hoverGradient: 'from-indigo-600 to-indigo-700',
-            path: '/app/crm-satisfaccion/clientes',
+            path: '/app/crm/clientes',
             metrics: {
                 clientes: '45',
                 activos: '38',
@@ -48,7 +48,7 @@ const CRMSatisfaccionMenu = ({ onBackToMainMenu }) => {
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600',
             hoverGradient: 'from-indigo-600 to-indigo-700',
-            path: '/app/crm-satisfaccion/oportunidades',
+            path: '/app/crm/oportunidades',
             metrics: {
                 oportunidades: '12',
                 abiertas: '8',
@@ -66,7 +66,7 @@ const CRMSatisfaccionMenu = ({ onBackToMainMenu }) => {
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600',
             hoverGradient: 'from-indigo-600 to-indigo-700',
-            path: '/app/crm-satisfaccion/actividades',
+            path: '/app/crm/actividades',
             metrics: {
                 actividades: '25',
                 programadas: '8',
@@ -84,7 +84,7 @@ const CRMSatisfaccionMenu = ({ onBackToMainMenu }) => {
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600',
             hoverGradient: 'from-indigo-600 to-indigo-700',
-            path: '/app/crm-satisfaccion/satisfaccion',
+            path: '/app/crm/satisfaccion',
             metrics: {
                 encuestas: '0',
                 respuestas: '0',
@@ -102,7 +102,7 @@ const CRMSatisfaccionMenu = ({ onBackToMainMenu }) => {
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600',
             hoverGradient: 'from-indigo-600 to-indigo-700',
-            path: '/app/crm-satisfaccion/reportes',
+            path: '/app/crm/reportes',
             metrics: {
                 reportes: '8',
                 dashboards: '3',
@@ -120,7 +120,7 @@ const CRMSatisfaccionMenu = ({ onBackToMainMenu }) => {
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600',
             hoverGradient: 'from-indigo-600 to-indigo-700',
-            path: '/app/crm-satisfaccion/analytics',
+            path: '/app/crm/analytics',
             metrics: {
                 kpis: '12',
                 predicciones: '4',

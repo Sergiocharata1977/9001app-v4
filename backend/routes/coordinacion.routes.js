@@ -8,6 +8,7 @@ const adminMiddleware = require('../middleware/adminMiddleware.js');
 router.use(authMiddleware);
 
 // Rutas públicas (requieren autenticación)
+router.get('/log-tareas', coordinacionController.leerLogTareas);
 router.get('/tareas', coordinacionController.obtenerTareas);
 router.get('/tareas/:tareaNumero', coordinacionController.obtenerTareaPorNumero);
 router.get('/estadisticas', coordinacionController.obtenerEstadisticas);

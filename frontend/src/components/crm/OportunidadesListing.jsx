@@ -62,7 +62,7 @@ const OportunidadesListing = () => {
   };
 
   const filtrarOportunidades = () => {
-    let filtered = [...oportunidades];
+    let filtered = [...(oportunidades || [])];
 
     if (searchTerm) {
       filtered = filtered.filter(oportunidad =>
@@ -200,7 +200,7 @@ const OportunidadesListing = () => {
       <Card>
         <CardHeader>
           <CardTitle>
-            Oportunidades ({filteredOportunidades.length} de {oportunidades.length})
+            Oportunidades ({(filteredOportunidades || []).length} de {(oportunidades || []).length})
           </CardTitle>
         </CardHeader>
         <CardContent>

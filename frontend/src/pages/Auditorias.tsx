@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Filter, Download, Eye, Edit, Trash } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { auditoriasService } from '@/services/auditoriasService';
 import { Auditoria, AuditoriaFilters } from '@/types/auditorias';
 import { useToast } from '@/hooks/useToast';
@@ -18,7 +18,6 @@ const Auditorias: React.FC = () => {
     auditor: '',
     search: ''
   });
-  const [selectedAuditoria, setSelectedAuditoria] = useState<Auditoria | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -37,51 +36,24 @@ const Auditorias: React.FC = () => {
   });
 
   // Mutations
-  const createMutation = useMutation({
-    mutationFn: auditoriasService.createAuditoria,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auditorias'] });
-      showToast('Auditoría creada exitosamente', 'success');
-      setIsModalOpen(false);
-    },
-    onError: (error) => {
-      showToast('Error al crear auditoría', 'error');
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: auditoriasService.updateAuditoria,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auditorias'] });
-      showToast('Auditoría actualizada exitosamente', 'success');
-      setIsModalOpen(false);
-      setIsEditMode(false);
-    },
-    onError: (error) => {
-      showToast('Error al actualizar auditoría', 'error');
-    }
-  });
-
   const deleteMutation = useMutation({
     mutationFn: auditoriasService.deleteAuditoria,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auditorias'] });
       showToast('Auditoría eliminada exitosamente', 'success');
     },
-    onError: (error) => {
+    onError: () => {
       showToast('Error al eliminar auditoría', 'error');
     }
   });
 
   // Handlers
   const handleCreate = () => {
-    setSelectedAuditoria(null);
     setIsEditMode(false);
     setIsModalOpen(true);
   };
 
   const handleEdit = (auditoria: Auditoria) => {
-    setSelectedAuditoria(auditoria);
     setIsEditMode(true);
     setIsModalOpen(true);
   };
@@ -96,7 +68,9 @@ const Auditorias: React.FC = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const getEstadoColor = (estado: string) => {
+  const getEstadoColor = (estado: string | undefined) => {
+    if (!estado) return 'bg-gray-100 text-gray-800';
+    
     switch (estado) {
       case 'programada': return 'bg-blue-100 text-blue-800';
       case 'en_proceso': return 'bg-yellow-100 text-yellow-800';
@@ -253,28 +227,28 @@ const Auditorias: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {auditoria.nombre}
+                          {auditoria.titulo || auditoria.codigo || `Auditoría ${auditoria.id}`}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {auditoria.alcance}
+                          {auditoria.alcance || 'Sin alcance definido'}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant="outline">
-                        {auditoria.tipo}
+                        {auditoria.tipo || 'Sin tipo'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge className={getEstadoColor(auditoria.estado)}>
-                        {auditoria.estado}
+                        {auditoria.estado || 'Sin estado'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(auditoria.fecha_programada).toLocaleDateString()}
+                      {auditoria.fecha_inicio ? new Date(auditoria.fecha_inicio).toLocaleDateString() : 'Sin fecha'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {auditoria.auditor}
+                      {auditoria.auditor_lider || 'Sin auditor'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">

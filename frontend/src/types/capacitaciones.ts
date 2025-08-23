@@ -21,6 +21,10 @@ export interface Capacitacion {
   certificacion?: boolean;
   created_at?: string;
   updated_at?: string;
+  tipo?: string;
+  hora_inicio?: string;
+  hora_fin?: string;
+  participantes?: any[];
 }
 
 export interface CapacitacionFormData {
@@ -43,6 +47,52 @@ export interface CapacitacionFormData {
   certificacion: boolean;
 }
 
+export interface CreateCapacitacionData {
+  nombre: string;
+  descripcion: string;
+  instructor: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  duracion_horas: number;
+  modalidad: string;
+  estado: string;
+  ubicacion: string;
+  costo: number;
+  cupo_maximo: number;
+  requisitos: string;
+  objetivos: string;
+  contenido: string;
+  metodologia: string;
+  evaluacion: string;
+  certificacion: boolean;
+  tipo?: string;
+  hora_inicio?: string;
+  hora_fin?: string;
+}
+
+export interface UpdateCapacitacionData {
+  nombre?: string;
+  descripcion?: string;
+  instructor?: string;
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  duracion_horas?: number;
+  modalidad?: string;
+  estado?: string;
+  ubicacion?: string;
+  costo?: number;
+  cupo_maximo?: number;
+  requisitos?: string;
+  objetivos?: string;
+  contenido?: string;
+  metodologia?: string;
+  evaluacion?: string;
+  certificacion?: boolean;
+  tipo?: string;
+  hora_inicio?: string;
+  hora_fin?: string;
+}
+
 export interface CapacitacionStats {
   total: number;
   planificadas: number;
@@ -51,8 +101,15 @@ export interface CapacitacionStats {
 }
 
 export interface CapacitacionFilters {
-  searchTerm: string;
-  filterEstado: string;
+  search?: string;
+  estado?: string;
+  tipo?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  instructor?: string;
+  departamento?: string;
+  searchTerm?: string;
+  filterEstado?: string;
 }
 
 export type ViewMode = 'grid' | 'list';

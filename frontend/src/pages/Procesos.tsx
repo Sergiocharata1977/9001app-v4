@@ -22,16 +22,10 @@ interface ProcesosPageProps {
 
 const ProcesosPage: React.FC<ProcesosPageProps> = () => {
   const [procesos, setProcesos] = useState<ProcesoSgc[]>([]);
-  const [procesoSeleccionado, setProcesoSeleccionado] = useState<ProcesoSgcCompleto | null>(null);
   const [dashboard, setDashboard] = useState<ProcesoSgcDashboard | null>(null);
   const [filtros, setFiltros] = useState<ProcesoSgcFiltros>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Estados para modales y formularios
-  const [showModalCrear, setShowModalCrear] = useState<boolean>(false);
-  const [showModalEditar, setShowModalEditar] = useState<boolean>(false);
-  const [showModalDetalle, setShowModalDetalle] = useState<boolean>(false);
 
   useEffect(() => {
     cargarProcesos();

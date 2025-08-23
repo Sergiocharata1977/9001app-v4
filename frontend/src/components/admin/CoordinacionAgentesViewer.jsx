@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { RefreshCw, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, Clock, RefreshCw, XCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { coordinacionService } from '@/services/coordinacionService';
 
 const CoordinacionAgentesViewer = () => {
   const [content, setContent] = useState('');
@@ -14,18 +15,17 @@ const CoordinacionAgentesViewer = () => {
       setIsLoading(true);
       setError(null);
       
-      // Simular carga del documento (en producción sería una API)
-      const response = await fetch('/api/coordinacion-document');
-      if (!response.ok) {
-        throw new Error('No se pudo cargar el documento');
-      }
+      const response = await coordinacionService.leerLogTareas();
       
-      const data = await response.text();
-      setContent(data);
-      setLastUpdate(new Date().toLocaleString('es-ES'));
-    } catch (err) {
-      setError('Error al cargar la bitácora de agentes');
-      console.error('Error loading document:', err);
+      if (response.success) {
+        setContent(response.data.content);
+        setLastUpdate(new Date(response.data.lastModified).toLocaleString('es-ES'));
+      } else {
+        setError('Error cargando el documento');
+      }
+    } catch (error) {
+      console.error('Error cargando documento:', error);
+      setError('Error de conexión al cargar el documento');
     } finally {
       setIsLoading(false);
     }
@@ -42,35 +42,27 @@ const CoordinacionAgentesViewer = () => {
       .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-purple-800 mt-8 mb-6 border-b border-purple-400 pb-4">$1</h1>')
       
       // Estados y badges
-      .replace(/🟢/g, '<span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>')
-      .replace(/🔴/g, '<span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span>')
-      .replace(/🟡/g, '<span class="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>')
-      .replace(/✅/g, '<span class="inline-block w-4 h-4 text-green-600">✓</span>')
-      .replace(/❌/g, '<span class="inline-block w-4 h-4 text-red-600">✗</span>')
-      .replace(/⏳/g, '<span class="inline-block w-4 h-4 text-yellow-600">⏳</span>')
-      .replace(/🔄/g, '<span class="inline-block w-4 h-4 text-blue-600">🔄</span>')
-      .replace(/⏸️/g, '<span class="inline-block w-4 h-4 text-orange-600">⏸️</span>')
+      .replace(/✅/g, '<span class="inline-block w-4 h-4 text-green-600">✅</span>')
+      .replace(/❌/g, '<span class="inline-block w-4 h-4 text-red-600">❌</span>')
+      .replace(/🔄/g, '<span class="inline-block w-4 h-4 text-yellow-600">🔄</span>')
+      .replace(/🎯/g, '<span class="inline-block w-4 h-4 text-blue-600">🎯</span>')
+      .replace(/📅/g, '<span class="inline-block w-4 h-4 text-gray-600">📅</span>')
+      .replace(/📋/g, '<span class="inline-block w-4 h-4 text-gray-600">📋</span>')
+      .replace(/🚀/g, '<span class="inline-block w-4 h-4 text-purple-600">🚀</span>')
+      .replace(/📊/g, '<span class="inline-block w-4 h-4 text-indigo-600">📊</span>')
+      .replace(/📝/g, '<span class="inline-block w-4 h-4 text-green-600">📝</span>')
       
       // Estados de texto
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       
-      // Listas con mejor formato para la bitácora (incluyendo nuevos campos de archivos)
-      .replace(/^- 📅 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">📅</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- ⏰ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">⏰</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 🖊️ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-purple-600 mr-2">🖊️</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 🎯 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-orange-600 mr-2">🎯</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 🔄 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">🔄</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 📦 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">📦</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 📁 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">📁</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 📄 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">📄</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 🗑️ (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-red-600 mr-2">🗑️</span> <span class="font-medium">$1</span></li>')
-      .replace(/^- 📑 (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-purple-600 mr-2">📑</span> <span class="font-medium">$1</span></li>')
+      // Listas con mejor formato para el log de tareas
+      .replace(/^- \*\*Agente:\*\* (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-blue-600 mr-2">🤖</span> <strong>Agente:</strong> <span class="font-medium">$1</span></li>')
+      .replace(/^- \*\*Tarea realizada:\*\* (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-green-600 mr-2">📋</span> <strong>Tarea realizada:</strong> <span class="font-medium">$1</span></li>')
+      .replace(/^- \*\*Documentos trabajados:\*\* (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-purple-600 mr-2">📁</span> <strong>Documentos trabajados:</strong> <span class="font-medium">$1</span></li>')
+      .replace(/^- \*\*Estado:\*\* (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-orange-600 mr-2">📊</span> <strong>Estado:</strong> <span class="font-medium">$1</span></li>')
+      .replace(/^- \*\*Contexto:\*\* (.*$)/gim, '<li class="ml-4 mb-2 flex items-center"><span class="text-indigo-600 mr-2">💡</span> <strong>Contexto:</strong> <span class="font-medium">$1</span></li>')
       .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1">• $1</li>')
-      
-      // Checkboxes
-      .replace(/^\[ \] (.*$)/gim, '<li class="ml-4 mb-1"><input type="checkbox" class="mr-2" disabled> $1</li>')
-      .replace(/^\[x\] (.*$)/gim, '<li class="ml-4 mb-1"><input type="checkbox" class="mr-2" checked disabled> <span class="line-through">$1</span></li>')
       
       // Separadores
       .replace(/^---$/gim, '<hr class="my-8 border-gray-300">')
@@ -85,14 +77,14 @@ const CoordinacionAgentesViewer = () => {
     loadDocument();
   }, []);
 
-  // Auto-refresh cada 5 minutos
+  // Auto-refresh cada 20 minutos
   useEffect(() => {
     if (!autoRefresh) return;
-    
+
     const interval = setInterval(() => {
       loadDocument();
-    }, 5 * 60 * 1000); // 5 minutos
-    
+    }, 20 * 60 * 1000); // 20 minutos
+
     return () => clearInterval(interval);
   }, [autoRefresh]);
 
@@ -107,10 +99,10 @@ const CoordinacionAgentesViewer = () => {
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold text-purple-600 flex items-center gap-3">
                   <RefreshCw className="w-8 h-8" />
-                  Bitácora de Agentes
+                  Log de Tareas - Agentes IA
                 </h1>
                 <p className="text-slate-600">
-                  Registro de actividades y tareas de agentes en tiempo real
+                  Registro cronológico de tareas realizadas por agentes IA
                 </p>
               </div>
               
@@ -171,7 +163,7 @@ const CoordinacionAgentesViewer = () => {
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <RefreshCw className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-4" />
-                  <p className="text-slate-600">Cargando bitácora de agentes...</p>
+                  <p className="text-slate-600">Cargando log de tareas...</p>
                 </div>
               </div>
             ) : error ? (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Plus, 
@@ -10,23 +10,15 @@ import {
   Users, 
   MapPin, 
   Clock,
-  Download,
   Grid3X3,
   List,
-  MoreHorizontal,
-  Eye,
-  Search,
-  Filter,
   Target,
-  CheckCircle,
-  AlertCircle,
-  TrendingUp,
   GraduationCap
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { capacitacionesService } from '@/services/capacitacionesService';
 import { Capacitacion, CapacitacionFilters } from '@/types/capacitaciones';
 import { useToast } from '@/hooks/useToast';
@@ -41,7 +33,6 @@ const Capacitaciones: React.FC = () => {
     instructor: '',
     departamento: ''
   });
-  const [selectedCapacitacion, setSelectedCapacitacion] = useState<Capacitacion | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -61,52 +52,27 @@ const Capacitaciones: React.FC = () => {
   });
 
   // Mutations
-  const createMutation = useMutation({
-    mutationFn: capacitacionesService.createCapacitacion,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['capacitaciones'] });
-      showToast('Capacitación creada exitosamente', 'success');
-      setIsModalOpen(false);
-    },
-    onError: (error) => {
-      showToast('Error al crear capacitación', 'error');
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: capacitacionesService.updateCapacitacion,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['capacitaciones'] });
-      showToast('Capacitación actualizada exitosamente', 'success');
-      setIsModalOpen(false);
-      setIsEditMode(false);
-    },
-    onError: (error) => {
-      showToast('Error al actualizar capacitación', 'error');
-    }
-  });
-
   const deleteMutation = useMutation({
     mutationFn: capacitacionesService.deleteCapacitacion,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['capacitaciones'] });
       showToast('Capacitación eliminada exitosamente', 'success');
     },
-    onError: (error) => {
+    onError: () => {
       showToast('Error al eliminar capacitación', 'error');
     }
   });
 
   // Handlers
   const handleCreate = () => {
-    setSelectedCapacitacion(null);
-    setIsEditMode(false);
+    // setSelectedCapacitacion(null); // This line was removed
+    // setIsEditMode(false); // This line was removed
     setIsModalOpen(true);
   };
 
   const handleEdit = (capacitacion: Capacitacion) => {
-    setSelectedCapacitacion(capacitacion);
-    setIsEditMode(true);
+    // setSelectedCapacitacion(capacitacion); // This line was removed
+    // setIsEditMode(true); // This line was removed
     setIsModalOpen(true);
   };
 
@@ -120,7 +86,9 @@ const Capacitaciones: React.FC = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const getEstadoColor = (estado: string) => {
+  const getEstadoColor = (estado: string | undefined) => {
+    if (!estado) return 'bg-gray-100 text-gray-800';
+    
     switch (estado) {
       case 'programada': return 'bg-blue-100 text-blue-800';
       case 'en_progreso': return 'bg-yellow-100 text-yellow-800';
@@ -131,7 +99,9 @@ const Capacitaciones: React.FC = () => {
     }
   };
 
-  const getTipoColor = (tipo: string) => {
+  const getTipoColor = (tipo: string | undefined) => {
+    if (!tipo) return 'bg-gray-100 text-gray-800';
+    
     switch (tipo) {
       case 'obligatoria': return 'bg-red-100 text-red-800';
       case 'recomendada': return 'bg-orange-100 text-orange-800';
@@ -141,15 +111,23 @@ const Capacitaciones: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Sin fecha';
+    
+    try {
+      return new Date(dateString).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return 'Fecha inválida';
+    }
   };
 
-  const formatTime = (timeString: string) => {
+  const formatTime = (timeString: string | undefined) => {
+    if (!timeString) return '--:--';
+    
     return timeString.substring(0, 5); // HH:MM format
   };
 

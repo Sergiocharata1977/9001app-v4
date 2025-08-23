@@ -1,6 +1,34 @@
 const coordinacionService = require('../services/coordinacionService.js');
+const fs = require('fs').promises;
+const path = require('path');
 
 class CoordinacionController {
+  
+  // Leer el archivo de log de tareas
+  async leerLogTareas(req, res) {
+    try {
+      const logPath = path.join(__dirname, '../../docs-esenciales/01-log-tareas-agentes.md');
+      
+      const content = await fs.readFile(logPath, 'utf8');
+      const stats = await fs.stat(logPath);
+      
+      res.json({
+        success: true,
+        data: {
+          content,
+          lastModified: stats.mtime,
+          size: stats.size
+        }
+      });
+    } catch (error) {
+      console.error('Error leyendo log de tareas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error leyendo archivo de log de tareas',
+        error: error.message
+      });
+    }
+  }
   
   // Obtener todas las tareas
   async obtenerTareas(req, res) {
