@@ -178,6 +178,62 @@ export interface Producto {
   updated_at: string;
 }
 
+// Datos para creación/actualización de productos
+export interface ProductoFormData {
+  nombre: string;
+  codigo: string;
+  descripcion: string;
+  estado?: 'planificacion' | 'entrada' | 'diseno' | 'verificacion' | 'validacion' | 'aprobado' | 'produccion' | 'obsoleto';
+  tipo: 'producto' | 'servicio';
+  categoria: string;
+  responsable: string;
+  fecha_creacion?: string;
+  fecha_revision?: string;
+  version?: string;
+  especificaciones?: string;
+  requisitos_calidad?: string;
+  proceso_aprobacion?: string;
+  documentos_asociados?: string;
+  observaciones?: string;
+}
+
+// Tipos de documentos del sistema
+export interface DocumentoSistema {
+  id: number;
+  nombre: string;
+  tipo: 'minuta' | 'auditoria' | 'procedimiento' | 'politica' | 'registro' | 'manual' | 'otro';
+  descripcion?: string;
+  ruta_archivo: string;
+  tamaño?: number;
+  mime_type?: string;
+  version?: string;
+  estado: 'borrador' | 'revision' | 'aprobado' | 'obsoleto';
+  autor_id?: string;
+  autor?: User;
+  fecha_creacion: string;
+  fecha_modificacion?: string;
+  fecha_aprobacion?: string;
+  tags?: string[];
+  metadatos?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+// Datos para creación/actualización de documentos
+export interface DocumentoFormData {
+  nombre: string;
+  tipo: 'minuta' | 'auditoria' | 'procedimiento' | 'politica' | 'registro' | 'manual' | 'otro';
+  descripcion?: string;
+  version?: string;
+  estado?: 'borrador' | 'revision' | 'aprobado' | 'obsoleto';
+  autor_id?: string;
+  fecha_creacion?: string;
+  fecha_modificacion?: string;
+  fecha_aprobacion?: string;
+  tags?: string[];
+  metadatos?: Record<string, any>;
+}
+
 // Tipos de minutas
 export interface Minuta {
   id: string;
@@ -572,6 +628,18 @@ export interface ExportConfig {
   formato_fecha: string;
   zona_horaria: string;
   idioma: string;
+}
+
+// Tipos para exportación de datos
+export interface ExportColumn {
+  key: string;
+  header: string;
+  width?: number;
+  format?: 'text' | 'number' | 'date' | 'currency' | 'percentage';
+}
+
+export interface ExportData {
+  [key: string]: any;
 }
 
 // ========== TIPOS DE NOTIFICACIONES AVANZADAS ==========
