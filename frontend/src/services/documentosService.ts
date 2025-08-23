@@ -20,7 +20,7 @@ const documentosService = {
   async getDocumentos(): Promise<DocumentoSistema[]> {
     try {
       console.log('📄 Obteniendo todos los documentos...');
-      const response: ApiResponse<DocumentoSistema[]> = await apiService.get('/documentos');
+      const response = await apiService.get('/documentos');
       console.log(`✅ ${response?.data?.length || 0} documentos obtenidos`);
       console.log('📄 Respuesta completa:', response);
       return Array.isArray(response?.data) ? response.data : [];
@@ -33,8 +33,12 @@ const documentosService = {
   // Obtener documento por ID
   async getDocumentoById(id: number): Promise<ApiResponse<DocumentoSistema>> {
     try {
-      const response: ApiResponse<DocumentoSistema> = await apiService.get(`/documentos/${id}`);
-      return response;
+      const response = await apiService.get(`/documentos/${id}`);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Documento obtenido exitosamente'
+      };
     } catch (error) {
       console.error(`Error al obtener documento ${id}:`, error);
       throw error;
@@ -44,8 +48,12 @@ const documentosService = {
   // Crear nuevo documento
   async createDocumento(data: DocumentoFormData): Promise<ApiResponse<DocumentoSistema>> {
     try {
-      const response: ApiResponse<DocumentoSistema> = await apiService.post('/documentos', data);
-      return response;
+      const response = await apiService.post('/documentos', data);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Documento creado exitosamente'
+      };
     } catch (error) {
       console.error('Error al crear documento:', error);
       throw error;
@@ -55,8 +63,12 @@ const documentosService = {
   // Actualizar documento
   async updateDocumento(id: number, data: Partial<DocumentoFormData>): Promise<ApiResponse<DocumentoSistema>> {
     try {
-      const response: ApiResponse<DocumentoSistema> = await apiService.put(`/documentos/${id}`, data);
-      return response;
+      const response = await apiService.put(`/documentos/${id}`, data);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Documento actualizado exitosamente'
+      };
     } catch (error) {
       console.error(`Error al actualizar documento ${id}:`, error);
       throw error;
@@ -72,30 +84,52 @@ const documentosService = {
     formData.append('documento', file);
     formData.append('tipo', tipo);
     
-    return await apiService.post('/documentos/upload', formData, {
+    const response = await apiService.post('/documentos/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Documento subido exitosamente'
+    };
   },
 
   // Obtener documentos por tipo
   async getDocumentosByTipo(
     tipo: 'minuta' | 'auditoria' | 'procedimiento' | 'politica' | 'registro' | 'manual' | 'otro'
   ): Promise<ApiResponse<DocumentoSistema[]>> {
-    return await apiService.get(`/documentos/tipo/${tipo}`);
+    const response = await apiService.get(`/documentos/tipo/${tipo}`);
+    return {
+      success: true,
+      data: response.data,
+      message: 'Documentos obtenidos exitosamente'
+    };
   },
 
   // Eliminar documento
   async deleteDocumento(id: number): Promise<ApiResponse<{ message: string }>> {
-    return await apiService.delete(`/documentos/${id}`);
+    const response = await apiService.delete(`/documentos/${id}`);
+    return {
+      success: true,
+      data: response.data,
+      message: 'Documento eliminado exitosamente'
+    };
   },
 
   // Descargar documento
   async downloadDocumento(id: number): Promise<ApiResponse<Blob>> {
-    return await apiService.get(`/documentos/${id}/download`, {
+    const response = await apiService.get(`/documentos/${id}/download`, {
       responseType: 'blob',
     } as DocumentDownloadConfig);
+    
+    return {
+      success: true,
+      data: response.data,
+      message: 'Documento descargado exitosamente'
+    };
   },
 };
 
