@@ -5,9 +5,10 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "sourceMap": true,
     "allowJs": true,
+    "checkJs": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -25,6 +26,7 @@
     "node_modules",
     "dist",
     "tests",
-    "coverage"
+    "coverage",
+    "uploads"
   ]
 }
