@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Download, FileText, Table, BarChart3, Calendar, Filter, Check, X, Info } from 'lucide-react';
+import { Download, FileText, Table, X, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
