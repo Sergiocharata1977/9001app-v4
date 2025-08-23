@@ -9,11 +9,11 @@ import medicionesService from './medicionesService.js';
 import mejorasService from './mejorasService.js';
 import { capacitacionesService } from './capacitacionesService.js';
 import evaluacionesService from './evaluacionesService.js';
-import productosService from './productosService.js';
+import productosService from './productosService';
 import encuestasService from './encuestasService.js';
 import usuariosService from './usuariosService.js';
 
-import { documentosService } from './documentosService.js';
+import documentosService from './documentosService';
 import normasService from './normasService.js';
 import procesosService from './procesosService.js';
 import objetivosCalidadService from './objetivosCalidadService.js';

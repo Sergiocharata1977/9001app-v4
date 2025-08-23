@@ -22,7 +22,7 @@ import {
   Save,
   X
 } from 'lucide-react';
-import productosService from '@/services/productosService.js';
+import productosService from '@/services/productosService';
 
 const ProductoSingle = ({ producto, onBack, onEdit, onDelete }) => {
   const [historial, setHistorial] = useState([]);
