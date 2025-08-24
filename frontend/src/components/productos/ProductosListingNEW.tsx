@@ -269,7 +269,7 @@ export function ProductosListingNEW() {
     setError(null);
     try {
       const response = await productosService.getAll();
-      setProductos(response.data || []);
+      setProductos(response || []);
     } catch (err: any) {
       setError(err.message || 'Error al cargar productos');
       toast.error('Error al cargar los productos');

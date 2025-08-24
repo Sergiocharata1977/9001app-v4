@@ -147,7 +147,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
 
     const handleDelete = async (documentId: string) => {
         try {
-            await documentosService.deleteDocument(documentId);
+            await documentosService.deleteDocumento(parseInt(documentId));
 
             toast({
                 title: "✅ Documento eliminado",

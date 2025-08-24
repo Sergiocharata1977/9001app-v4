@@ -19,9 +19,9 @@ export const hallazgosService = {
    */
   async getAllHallazgos(): Promise<Hallazgo[]> {
     try {
-      const data: Hallazgo[] = await apiClient.get('/');
+      const response: ApiResponse<Hallazgo[]> = await apiClient.get('/');
       // Validación defensiva
-      const safeData = Array.isArray(data) ? data : [];
+      const safeData = Array.isArray(response.data) ? response.data : [];
       console.log('🚀 DEBUG: Hallazgos obtenidos del API:', safeData);
       console.log('🚀 DEBUG: Cantidad de hallazgos del API:', safeData?.length);
       
@@ -53,8 +53,11 @@ export const hallazgosService = {
    */
   async getHallazgoById(id: number): Promise<Hallazgo> {
     try {
-      const data: Hallazgo = await apiClient.get(`/${id}`);
-      return data;
+      const response: ApiResponse<Hallazgo> = await apiClient.get(`/${id}`);
+      if (!response.data) {
+        throw new Error('Hallazgo no encontrado');
+      }
+      return response.data;
     } catch (error) {
       console.error(`Error al obtener el hallazgo con ID ${id}:`, error);
       throw new Error((error as Error).message || 'Error al cargar el hallazgo');
@@ -68,8 +71,11 @@ export const hallazgosService = {
    */
   async createHallazgo(hallazgoData: HallazgoFormData): Promise<Hallazgo> {
     try {
-      const data: Hallazgo = await apiClient.post('/', hallazgoData);
-      return data;
+      const response: ApiResponse<Hallazgo> = await apiClient.post('/', hallazgoData);
+      if (!response.data) {
+        throw new Error('Error al crear el hallazgo');
+      }
+      return response.data;
     } catch (error) {
       console.error('Error al crear el hallazgo:', error);
       throw new Error((error as Error).message || 'Error al crear el hallazgo');
@@ -84,8 +90,11 @@ export const hallazgosService = {
    */
   async updateHallazgo(id: number, hallazgoData: Partial<HallazgoFormData>): Promise<Hallazgo> {
     try {
-      const data: Hallazgo = await apiClient.put(`/${id}`, hallazgoData);
-      return data;
+      const response: ApiResponse<Hallazgo> = await apiClient.put(`/${id}`, hallazgoData);
+      if (!response.data) {
+        throw new Error('Error al actualizar el hallazgo');
+      }
+      return response.data;
     } catch (error) {
       console.error(`Error al actualizar el hallazgo con ID ${id}:`, error);
       throw new Error((error as Error).message || 'Error al actualizar el hallazgo');
