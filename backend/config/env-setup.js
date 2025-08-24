@@ -1,11 +1,11 @@
-// Configuración de variables de entorno para isoflow4
+// Configuración de variables de entorno para 9001app-v2 (VERSIÓN EXPERIMENTAL)
 require('dotenv').config();
 
 const loadEnvConfig = () => {
   return {
-    // Configuración de base de datos isoflow4
-    TURSO_DATABASE_URL: 'libsql://isoflow4-sergiocharata1977.aws-us-east-1.turso.io',
-    TURSO_AUTH_TOKEN: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTU2OTAwMDYsImlkIjoiYjRjZTU4MWItZjc3Yy00OTY4LTgxODYtNjEwM2E4MmY0NWQxIiwicmlkIjoiMmI4MTUwOWEtYWQ2Yy00NThkLTg2OTMtYjQ3ZDQ1OWFkYWNiIn0.hs83X428FW-ZjxGvLZ1eWE6Gjp4JceY2e88VDSAgaLHOxVe-IntR-S_-bQoyA-UnMnoFYJtP-PiktziqDMOVDw',
+    // Configuración de base de datos 9001app-v2
+    TURSO_DATABASE_URL: 'libsql://9001app-v2-sergiocharata1977.aws-us-east-1.turso.io',
+    TURSO_AUTH_TOKEN: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTYwMzI1MjIsImlkIjoiOTQ3M2M5NWItMWE3OC00MWYwLTgyMDItMmMyM2Q4MmQyMjM2IiwicmlkIjoiYzIyOGMwODItZTNjZC00MTJmLWIxMWQtNWU1NjRjM2RmNzRiIn0.x4EI9uRwsvnpJzwoUJZDecbiBT4wr0Z9IhRgvwRZIIhh6AqlG5cVw9xu-P6ZAnhN-kAnjmSFyYfiG9iGlHFtBg',
     
     // Otras configuraciones
     PORT: process.env.PORT || 3001,

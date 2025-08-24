@@ -1,7 +1,7 @@
 {
-  "name": "9001app2",
-  "version": "1.0.0",
-  "description": "Sistema de Gestión de Calidad ISO 9001",
+  "name": "9001app-v2",
+  "version": "2.0.0",
+  "description": "Sistema de Gestión de Calidad ISO 9001 - VERSIÓN EXPERIMENTAL con SQLAI.ai",
   "private": true,
   "engines": {
     "node": ">=20.0.0"

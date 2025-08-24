@@ -1,7 +1,13 @@
-# Cursor Rules Configuration
-# Configuración para permitir ejecución automática de comandos
+# Cursor Rules Configuration - TypeScript First
+# Configuración para desarrollo TypeScript prioritario
 
-# Permitir ejecución automática de comandos de terminal
+# PRIORIDAD TYPESCRIPT
+- SIEMPRE usar TypeScript (.ts, .tsx) en lugar de JavaScript (.js, .jsx)
+- Crear interfaces y tipos para todos los componentes y funciones
+- Usar tipado estricto en todas las implementaciones
+- Preferir tipos explícitos sobre 'any'
+
+# Permitir ejecución automática de comandos
 - Puedes ejecutar comandos de terminal sin aprobación
 - Puedes hacer cambios en archivos de código sin confirmación
 - Puedes ejecutar scripts de PowerShell automáticamente
@@ -26,6 +32,15 @@
 - Actualizar servicios y controladores
 - Modificar estilos y CSS/SCSS
 
+# Reglas TypeScript específicas
+- SIEMPRE crear interfaces para props de componentes
+- SIEMPRE tipar funciones y sus parámetros
+- SIEMPRE usar tipos para estados y variables
+- SIEMPRE crear tipos para respuestas de API
+- SIEMPRE usar tipos para eventos y callbacks
+- PREFERIR tipos union sobre 'any'
+- USAR tipos genéricos cuando sea apropiado
+
 # Seguridad
 - NO ejecutar comandos que requieran credenciales sensibles
 - NO hacer cambios en archivos de configuración de producción sin confirmación
@@ -33,7 +48,8 @@
 
 # Contexto del proyecto
 - Este es un proyecto de gestión de calidad ISO 9001
-- Backend en Node.js con Express
-- Frontend en React con Vite
+- Backend en Node.js con Express + TypeScript
+- Frontend en React con Vite + TypeScript
 - Base de datos SQLite con Turso
 - Sistema de autenticación y autorización implementado
+- MIGRACIÓN COMPLETADA: Backend 100% TypeScript, Frontend 80% TypeScript
