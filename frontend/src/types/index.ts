@@ -32,8 +32,26 @@ export type {
 // Tipos de formularios
 export * from './forms';
 
-// Tipos de acciones
-export * from './acciones';
+// Tipos de acciones (con alias para evitar conflictos)
+export type {
+  Accion,
+  AccionEstado,
+  AccionPrioridad,
+  AccionFormData as AccionFormDataType,
+  AccionFilters as AccionFiltersType,
+  AccionUpdateData,
+  AccionStats,
+  AccionViewMode,
+  AccionEstadoConfig,
+  AccionKanbanColumn,
+  AccionTableAction,
+  AccionTableColumn,
+  AccionCardProps,
+  AccionKanbanCardProps,
+  AccionService,
+  AccionWorkflow,
+  AccionesListingProps
+} from './acciones';
 
 // Tipos de procesos SGC
 export * from './procesos';

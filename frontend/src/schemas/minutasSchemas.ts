@@ -330,10 +330,48 @@ export const normasMinutaSchema = z.object({
 });
 
 // Esquema completo para minuta con todas las validaciones
-export const minutaCompletaSchema = minutaFormSchemaConValidaciones
-  .extend(participantesMinutaSchema.shape)
-  .extend(documentosMinutaSchema.shape)
-  .extend(normasMinutaSchema.shape);
+export const minutaCompletaSchema = z.object({
+  ...minutaFormSchema.shape,
+  participantes: z.array(minutaParticipanteSchema).optional(),
+  documentos: z.array(minutaDocumentoSchema).optional(),
+  normas: z.array(minutaNormaSchema).optional()
+}).refine(
+  (data) => validacionesMinutas.validarHoras(data.hora_inicio, data.hora_fin),
+  {
+    message: 'La hora de fin debe ser posterior a la hora de inicio',
+    path: ['hora_fin']
+  }
+).refine(
+  (data) => validacionesMinutas.validarFechaProgramada(data.fecha, data.estado),
+  {
+    message: 'No se pueden programar minutas en fechas pasadas',
+    path: ['fecha']
+  }
+).refine(
+  (data) => validacionesMinutas.validarDuracionMinuta(data.hora_inicio, data.hora_fin),
+  {
+    message: 'La duración de la minuta debe estar entre 15 minutos y 8 horas',
+    path: ['hora_fin']
+  }
+).refine(
+  (data) => validacionesMinutas.validarFormatoHora(data.hora_inicio),
+  {
+    message: 'Formato de hora de inicio inválido (HH:MM)',
+    path: ['hora_inicio']
+  }
+).refine(
+  (data) => validacionesMinutas.validarFormatoHora(data.hora_fin),
+  {
+    message: 'Formato de hora de fin inválido (HH:MM)',
+    path: ['hora_fin']
+  }
+).refine(
+  (data) => !data.acuerdos || validacionesMinutas.validarAcuerdosUnicos(data.acuerdos),
+  {
+    message: 'No se permiten acuerdos duplicados',
+    path: ['acuerdos']
+  }
+);
 
 // Tipos para el esquema completo
 export type MinutaCompletaData = z.infer<typeof minutaCompletaSchema>;

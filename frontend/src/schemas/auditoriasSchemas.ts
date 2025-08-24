@@ -102,8 +102,7 @@ export const auditoriaBaseSchema = z.object({
   es_recurrente: z.boolean().default(false),
   
   frecuencia_recurrencia: z.enum(['mensual', 'trimestral', 'semestral', 'anual'])
-    .optional()
-    .refine(() => true, 'Debe especificar la frecuencia de recurrencia'),
+    .optional(),
   
   fecha_fin_recurrencia: z.string()
     .optional()
@@ -277,8 +276,6 @@ export const auditoriaBaseSchema = z.object({
 
 // Esquema para crear auditoría
 export const createAuditoriaSchema = auditoriaBaseSchema.omit({
-  id: true,
-  estado: true,
   fecha_creacion: true,
   fecha_actualizacion: true,
   actualizado_por: true,
@@ -287,7 +284,6 @@ export const createAuditoriaSchema = auditoriaBaseSchema.omit({
 
 // Esquema para actualizar auditoría
 export const updateAuditoriaSchema = auditoriaBaseSchema.partial().omit({
-  id: true,
   fecha_creacion: true,
   historial_cambios: true
 });
