@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AccionWorkflowManager from '@/components/acciones/AccionWorkflowManager';
 import CrearAccionForm from '@/components/acciones/forms/CrearAccionForm';
-import { ACCION_ESTADOS, accionWorkflow } from '@/config/accionWorkflow';
+import { ACCION_ESTADOS, accionWorkflow, ACCION_PRIORIDADES } from '@/config/accionWorkflow';
 import { 
   Accion, 
   AccionStats, 
@@ -133,9 +133,9 @@ const AccionesListingNEW: React.FC<AccionesListingProps> = ({
   // Renderizado de prioridad
   const renderPrioridad = (prioridad: string | undefined): React.ReactNode => {
     const colors: Record<string, string> = {
-      alta: 'bg-red-500',
-      media: 'bg-yellow-500',
-      baja: 'bg-green-500'
+      [ACCION_PRIORIDADES.ALTA]: 'bg-red-500',
+      [ACCION_PRIORIDADES.MEDIA]: 'bg-yellow-500',
+      [ACCION_PRIORIDADES.BAJA]: 'bg-green-500'
     };
     
     return (

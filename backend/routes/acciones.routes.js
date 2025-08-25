@@ -21,7 +21,14 @@ const router = Router();
 
 // POST /api/acciones - Crear una nueva acción de mejora
 router.post('/', async (req, res) => {
-  const { hallazgo_id, descripcion_accion, responsable_accion, fecha_plan_accion } = req.body;
+  const { 
+    hallazgo_id, 
+    descripcion_accion, 
+    responsable_accion, 
+    fecha_plan_accion,
+    titulo,
+    prioridad = 'media'
+  } = req.body;
 
   if (!hallazgo_id || !descripcion_accion) {
     return res.status(400).json({ error: 'hallazgo_id y descripcion_accion son campos requeridos.' });
@@ -41,8 +48,9 @@ router.post('/', async (req, res) => {
     const estadoInicial = 'p1_planificacion_accion'; // Estado inicial por defecto
 
     const result = await tursoClient.execute({
-      sql: `INSERT INTO acciones (id, hallazgo_id, numeroAccion, estado, descripcion_accion, responsable_accion, fecha_plan_accion, eficacia)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,      args: [id, hallazgo_id, nextNumeroAccion, estadoInicial, descripcion_accion, responsable_accion, fecha_plan_accion, 'Pendiente'],
+      sql: `INSERT INTO acciones (id, hallazgo_id, numeroAccion, estado, descripcion_accion, responsable_accion, fecha_plan_accion, eficacia, titulo, prioridad)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [id, hallazgo_id, nextNumeroAccion, estadoInicial, descripcion_accion, responsable_accion, fecha_plan_accion, 'Pendiente', titulo, prioridad],
     });
 
     // Devolver la acción recién creada
@@ -100,8 +108,10 @@ router.put('/:id', async (req, res) => {
         // Campos permitidos para actualización
         const allowedFields = [
             'estado', 'descripcion_accion', 'responsable_accion', 'fecha_plan_accion',
-            'fecha_ejecucion_accion', 'evidencia_accion', 'fecha_verificacion',
-            'resultado_verificacion', 'eficacia', 'observaciones'
+            'fecha_ejecucion', 'evidencia_accion', 'fecha_verificacion_finalizada',
+            'resultado_verificacion', 'eficacia', 'observaciones', 'titulo', 'prioridad',
+            'comentarios_ejecucion', 'descripcion_verificacion', 'responsable_verificacion',
+            'fecha_plan_verificacion', 'comentarios_verificacion'
         ];
         
         for (const [key, value] of Object.entries(updateData)) {

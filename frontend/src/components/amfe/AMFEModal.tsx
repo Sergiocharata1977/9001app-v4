@@ -24,7 +24,7 @@ const AMFEModal: React.FC<AMFEModalProps> = ({ isOpen, onClose, onSave, record, 
     recommendedActions: '',
     responsible: '',
     dueDate: '',
-    status: 'pending' as const
+    status: 'pending' as 'pending' | 'in-progress' | 'completed'
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -373,7 +373,7 @@ const AMFEModal: React.FC<AMFEModalProps> = ({ isOpen, onClose, onSave, record, 
                 </label>
                 <select
                   value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  onChange={(e) => handleInputChange('status', e.target.value as 'pending' | 'in-progress' | 'completed')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="pending">Pendiente</option>

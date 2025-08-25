@@ -19,7 +19,7 @@ import {
 import { 
   Personal, 
   RolComercial, 
-  ClasificacionComercial, 
+  ClasificacionComercial as ClasificacionComercialType, 
   EspecialidadAgro, 
   ROLES_COMERCIALES,
   CLASIFICACIONES_COMERCIALES,
@@ -291,7 +291,7 @@ const ClasificacionComercial: React.FC<ClasificacionComercialProps> = ({
               <Building2 className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Clasificación</p>
-                <p className="font-medium">{CLASIFICACIONES_COMERCIALES[formData.clasificacion_comercial as ClasificacionComercial]}</p>
+                <p className="font-medium">{CLASIFICACIONES_COMERCIALES[formData.clasificacion_comercial as ClasificacionComercialType]}</p>
               </div>
             </div>
 

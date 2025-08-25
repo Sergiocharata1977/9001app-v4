@@ -1,15 +1,16 @@
-import React, { useState, useCallback } from 'react';
-import { Download, FileText, Table, X, Info } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/components/ui/use-toast';
-import { exportToPDF, exportToExcel } from '@/utils/export';
+import { toast } from 'sonner';
+import { exportToExcel, exportToPDF } from '@/utils/export';
+import { Download, FileText, Info, Table, X } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 
 export interface Column {
   key: string;
   label: string;
+  header?: string;
   type?: string;
   width?: string;
   align?: 'left' | 'center' | 'right';
@@ -36,9 +37,9 @@ export interface FormatOption {
  * Componente de exportación masiva mejorada
  * Complementa el sistema de exportación existente
  */
-const BulkExport: React.FC<BulkExportProps> = ({ 
-  data = [], 
-  columns = [], 
+const BulkExport: React.FC<BulkExportProps> = ({
+  data = [],
+  columns = [],
   title = 'Exportar Datos',
   onExport,
   exportFormats = ['excel', 'pdf'],
@@ -50,15 +51,11 @@ const BulkExport: React.FC<BulkExportProps> = ({
   const [progress, setProgress] = useState<number>(0);
   const [selectedColumns, setSelectedColumns] = useState<string[]>(columns.map(col => col.key));
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const { toast } = useToast();
+
 
   const handleExport = useCallback(async () => {
     if (!data || data.length === 0) {
-      toast({
-        title: "Error",
-        description: "No hay datos para exportar",
-        variant: "destructive"
-      });
+      toast.error("No hay datos para exportar");
       return;
     }
 
@@ -79,7 +76,7 @@ const BulkExport: React.FC<BulkExportProps> = ({
 
       // Filtrar datos según los filtros aplicados
       let filteredData = [...data];
-      
+
       Object.entries(filters).forEach(([key, value]) => {
         if (value && value !== '') {
           filteredData = filteredData.filter(item => {
@@ -99,29 +96,20 @@ const BulkExport: React.FC<BulkExportProps> = ({
       if (onExport) {
         await onExport(filteredData, filteredColumns, selectedFormat);
       } else {
-        // Exportación por defecto
         if (selectedFormat === 'excel') {
-          exportToExcel(filteredData, title, filteredColumns);
+          exportToExcel(filteredData, title, filteredColumns as any);
         } else if (selectedFormat === 'pdf') {
-          exportToPDF(filteredData, title, filteredColumns);
+          exportToPDF(filteredData, title, filteredColumns as any);
         }
       }
 
       setProgress(100);
-      
-      toast({
-        title: "Éxito",
-        description: `Datos exportados exitosamente en formato ${selectedFormat.toUpperCase()}`,
-        variant: "default"
-      });
+
+      toast.success(`Datos exportados exitosamente en formato ${selectedFormat.toUpperCase()}`);
 
     } catch (error) {
       console.error('Error en exportación:', error);
-      toast({
-        title: "Error",
-        description: "Error al exportar los datos",
-        variant: "destructive"
-      });
+      toast.error("Error al exportar los datos");
     } finally {
       setIsExporting(false);
       setProgress(0);
@@ -129,7 +117,7 @@ const BulkExport: React.FC<BulkExportProps> = ({
   }, [data, columns, selectedFormat, selectedColumns, filters, title, onExport, toast]);
 
   const toggleColumn = useCallback((columnKey: string) => {
-    setSelectedColumns(prev => 
+    setSelectedColumns(prev =>
       prev.includes(columnKey)
         ? prev.filter(key => key !== columnKey)
         : [...prev, columnKey]
@@ -149,7 +137,7 @@ const BulkExport: React.FC<BulkExportProps> = ({
 
   const getFilteredDataCount = (): number => {
     let filteredData = [...data];
-    
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value && value !== '') {
         filteredData = filteredData.filter(item => {
@@ -161,7 +149,7 @@ const BulkExport: React.FC<BulkExportProps> = ({
         });
       }
     });
-    
+
     return filteredData.length;
   };
 
@@ -180,7 +168,7 @@ const BulkExport: React.FC<BulkExportProps> = ({
           <Badge variant="outline">{getFilteredDataCount()} registros</Badge>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Formato de exportación */}
         <div className="space-y-3">
@@ -221,7 +209,7 @@ const BulkExport: React.FC<BulkExportProps> = ({
                 Limpiar
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {columns.slice(0, 6).map((column) => (
                 <div key={column.key} className="space-y-1">

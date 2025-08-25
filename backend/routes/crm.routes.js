@@ -571,7 +571,7 @@ router.get('/vendedores', async (req, res) => {
 router.get('/tecnicos', async (req, res) => {
   try {
     const orgId = req.user?.organization_id;
-    console.log('🔧 Obteniendo técnicos para organización:', orgId);
+    console.log('👨‍🔬 Obteniendo técnicos para organización:', orgId);
 
     const result = await tursoClient.execute({
       sql: `SELECT id, nombres, apellidos, email, telefono 
@@ -594,6 +594,75 @@ router.get('/tecnicos', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error al obtener técnicos',
+      error: error.message
+    });
+  }
+});
+
+// GET /api/crm/puestos - Obtener puestos disponibles
+router.get('/puestos', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    console.log('💼 Obteniendo puestos para organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `SELECT id, nombre, descripcion 
+            FROM puestos 
+            WHERE organization_id = ? 
+            ORDER BY nombre`,
+      args: [orgId]
+    });
+
+    console.log(`✅ Encontrados ${result.rows.length} puestos`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo puestos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener puestos',
+      error: error.message
+    });
+  }
+});
+
+// GET /api/crm/personal/puesto/:puestoId - Obtener personal por puesto
+router.get('/personal/puesto/:puestoId', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    const { puestoId } = req.params;
+    console.log('👥 Obteniendo personal para puesto:', puestoId, 'organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `SELECT p.id, p.nombres, p.apellidos, p.email, p.telefono, p.puesto
+            FROM personal p
+            JOIN relaciones_sgc r ON p.id = r.origen_id
+            WHERE p.organization_id = ? 
+            AND p.is_active = 1
+            AND r.destino_tipo = 'puesto'
+            AND r.destino_id = ?
+            ORDER BY p.nombres, p.apellidos`,
+      args: [orgId, puestoId]
+    });
+
+    console.log(`✅ Encontrados ${result.rows.length} personas para puesto ${puestoId}`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo personal por puesto:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener personal por puesto',
       error: error.message
     });
   }

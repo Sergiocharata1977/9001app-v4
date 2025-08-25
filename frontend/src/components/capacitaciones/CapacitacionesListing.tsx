@@ -33,37 +33,30 @@ import CapacitacionModal from "./CapacitacionModal";
 import CapacitacionSingle from "./CapacitacionSingle";
 import UnifiedHeader from "../common/UnifiedHeader";
 import UnifiedCard from "../common/UnifiedCard";
-import { 
-  Capacitacion, 
-  CapacitacionFormData, 
-  CapacitacionStats, 
-  ViewMode, 
-  CapacitacionField 
-} from "@/types/capacitaciones";
 
-export default function CapacitacionesListing(): React.JSX.Element {
+export default function CapacitacionesListing() {
   const { toast } = useToast();
-  const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filterEstado, setFilterEstado] = useState<string>("todos");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [selectedCapacitacion, setSelectedCapacitacion] = useState<Capacitacion | null>(null);
-  const [showSingle, setShowSingle] = useState<boolean>(false);
-  const [singleCapacitacionId, setSingleCapacitacionId] = useState<number | null>(null);
+  const [capacitaciones, setCapacitaciones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterEstado, setFilterEstado] = useState("todos");
+  const [viewMode, setViewMode] = useState("grid"); // grid | list
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCapacitacion, setSelectedCapacitacion] = useState(null);
+  const [showSingle, setShowSingle] = useState(false);
+  const [singleCapacitacionId, setSingleCapacitacionId] = useState(null);
 
   useEffect(() => {
     fetchCapacitaciones();
   }, []);
 
-  const fetchCapacitaciones = async (): Promise<void> => {
+  const fetchCapacitaciones = async () => {
     try {
       setLoading(true);
       const data = await capacitacionesService.getAll();
       setCapacitaciones(data);
       console.log('✅ Capacitaciones cargadas:', data);
-    } catch (error) {
+      } catch (error) {
       console.error('❌ Error al cargar capacitaciones:', error);
       toast({ variant: "destructive", title: "Error", description: "Error al cargar las capacitaciones" });
     } finally {
@@ -71,28 +64,28 @@ export default function CapacitacionesListing(): React.JSX.Element {
     }
   };
 
-  const handleCreate = (): void => {
+  const handleCreate = () => {
     setSelectedCapacitacion(null);
     setModalOpen(true);
   };
 
-  const handleEdit = (capacitacion: Capacitacion): void => {
+  const handleEdit = (capacitacion) => {
     setSelectedCapacitacion(capacitacion);
     setModalOpen(true);
   };
 
-  const handleViewSingle = (capacitacion: Capacitacion): void => {
+  const handleViewSingle = (capacitacion) => {
     setSingleCapacitacionId(capacitacion.id);
     setShowSingle(true);
   };
 
-  const handleBackFromSingle = (): void => {
+  const handleBackFromSingle = () => {
     setShowSingle(false);
     setSingleCapacitacionId(null);
     fetchCapacitaciones();
   };
 
-  const handleSave = async (formData: CapacitacionFormData): Promise<void> => {
+  const handleSave = async (formData) => {
     try {
       if (selectedCapacitacion) {
         await capacitacionesService.update(selectedCapacitacion.id, formData);
@@ -105,15 +98,15 @@ export default function CapacitacionesListing(): React.JSX.Element {
       fetchCapacitaciones();
     } catch (error) {
       console.error('Error al guardar capacitación:', error);
-      toast({ variant: "destructive", title: "Error", description: "Error al guardar la capacitación" });
+      toast.error("Error al guardar la capacitación");
     }
   };
 
-  const handleDelete = async (capacitacion: Capacitacion): Promise<void> => {
+  const handleDelete = async (capacitacion) => {
     if (window.confirm("¿Está seguro de que desea eliminar esta capacitación?")) {
       try {
         await capacitacionesService.delete(capacitacion.id);
-        toast({ title: "Éxito", description: "Capacitación eliminada exitosamente" });
+        toast.success("Capacitación eliminada exitosamente");
         fetchCapacitaciones();
       } catch (error) {
         console.error('Error al eliminar capacitación:', error);
@@ -122,15 +115,15 @@ export default function CapacitacionesListing(): React.JSX.Element {
     }
   };
 
-  const handleExport = (): void => {
+  const handleExport = () => {
     toast({ title: "Exportación", description: "Función de exportación en desarrollo" });
   };
 
-  const handleViewModeChange = (mode: ViewMode): void => {
+  const handleViewModeChange = (mode) => {
     setViewMode(mode);
   };
 
-  const filteredCapacitaciones = capacitaciones.filter((capacitacion: Capacitacion) => {
+  const filteredCapacitaciones = capacitaciones.filter((capacitacion) => {
     const titleField = capacitacion.nombre || capacitacion.titulo || '';
     const descriptionField = capacitacion.descripcion || '';
     
@@ -141,50 +134,51 @@ export default function CapacitacionesListing(): React.JSX.Element {
     return matchesSearch && matchesEstado;
   });
 
-  const getEstadoBadgeColor = (estado?: string): string => {
-    if (!estado) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-    
-    switch (estado.toLowerCase()) {
+  const getEstadoBadgeColor = (estado) => {
+    switch (estado?.toLowerCase()) {
       case 'planificacion':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'planificada':
+      case 'programada':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'en preparacion':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'en curso':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      case 'preparando material':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'en evaluacion':
+      case 'evaluando resultados':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'completada':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'finalizada':
+      case 'cerrada':
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'cancelada':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+        return 'bg-red-100 text-red-800 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getEstadoIcon = (estado?: string): React.ComponentType<{ className?: string }> => {
-    if (!estado) return AlertCircle;
-    
-    switch (estado.toLowerCase()) {
+  const getEstadoIcon = (estado) => {
+    switch (estado?.toLowerCase()) {
       case 'planificacion':
-        return Calendar;
+      case 'planificada':
+        return Target;
       case 'en preparacion':
-        return BookOpen;
-      case 'en curso':
+        return Clock;
+      case 'en evaluacion':
         return TrendingUp;
       case 'completada':
         return CheckCircle;
       case 'cancelada':
         return AlertCircle;
       default:
-        return AlertCircle;
+        return BookOpen;
     }
   };
 
-  const formatDate = (dateString?: string): string => {
-    if (!dateString) return 'Fecha no definida';
-    
+  const formatDate = (dateString) => {
+    if (!dateString) return 'No definida';
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', {
+      return new Date(dateString).toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
@@ -194,7 +188,7 @@ export default function CapacitacionesListing(): React.JSX.Element {
     }
   };
 
-  const getStats = (): CapacitacionStats => {
+  const getStats = () => {
     const total = capacitaciones.length;
     const planificadas = capacitaciones.filter(c => c.estado?.toLowerCase() === 'planificacion').length;
     const enPreparacion = capacitaciones.filter(c => c.estado?.toLowerCase() === 'en preparacion').length;
@@ -203,7 +197,7 @@ export default function CapacitacionesListing(): React.JSX.Element {
     return { total, planificadas, enPreparacion, completadas };
   };
 
-  if (showSingle && singleCapacitacionId) {
+  if (showSingle) {
     return (
       <CapacitacionSingle 
         capacitacionId={singleCapacitacionId}
@@ -212,9 +206,11 @@ export default function CapacitacionesListing(): React.JSX.Element {
     );
   }
 
+  // Vista Kanban deshabilitada temporalmente (requiere @dnd-kit/*)
+
   const stats = getStats();
 
-  const renderGridView = (): React.JSX.Element => {
+  const renderGridView = () => {
     if (loading) {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -247,8 +243,9 @@ export default function CapacitacionesListing(): React.JSX.Element {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredCapacitaciones.map((capacitacion: Capacitacion) => {
-          const fields: CapacitacionField[] = [
+        {filteredCapacitaciones.map((capacitacion) => {
+          const StatusIcon = getEstadoIcon(capacitacion.estado);
+          const fields = [
             ...(capacitacion.instructor ? [{ 
               icon: User, 
               label: "Instructor", 
@@ -274,9 +271,9 @@ export default function CapacitacionesListing(): React.JSX.Element {
           return (
             <div key={capacitacion.id} className="cursor-pointer" onClick={() => handleViewSingle(capacitacion)}>
               <UnifiedCard
-                title={capacitacion.nombre || capacitacion.titulo || ''}
-                description={capacitacion.descripcion || ''}
-                status={capacitacion.estado || ''}
+                title={capacitacion.nombre || capacitacion.titulo}
+                description={capacitacion.descripcion}
+                status={capacitacion.estado}
                 fields={fields}
                 icon={GraduationCap}
                 primaryColor="emerald"
@@ -291,7 +288,7 @@ export default function CapacitacionesListing(): React.JSX.Element {
     );
   };
 
-  const renderListView = (): React.JSX.Element => {
+  const renderListView = () => {
     if (loading) {
       return (
         <div className="flex items-center justify-center p-8">
@@ -301,33 +298,33 @@ export default function CapacitacionesListing(): React.JSX.Element {
     }
 
     return (
-      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+          <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Capacitación
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Instructor
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Fecha Inicio
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Fecha
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Duración
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Acciones
+                <th className="relative px-6 py-3">
+                  <span className="sr-only">Acciones</span>
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredCapacitaciones.map((capacitacion: Capacitacion) => (
+              {filteredCapacitaciones.map((capacitacion) => (
                 <tr key={capacitacion.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" onClick={() => handleViewSingle(capacitacion)}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -359,34 +356,25 @@ export default function CapacitacionesListing(): React.JSX.Element {
                     {capacitacion.duracion_horas ? `${capacitacion.duracion_horas}h` : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
+                    <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewSingle(capacitacion);
-                        }}
+                        onClick={e => { e.stopPropagation(); handleViewSingle(capacitacion); }}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(capacitacion);
-                        }}
+                        onClick={e => { e.stopPropagation(); handleEdit(capacitacion); }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(capacitacion);
-                        }}
+                        onClick={e => { e.stopPropagation(); handleDelete(capacitacion); }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -402,110 +390,118 @@ export default function CapacitacionesListing(): React.JSX.Element {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <UnifiedHeader
-        title="Capacitaciones"
-        description="Gestiona las capacitaciones del personal"
+        title="Gestión de Capacitaciones"
+        description="Administra las capacitaciones del personal según ISO 9001"
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onNew={handleCreate}
         onExport={handleExport}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
+        newButtonText="Nueva Capacitación"
+        totalCount={capacitaciones.length}
+        lastUpdated="hoy"
         icon={GraduationCap}
         primaryColor="emerald"
-        totalCount={stats.total}
-        newButtonText="Nueva Capacitación"
       />
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <Target className="h-8 w-8 text-emerald-500 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <Calendar className="h-8 w-8 text-blue-500 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Planificadas</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.planificadas}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <BookOpen className="h-8 w-8 text-yellow-500 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">En Preparación</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.enPreparacion}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <CheckCircle className="h-8 w-8 text-green-500 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completadas</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.completadas}</p>
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Planificadas</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.planificadas}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">En Preparación</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.enPreparacion}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completadas</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.completadas}</div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Filtros y búsqueda */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
-        <div className="flex flex-1 gap-4 items-center">
-          <Select value={filterEstado} onValueChange={setFilterEstado}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos los estados</SelectItem>
-              <SelectItem value="planificacion">Planificación</SelectItem>
-              <SelectItem value="en preparacion">En Preparación</SelectItem>
-              <SelectItem value="en curso">En Curso</SelectItem>
-              <SelectItem value="completada">Completada</SelectItem>
-              <SelectItem value="cancelada">Cancelada</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="flex items-center gap-2">
+      {/* View Mode Selector */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
           <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
+            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => handleViewModeChange("grid")}
+            onClick={() => setViewMode('grid')}
+            className="h-8"
           >
-            <Grid3X3 className="h-4 w-4" />
+            <Grid3X3 className="h-4 w-4 mr-2" />
+            Tarjetas
           </Button>
           <Button
-            variant={viewMode === "list" ? "default" : "outline"}
+            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => handleViewModeChange("list")}
+            onClick={() => setViewMode('list')}
+            className="h-8"
           >
-            <List className="h-4 w-4" />
+            <List className="h-4 w-4 mr-2" />
+            Lista
+          </Button>
+          <Button
+            variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('kanban')}
+            className="h-8"
+          >
+            <Target className="h-4 w-4 mr-2" />
+            Kanban
           </Button>
         </div>
+
+        <Select value={filterEstado} onValueChange={setFilterEstado}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Filtrar por estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos los estados</SelectItem>
+            <SelectItem value="planificacion">Planificación</SelectItem>
+            <SelectItem value="en preparacion">En Preparación</SelectItem>
+            <SelectItem value="en evaluacion">En Evaluación</SelectItem>
+            <SelectItem value="completada">Completada</SelectItem>
+            <SelectItem value="cancelada">Cancelada</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Contenido principal */}
-      {viewMode === "grid" ? renderGridView() : renderListView()}
+      {viewMode === 'grid' ? renderGridView() : renderListView()}
 
-      {/* Modal */}
-      {modalOpen && (
-        <CapacitacionModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          capacitacion={selectedCapacitacion}
-          onSave={handleSave}
-        />
-      )}
+      <CapacitacionModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        capacitacion={selectedCapacitacion}
+        onSave={handleSave}
+      />
     </div>
   );
 }

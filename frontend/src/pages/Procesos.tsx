@@ -1,31 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { ProcesoSgc, ProcesoSgcCompleto, ProcesoSgcFiltros, ProcesoSgcDashboard } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
+  Search, 
   Filter, 
-  BarChart3, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  Building2, 
   Users, 
-  FileText, 
+  Target,
   TrendingUp,
-  AlertTriangle,
-  CheckCircle
+  Calendar,
+  FileText,
+  BarChart3,
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { ProcesoSgcCompleto } from '@/types/procesos';
 
-interface ProcesosPageProps {
-  // Props específicas de la página si las hay
+// Definir tipos faltantes
+type ProcesoTipo = 'principal' | 'soporte' | 'mejora';
+
+interface ProcesosProps {
+  // Props del componente
 }
 
-const ProcesosPage: React.FC<ProcesosPageProps> = () => {
-  const [procesos, setProcesos] = useState<ProcesoSgc[]>([]);
-  const [dashboard, setDashboard] = useState<ProcesoSgcDashboard | null>(null);
-  const [filtros, setFiltros] = useState<ProcesoSgcFiltros>({});
+const Procesos: React.FC<ProcesosProps> = () => {
+  const { toast } = useToast();
+  const [procesos, setProcesos] = useState<ProcesoSgcCompleto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filtros, setFiltros] = useState({
+    tipo: '' as ProcesoTipo | '',
+    departamento: '',
+    estado: '',
+    search: '',
+    nivel_critico: ''
+  });
+  
+  // Estados para modales
+  const [showModalCrear, setShowModalCrear] = useState<boolean>(false);
+  const [showModalDetalle, setShowModalDetalle] = useState<boolean>(false);
+  const [procesoSeleccionado, setProcesoSeleccionado] = useState<ProcesoSgcCompleto | null>(null);
 
   useEffect(() => {
     cargarProcesos();
@@ -246,7 +272,7 @@ const ProcesosPage: React.FC<ProcesosPageProps> = () => {
               </label>
               <Select 
                 value={filtros.estado || ''} 
-                onValueChange={(value) => setFiltros({ ...filtros, estado: value as any })}
+                onValueChange={(value: string) => setFiltros({ ...filtros, estado: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todos los estados" />
@@ -267,7 +293,7 @@ const ProcesosPage: React.FC<ProcesosPageProps> = () => {
               </label>
               <Select 
                 value={filtros.nivel_critico || ''} 
-                onValueChange={(value) => setFiltros({ ...filtros, nivel_critico: value as any })}
+                onValueChange={(value: string) => setFiltros({ ...filtros, nivel_critico: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todos los niveles" />
@@ -353,4 +379,4 @@ const ProcesosPage: React.FC<ProcesosPageProps> = () => {
   );
 };
 
-export default ProcesosPage;
+export default Procesos;

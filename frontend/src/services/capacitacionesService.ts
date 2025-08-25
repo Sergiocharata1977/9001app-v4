@@ -1,446 +1,196 @@
 import { createApiClient } from './apiService';
+import { Capacitacion, CapacitacionFormData } from '@/types/capacitaciones';
 
 const apiClient = createApiClient('/capacitaciones');
-import { Capacitacion, CapacitacionFilters, CreateCapacitacionData, UpdateCapacitacionData } from '@/types/capacitaciones';
 
-class CapacitacionesService {
-  private readonly baseUrl = '/api/capacitaciones';
-
-  /**
-   * Obtiene todas las capacitaciones con filtros opcionales
-   */
-  async getCapacitaciones(filters: CapacitacionFilters = {}): Promise<Capacitacion[]> {
+export const capacitacionesService = {
+  // Obtener todas las capacitaciones
+  getAll: async (): Promise<Capacitacion[]> => {
     try {
-      const params = new URLSearchParams();
-      
-      if (filters.search) params.append('search', filters.search);
-      if (filters.estado) params.append('estado', filters.estado);
-      if (filters.tipo) params.append('tipo', filters.tipo);
-      if (filters.fechaDesde) params.append('fechaDesde', filters.fechaDesde);
-      if (filters.fechaHasta) params.append('fechaHasta', filters.fechaHasta);
-      if (filters.instructor) params.append('instructor', filters.instructor);
-      if (filters.departamento) params.append('departamento', filters.departamento);
-
-      const response = await apiClient.get(`${this.baseUrl}?${params.toString()}`);
-      return response.data;
+      const response = await apiClient.get('/');
+      return Array.isArray(response) ? response : response.data || [];
     } catch (error) {
-      console.error('Error fetching capacitaciones:', error);
-      throw new Error('Error al obtener capacitaciones');
+      console.error('Error al obtener capacitaciones:', error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Obtiene una capacitación por ID
-   */
-  async getCapacitacionById(id: number): Promise<Capacitacion> {
+  // Obtener una capacitación por ID
+  getById: async (id: number): Promise<Capacitacion> => {
     try {
-      const response = await apiClient.get(`${this.baseUrl}/${id}`);
-      return response.data;
+      const response = await apiClient.get(`/${id}`);
+      return response.data || response;
     } catch (error) {
-      console.error('Error fetching capacitacion:', error);
-      throw new Error('Error al obtener la capacitación');
+      console.error(`Error al obtener capacitación ${id}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Crea una nueva capacitación
-   */
-  async createCapacitacion(data: CreateCapacitacionData): Promise<Capacitacion> {
+  // Crear una nueva capacitación
+  create: async (formData: CapacitacionFormData): Promise<Capacitacion> => {
     try {
-      const response = await apiClient.post(this.baseUrl, data);
-      return response.data;
+      const response = await apiClient.post('/', formData);
+      return response.data || response;
     } catch (error) {
-      console.error('Error creating capacitacion:', error);
-      throw new Error('Error al crear la capacitación');
+      console.error('Error al crear capacitación:', error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Actualiza una capacitación existente
-   */
-  async updateCapacitacion(id: number, data: UpdateCapacitacionData): Promise<Capacitacion> {
+  // Actualizar una capacitación
+  update: async (id: number, formData: CapacitacionFormData): Promise<Capacitacion> => {
     try {
-      const response = await apiClient.put(`${this.baseUrl}/${id}`, data);
-      return response.data;
+      const response = await apiClient.put(`/${id}`, formData);
+      return response.data || response;
     } catch (error) {
-      console.error('Error updating capacitacion:', error);
-      throw new Error('Error al actualizar la capacitación');
+      console.error(`Error al actualizar capacitación ${id}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Elimina una capacitación
-   */
-  async deleteCapacitacion(id: number): Promise<void> {
+  // Eliminar una capacitación
+  delete: async (id: number): Promise<void> => {
     try {
-      await apiClient.delete(`${this.baseUrl}/${id}`);
+      await apiClient.delete(`/${id}`);
     } catch (error) {
-      console.error('Error deleting capacitacion:', error);
-      throw new Error('Error al eliminar la capacitación');
+      console.error(`Error al eliminar capacitación ${id}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Cambia el estado de una capacitación
-   */
-  async changeEstado(id: number, estado: string): Promise<Capacitacion> {
+  // --- TEMAS DE CAPACITACIÓN ---
+  
+  // Obtener temas de una capacitación
+  getTemas: async (capacitacionId: number): Promise<any[]> => {
     try {
-      const response = await apiClient.patch(`${this.baseUrl}/${id}/estado`, { estado });
-      return response.data;
+      const response = await apiClient.get(`/${capacitacionId}/temas`);
+      return Array.isArray(response) ? response : response.data || [];
     } catch (error) {
-      console.error('Error changing capacitacion estado:', error);
-      throw new Error('Error al cambiar el estado de la capacitación');
+      console.error(`Error al obtener temas de capacitación ${capacitacionId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Inscribe participantes a una capacitación
-   */
-  async inscribirParticipantes(id: number, participantes: number[]): Promise<Capacitacion> {
+  // Crear un tema para una capacitación
+  createTema: async (capacitacionId: number, temaData: { titulo: string; descripcion?: string; orden?: number }): Promise<any> => {
     try {
-      const response = await apiClient.post(`${this.baseUrl}/${id}/participantes`, { participantes });
-      return response.data;
+      const response = await apiClient.post(`/${capacitacionId}/temas`, temaData);
+      return response.data || response;
     } catch (error) {
-      console.error('Error inscribing participantes:', error);
-      throw new Error('Error al inscribir participantes');
+      console.error(`Error al crear tema para capacitación ${capacitacionId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Desinscribe participantes de una capacitación
-   */
-  async desinscribirParticipantes(id: number, participantes: number[]): Promise<Capacitacion> {
+  // Actualizar un tema
+  updateTema: async (capacitacionId: number, temaId: string, temaData: { titulo: string; descripcion?: string; orden?: number }): Promise<any> => {
     try {
-      const response = await apiClient.delete(`${this.baseUrl}/${id}/participantes`, { 
-        data: { participantes } 
-      });
-      return response.data;
+      const response = await apiClient.put(`/${capacitacionId}/temas/${temaId}`, temaData);
+      return response.data || response;
     } catch (error) {
-      console.error('Error unsubscribing participantes:', error);
-      throw new Error('Error al desinscribir participantes');
+      console.error(`Error al actualizar tema ${temaId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Obtiene estadísticas de capacitaciones
-   */
-  async getEstadisticas(): Promise<{
-    total: number;
-    programadas: number;
-    en_progreso: number;
-    completadas: number;
-    canceladas: number;
-    evaluacion_pendiente: number;
-    por_tipo: Record<string, number>;
-    por_departamento: Record<string, number>;
-  }> {
+  // Eliminar un tema
+  deleteTema: async (capacitacionId: number, temaId: string): Promise<void> => {
     try {
-      const response = await apiClient.get(`${this.baseUrl}/estadisticas`);
-      return response.data;
+      await apiClient.delete(`/${capacitacionId}/temas/${temaId}`);
     } catch (error) {
-      console.error('Error fetching capacitaciones estadisticas:', error);
-      throw new Error('Error al obtener estadísticas de capacitaciones');
+      console.error(`Error al eliminar tema ${temaId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Exporta capacitaciones a Excel
-   */
-  async exportToExcel(filters: CapacitacionFilters = {}): Promise<Blob> {
+  // --- ASISTENTES DE CAPACITACIÓN ---
+
+  // Obtener asistentes de una capacitación
+  getAsistentes: async (capacitacionId: number): Promise<any[]> => {
     try {
-      const params = new URLSearchParams();
-      
-      if (filters.search) params.append('search', filters.search);
-      if (filters.estado) params.append('estado', filters.estado);
-      if (filters.tipo) params.append('tipo', filters.tipo);
-      if (filters.fechaDesde) params.append('fechaDesde', filters.fechaDesde);
-      if (filters.fechaHasta) params.append('fechaHasta', filters.fechaHasta);
-      if (filters.instructor) params.append('instructor', filters.instructor);
-      if (filters.departamento) params.append('departamento', filters.departamento);
-
-      const response = await apiClient.get(`${this.baseUrl}/export/excel?${params.toString()}`, {
-        responseType: 'blob'
-      });
-      return response.data;
+      const response = await apiClient.get(`/${capacitacionId}/asistentes`);
+      return Array.isArray(response) ? response : response.data || [];
     } catch (error) {
-      console.error('Error exporting capacitaciones:', error);
-      throw new Error('Error al exportar capacitaciones');
+      console.error(`Error al obtener asistentes de capacitación ${capacitacionId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Exporta capacitaciones a PDF
-   */
-  async exportToPDF(filters: CapacitacionFilters = {}): Promise<Blob> {
+  // Agregar un asistente a una capacitación
+  addAsistente: async (capacitacionId: number, empleadoId: number): Promise<any> => {
     try {
-      const params = new URLSearchParams();
-      
-      if (filters.search) params.append('search', filters.search);
-      if (filters.estado) params.append('estado', filters.estado);
-      if (filters.tipo) params.append('tipo', filters.tipo);
-      if (filters.fechaDesde) params.append('fechaDesde', filters.fechaDesde);
-      if (filters.fechaHasta) params.append('fechaHasta', filters.fechaHasta);
-      if (filters.instructor) params.append('instructor', filters.instructor);
-      if (filters.departamento) params.append('departamento', filters.departamento);
-
-      const response = await apiClient.get(`${this.baseUrl}/export/pdf?${params.toString()}`, {
-        responseType: 'blob'
-      });
-      return response.data;
+      const response = await apiClient.post(`/${capacitacionId}/asistentes`, { empleado_id: empleadoId });
+      return response.data || response;
     } catch (error) {
-      console.error('Error exporting capacitaciones to PDF:', error);
-      throw new Error('Error al exportar capacitaciones a PDF');
+      console.error(`Error al agregar asistente a capacitación ${capacitacionId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Obtiene capacitaciones próximas (próximas 30 días)
-   */
-  async getCapacitacionesProximas(): Promise<Capacitacion[]> {
+  // Remover un asistente de una capacitación
+  removeAsistente: async (capacitacionId: number, asistenteId: string): Promise<void> => {
     try {
-      const response = await apiClient.get(`${this.baseUrl}/proximas`);
-      return response.data;
+      await apiClient.delete(`/${capacitacionId}/asistentes/${asistenteId}`);
     } catch (error) {
-      console.error('Error fetching capacitaciones proximas:', error);
-      throw new Error('Error al obtener capacitaciones próximas');
+      console.error(`Error al remover asistente ${asistenteId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Obtiene capacitaciones por departamento
-   */
-  async getCapacitacionesByDepartamento(departamentoId: number): Promise<Capacitacion[]> {
+  // --- EVALUACIONES DE CAPACITACIÓN ---
+
+  // Obtener evaluaciones de una capacitación
+  getEvaluaciones: async (capacitacionId: number): Promise<any[]> => {
     try {
-      const response = await apiClient.get(`${this.baseUrl}/departamento/${departamentoId}`);
-      return response.data;
+      const response = await apiClient.get(`/${capacitacionId}/evaluaciones`);
+      return Array.isArray(response) ? response : response.data || [];
     } catch (error) {
-      console.error('Error fetching capacitaciones by departamento:', error);
-      throw new Error('Error al obtener capacitaciones por departamento');
+      console.error(`Error al obtener evaluaciones de capacitación ${capacitacionId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Obtiene capacitaciones por instructor
-   */
-  async getCapacitacionesByInstructor(instructorId: number): Promise<Capacitacion[]> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/instructor/${instructorId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching capacitaciones by instructor:', error);
-      throw new Error('Error al obtener capacitaciones por instructor');
-    }
-  }
-
-  /**
-   * Obtiene capacitaciones por participante
-   */
-  async getCapacitacionesByParticipante(participanteId: number): Promise<Capacitacion[]> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/participante/${participanteId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching capacitaciones by participante:', error);
-      throw new Error('Error al obtener capacitaciones por participante');
-    }
-  }
-
-  /**
-   * Duplica una capacitación existente
-   */
-  async duplicateCapacitacion(id: number): Promise<Capacitacion> {
-    try {
-      const response = await apiClient.post(`${this.baseUrl}/${id}/duplicate`);
-      return response.data;
-    } catch (error) {
-      console.error('Error duplicating capacitacion:', error);
-      throw new Error('Error al duplicar la capacitación');
-    }
-  }
-
-  /**
-   * Programa capacitaciones recurrentes
-   */
-  async programarCapacitacionesRecurrentes(data: {
-    tipo: string;
-    frecuencia: 'semanal' | 'mensual' | 'trimestral' | 'semestral' | 'anual';
-    fechaInicio: string;
-    fechaFin: string;
-    departamentos: number[];
-    instructores: number[];
-  }): Promise<Capacitacion[]> {
-    try {
-      const response = await apiClient.post(`${this.baseUrl}/programar-recurrentes`, data);
-      return response.data;
-    } catch (error) {
-      console.error('Error programming recurrent capacitaciones:', error);
-      throw new Error('Error al programar capacitaciones recurrentes');
-    }
-  }
-
-  /**
-   * Obtiene el historial de cambios de una capacitación
-   */
-  async getHistorialCambios(id: number): Promise<{
-    id: number;
-    capacitacion_id: number;
-    campo: string;
-    valor_anterior: string;
-    valor_nuevo: string;
-    usuario: string;
-    fecha: string;
-  }[]> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/${id}/historial`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching capacitacion historial:', error);
-      throw new Error('Error al obtener historial de cambios');
-    }
-  }
-
-  /**
-   * Obtiene temas de capacitación disponibles
-   */
-  async getTemasCapacitacion(): Promise<{
-    id: number;
-    nombre: string;
-    descripcion: string;
-    categoria: string;
-    duracion_estimada: number;
-    nivel: 'basico' | 'intermedio' | 'avanzado';
-  }[]> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/temas`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching temas capacitacion:', error);
-      throw new Error('Error al obtener temas de capacitación');
-    }
-  }
-
-  /**
-   * Obtiene instructores disponibles
-   */
-  async getInstructores(): Promise<{
-    id: number;
-    nombre: string;
-    especialidad: string;
-    experiencia_anos: number;
-    certificaciones: string[];
-    disponibilidad: string;
-  }[]> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/instructores`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching instructores:', error);
-      throw new Error('Error al obtener instructores');
-    }
-  }
-
-  /**
-   * Obtiene participantes disponibles
-   */
-  async getParticipantesDisponibles(capacitacionId: number): Promise<{
-    id: number;
-    nombre: string;
-    departamento: string;
-    puesto: string;
-    email: string;
-    telefono: string;
-  }[]> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/${capacitacionId}/participantes-disponibles`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching participantes disponibles:', error);
-      throw new Error('Error al obtener participantes disponibles');
-    }
-  }
-
-  /**
-   * Obtiene participantes inscritos
-   */
-  async getParticipantesInscritos(capacitacionId: number): Promise<{
-    id: number;
-    nombre: string;
-    departamento: string;
-    puesto: string;
-    email: string;
-    telefono: string;
-    fecha_inscripcion: string;
-    estado: 'inscrito' | 'asistio' | 'no_asistio' | 'cancelado';
-    evaluacion?: number;
+  // Crear una evaluación
+  addEvaluacion: async (capacitacionId: number, evaluacionData: {
+    empleado_id: number;
+    tema_id: string;
+    calificacion?: number;
     comentarios?: string;
-  }[]> {
+    fecha_evaluacion?: string;
+  }): Promise<any> => {
     try {
-      const response = await apiClient.get(`${this.baseUrl}/${capacitacionId}/participantes-inscritos`);
-      return response.data;
+      const response = await apiClient.post(`/${capacitacionId}/evaluaciones`, evaluacionData);
+      return response.data || response;
     } catch (error) {
-      console.error('Error fetching participantes inscritos:', error);
-      throw new Error('Error al obtener participantes inscritos');
+      console.error(`Error al crear evaluación para capacitación ${capacitacionId}:`, error);
+      throw error;
     }
-  }
+  },
 
-  /**
-   * Registra asistencia de participantes
-   */
-  async registrarAsistencia(capacitacionId: number, asistencias: {
-    participante_id: number;
-    asistio: boolean;
+  // Actualizar una evaluación
+  updateEvaluacion: async (capacitacionId: number, evaluacionId: string, evaluacionData: {
+    calificacion?: number;
     comentarios?: string;
-  }[]): Promise<void> {
+    fecha_evaluacion?: string;
+  }): Promise<any> => {
     try {
-      await apiClient.post(`${this.baseUrl}/${capacitacionId}/asistencia`, { asistencias });
+      const response = await apiClient.put(`/${capacitacionId}/evaluaciones/${evaluacionId}`, evaluacionData);
+      return response.data || response;
     } catch (error) {
-      console.error('Error registering attendance:', error);
-      throw new Error('Error al registrar asistencia');
+      console.error(`Error al actualizar evaluación ${evaluacionId}:`, error);
+      throw error;
+    }
+  },
+
+  // Eliminar una evaluación
+  deleteEvaluacion: async (capacitacionId: number, evaluacionId: string): Promise<void> => {
+    try {
+      await apiClient.delete(`/${capacitacionId}/evaluaciones/${evaluacionId}`);
+    } catch (error) {
+      console.error(`Error al eliminar evaluación ${evaluacionId}:`, error);
+      throw error;
     }
   }
+};
 
-  /**
-   * Registra evaluaciones de participantes
-   */
-  async registrarEvaluaciones(capacitacionId: number, evaluaciones: {
-    participante_id: number;
-    puntuacion: number;
-    comentarios?: string;
-  }[]): Promise<void> {
-    try {
-      await apiClient.post(`${this.baseUrl}/${capacitacionId}/evaluaciones`, { evaluaciones });
-    } catch (error) {
-      console.error('Error registering evaluations:', error);
-      throw new Error('Error al registrar evaluaciones');
-    }
-  }
-
-  /**
-   * Obtiene reporte de capacitación
-   */
-  async getReporteCapacitacion(id: number): Promise<{
-    capacitacion: Capacitacion;
-    estadisticas: {
-      total_inscritos: number;
-      total_asistieron: number;
-      total_no_asistieron: number;
-      promedio_evaluacion: number;
-      porcentaje_asistencia: number;
-    };
-    participantes: {
-      inscritos: any[];
-      asistencias: any[];
-      evaluaciones: any[];
-    };
-  }> {
-    try {
-      const response = await apiClient.get(`${this.baseUrl}/${id}/reporte`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching capacitacion reporte:', error);
-      throw new Error('Error al obtener reporte de capacitación');
-    }
-  }
-}
-
-export const capacitacionesService = new CapacitacionesService();
+export default capacitacionesService;
