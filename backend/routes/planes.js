@@ -1,9 +1,9 @@
 const express = require('express');
-const { getAllPlanes } = require('../controllers/planesController.js');
+const { getOrganizationPlanes } = require('../controllers/planesController.js');
 const router = express.Router();
 
 // GET - Obtener todos los planes
-router.get('/', getAllPlanes);
+router.get('/', getOrganizationPlanes);
 
 // GET - Health check
 router.get('/health', (req, res) => {

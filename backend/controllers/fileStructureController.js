@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { generateFileStructure } = require('../scripts/permanentes/generate-file-structure');
+const mongoClient = require('../lib/mongoClient.js');
 
 /**
  * Controlador para la estructura de archivos del sistema

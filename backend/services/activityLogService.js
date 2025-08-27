@@ -1,4 +1,4 @@
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 const crypto = require('crypto');
 
 /**
@@ -24,34 +24,27 @@ class ActivityLogService {
   static async registrarActividad(activityData) {
     try {
       const id = crypto.randomUUID();
-      const now = new Date().toISOString();
+      const now = new Date();
 
-      const sql = `
-        INSERT INTO actividad_sistema (
-          id, tipo_entidad, entidad_id, accion, descripcion,
-          usuario_id, usuario_nombre, organization_id,
-          datos_anteriores, datos_nuevos, created_at,
-          ip_address, user_agent
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
+      const collection = mongoClient.collection('actividad_sistema');
 
-      const args = [
+      const actividad = {
         id,
-        activityData.tipo_entidad,
-        activityData.entidad_id,
-        activityData.accion,
-        activityData.descripcion,
-        activityData.usuario_id || null,
-        activityData.usuario_nombre || 'Sistema',
-        activityData.organization_id,
-        activityData.datos_anteriores ? JSON.stringify(activityData.datos_anteriores) : null,
-        activityData.datos_nuevos ? JSON.stringify(activityData.datos_nuevos) : null,
-        now,
-        activityData.ip_address || null,
-        activityData.user_agent || null
-      ];
+        tipo_entidad: activityData.tipo_entidad,
+        entidad_id: activityData.entidad_id,
+        accion: activityData.accion,
+        descripcion: activityData.descripcion,
+        usuario_id: activityData.usuario_id || null,
+        usuario_nombre: activityData.usuario_nombre || 'Sistema',
+        organization_id: activityData.organization_id,
+        datos_anteriores: activityData.datos_anteriores || null,
+        datos_nuevos: activityData.datos_nuevos || null,
+        created_at: now,
+        ip_address: activityData.ip_address || null,
+        user_agent: activityData.user_agent || null
+      };
 
-      await tursoClient.execute({ sql, args });
+      await collection.insertOne(actividad);
 
       return { id, created_at: now };
 
@@ -83,135 +76,179 @@ class ActivityLogService {
         offset = 0
       } = filtros;
 
-      let whereClause = 'WHERE organization_id = ?';
-      const args = [organization_id];
+      const collection = mongoClient.collection('actividad_sistema');
+
+      // Construir filtro
+      const filter = { organization_id };
 
       if (tipo_entidad) {
-        whereClause += ' AND tipo_entidad = ?';
-        args.push(tipo_entidad);
+        filter.tipo_entidad = tipo_entidad;
       }
 
       if (entidad_id) {
-        whereClause += ' AND entidad_id = ?';
-        args.push(entidad_id);
+        filter.entidad_id = entidad_id;
       }
 
       if (usuario_id) {
-        whereClause += ' AND usuario_id = ?';
-        args.push(usuario_id);
+        filter.usuario_id = usuario_id;
       }
 
-      const sql = `
-        SELECT * FROM actividad_sistema
-        ${whereClause}
-        ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
-      `;
+      const result = await collection.find(filter, {
+        sort: { created_at: -1 },
+        limit: limite,
+        skip: offset
+      }).toArray();
 
-      args.push(limite, offset);
-
-      const result = await tursoClient.execute({ sql, args });
-
-      // Parsear JSON de datos anteriores y nuevos
-      const actividades = result.rows.map(row => ({
-        ...row,
-        datos_anteriores: row.datos_anteriores ? JSON.parse(row.datos_anteriores) : null,
-        datos_nuevos: row.datos_nuevos ? JSON.parse(row.datos_nuevos) : null
-      }));
-
-      return actividades;
-
+      return result;
     } catch (error) {
       console.error('Error obteniendo historial:', error);
-      throw error;
+      return [];
     }
   }
 
   /**
-   * Obtiene estadísticas de actividad
+   * Obtiene estadísticas de actividades
    * @param {number} organization_id - ID de la organización
-   * @param {string} periodo - Período: 'dia', 'semana', 'mes' (default: 'semana')
+   * @param {string} periodo - Periodo de tiempo (hoy, semana, mes, año)
    */
-  static async obtenerEstadisticas(organization_id, periodo = 'semana') {
+  static async obtenerEstadisticas(organization_id, periodo = 'mes') {
     try {
-      let dateFilter;
+      const collection = mongoClient.collection('actividad_sistema');
+
+      // Calcular fecha de inicio según el periodo
+      const now = new Date();
+      let fechaInicio;
+
       switch (periodo) {
-        case 'dia':
-          dateFilter = "datetime('now', '-1 day')";
+        case 'hoy':
+          fechaInicio = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'semana':
+          fechaInicio = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           break;
         case 'mes':
-          dateFilter = "datetime('now', '-1 month')";
+          fechaInicio = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'año':
+          fechaInicio = new Date(now.getFullYear(), 0, 1);
           break;
         default:
-          dateFilter = "datetime('now', '-7 days')";
+          fechaInicio = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       }
 
-      const sql = `
-        SELECT 
-          tipo_entidad,
-          accion,
-          COUNT(*) as total
-        FROM actividad_sistema
-        WHERE organization_id = ? 
-          AND created_at >= ${dateFilter}
-        GROUP BY tipo_entidad, accion
-        ORDER BY total DESC
-      `;
+      // Consulta de agregación para estadísticas
+      const pipeline = [
+        {
+          $match: {
+            organization_id,
+            created_at: { $gte: fechaInicio }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              tipo_entidad: '$tipo_entidad',
+              accion: '$accion'
+            },
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $group: {
+            _id: '$_id.tipo_entidad',
+            acciones: {
+              $push: {
+                accion: '$_id.accion',
+                count: '$count'
+              }
+            },
+            total: { $sum: '$count' }
+          }
+        }
+      ];
 
-      const result = await tursoClient.execute({
-        sql,
-        args: [organization_id]
+      const result = await collection.aggregate(pipeline).toArray();
+
+      // Formatear resultado
+      const estadisticas = {};
+      result.forEach(item => {
+        estadisticas[item._id] = {
+          total: item.total,
+          acciones: item.acciones.reduce((acc, act) => {
+            acc[act.accion] = act.count;
+            return acc;
+          }, {})
+        };
       });
 
-      return result.rows;
-
+      return estadisticas;
     } catch (error) {
       console.error('Error obteniendo estadísticas:', error);
-      throw error;
+      return {};
     }
   }
 
   /**
-   * Métodos de conveniencia para registrar actividades específicas
+   * Obtiene actividades recientes
+   * @param {number} organization_id - ID de la organización
+   * @param {number} limite - Número de actividades a obtener
    */
-  static async registrarCreacion(tipo_entidad, entidad_id, datos_nuevos, usuario, organization_id) {
-    return this.registrarActividad({
-      tipo_entidad,
-      entidad_id,
-      accion: 'crear',
-      descripcion: `Se creó ${tipo_entidad}: ${datos_nuevos.nombre || entidad_id}`,
-      usuario_id: usuario?.id,
-      usuario_nombre: usuario?.nombre || 'Sistema',
-      organization_id,
-      datos_nuevos
-    });
+  static async obtenerActividadesRecientes(organization_id, limite = 10) {
+    try {
+      const collection = mongoClient.collection('actividad_sistema');
+
+      const result = await collection.find(
+        { organization_id },
+        {
+          sort: { created_at: -1 },
+          limit: limite,
+          projection: {
+            id: 1,
+            tipo_entidad: 1,
+            accion: 1,
+            descripcion: 1,
+            usuario_nombre: 1,
+            created_at: 1
+          }
+        }
+      ).toArray();
+
+      return result;
+    } catch (error) {
+      console.error('Error obteniendo actividades recientes:', error);
+      return [];
+    }
   }
 
-  static async registrarActualizacion(tipo_entidad, entidad_id, datos_anteriores, datos_nuevos, usuario, organization_id) {
-    return this.registrarActividad({
-      tipo_entidad,
-      entidad_id,
-      accion: 'actualizar',
-      descripcion: `Se actualizó ${tipo_entidad}: ${datos_nuevos.nombre || entidad_id}`,
-      usuario_id: usuario?.id,
-      usuario_nombre: usuario?.nombre || 'Sistema',
-      organization_id,
-      datos_anteriores,
-      datos_nuevos
-    });
-  }
+  /**
+   * Limpia actividades antiguas
+   * @param {number} organization_id - ID de la organización
+   * @param {number} diasAntiguedad - Días de antigüedad para eliminar
+   */
+  static async limpiarActividadesAntiguas(organization_id, diasAntiguedad = 365) {
+    try {
+      const collection = mongoClient.collection('actividad_sistema');
 
-  static async registrarEliminacion(tipo_entidad, entidad_id, datos_anteriores, usuario, organization_id) {
-    return this.registrarActividad({
-      tipo_entidad,
-      entidad_id,
-      accion: 'eliminar',
-      descripcion: `Se eliminó ${tipo_entidad}: ${datos_anteriores.nombre || entidad_id}`,
-      usuario_id: usuario?.id,
-      usuario_nombre: usuario?.nombre || 'Sistema',
-      organization_id,
-      datos_anteriores
-    });
+      const fechaLimite = new Date();
+      fechaLimite.setDate(fechaLimite.getDate() - diasAntiguedad);
+
+      const result = await collection.deleteMany({
+        organization_id,
+        created_at: { $lt: fechaLimite }
+      });
+
+      return {
+        success: true,
+        deletedCount: result.deletedCount,
+        message: `Se eliminaron ${result.deletedCount} actividades antiguas`
+      };
+    } catch (error) {
+      console.error('Error limpiando actividades antiguas:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
 }
 

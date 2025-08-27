@@ -1,19 +1,22 @@
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 
 class CoordinacionService {
   
   // Obtener todas las tareas
   async obtenerTareas(organizationId = 2, limit = 50, offset = 0) {
     try {
-      const query = `
-        SELECT * FROM coordinacion_tareas 
-        WHERE organization_id = ? 
-        ORDER BY fecha DESC, hora_inicio DESC 
-        LIMIT ? OFFSET ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const result = await tursoClient.execute(query, [organizationId, limit, offset]);
-      return result.rows;
+      const result = await collection.find(
+        { organization_id: organizationId },
+        {
+          sort: { fecha: -1, hora_inicio: -1 },
+          limit: limit,
+          skip: offset
+        }
+      ).toArray();
+      
+      return result;
     } catch (error) {
       console.error('Error obteniendo tareas:', error);
       throw error;
@@ -23,13 +26,14 @@ class CoordinacionService {
   // Obtener tarea por número
   async obtenerTareaPorNumero(organizationId, tareaNumero) {
     try {
-      const query = `
-        SELECT * FROM coordinacion_tareas 
-        WHERE organization_id = ? AND tarea_numero = ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const result = await tursoClient.execute(query, [organizationId, tareaNumero]);
-      return result.rows[0] || null;
+      const result = await collection.findOne({
+        organization_id: organizationId,
+        tarea_numero: tareaNumero
+      });
+      
+      return result;
     } catch (error) {
       console.error('Error obteniendo tarea:', error);
       throw error;
@@ -39,75 +43,75 @@ class CoordinacionService {
   // Obtener estadísticas
   async obtenerEstadisticas(organizationId = 2) {
     try {
+      const collection = mongoClient.collection('coordinacion_tareas');
+      
       // Total tareas
-      const totalQuery = await tursoClient.execute(
-        'SELECT COUNT(*) as total FROM coordinacion_tareas WHERE organization_id = ?',
-        [organizationId]
-      );
+      const total = await collection.countDocuments({ organization_id: organizationId });
       
       // Por estado
-      const estadoQuery = await tursoClient.execute(`
-        SELECT estado, COUNT(*) as count 
-        FROM coordinacion_tareas 
-        WHERE organization_id = ? 
-        GROUP BY estado
-      `, [organizationId]);
+      const estadoQuery = await collection.aggregate([
+        { $match: { organization_id: organizationId } },
+        { $group: { _id: '$estado', count: { $sum: 1 } } }
+      ]).toArray();
       
       // Por módulo
-      const moduloQuery = await tursoClient.execute(`
-        SELECT modulo, COUNT(*) as count 
-        FROM coordinacion_tareas 
-        WHERE organization_id = ? 
-        GROUP BY modulo
-      `, [organizationId]);
+      const moduloQuery = await collection.aggregate([
+        { $match: { organization_id: organizationId } },
+        { $group: { _id: '$modulo', count: { $sum: 1 } } }
+      ]).toArray();
       
       // Por prioridad
-      const prioridadQuery = await tursoClient.execute(`
-        SELECT prioridad, COUNT(*) as count 
-        FROM coordinacion_tareas 
-        WHERE organization_id = ? 
-        GROUP BY prioridad
-      `, [organizationId]);
+      const prioridadQuery = await collection.aggregate([
+        { $match: { organization_id: organizationId } },
+        { $group: { _id: '$prioridad', count: { $sum: 1 } } }
+      ]).toArray();
       
       // Tiempo total
-      const tiempoQuery = await tursoClient.execute(`
-        SELECT 
-          SUM(tiempo_real) as tiempo_total,
-          AVG(tiempo_real) as tiempo_promedio,
-          COUNT(*) as tareas_con_tiempo
-        FROM coordinacion_tareas 
-        WHERE organization_id = ? AND tiempo_real IS NOT NULL
-      `, [organizationId]);
+      const tiempoQuery = await collection.aggregate([
+        { 
+          $match: { 
+            organization_id: organizationId,
+            tiempo_real: { $ne: null }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            tiempo_total: { $sum: '$tiempo_real' },
+            tiempo_promedio: { $avg: '$tiempo_real' },
+            tareas_con_tiempo: { $sum: 1 }
+          }
+        }
+      ]).toArray();
       
-      const total = totalQuery.rows[0].total;
       const estados = {};
       const modulos = {};
       const prioridades = {};
       
-      estadoQuery.rows.forEach(row => {
-        estados[row.estado] = row.count;
+      estadoQuery.forEach(row => {
+        estados[row._id] = row.count;
       });
       
-      moduloQuery.rows.forEach(row => {
-        modulos[row.modulo] = row.count;
+      moduloQuery.forEach(row => {
+        modulos[row._id] = row.count;
       });
       
-      prioridadQuery.rows.forEach(row => {
-        prioridades[row.prioridad] = row.count;
+      prioridadQuery.forEach(row => {
+        prioridades[row._id] = row.count;
       });
       
-      const tiempo = tiempoQuery.rows[0];
+      const tiempo = tiempoQuery[0] || {
+        tiempo_total: 0,
+        tiempo_promedio: 0,
+        tareas_con_tiempo: 0
+      };
       
       return {
         total,
         estados,
         modulos,
         prioridades,
-        tiempo: {
-          total: tiempo.tiempo_total || 0,
-          promedio: tiempo.tiempo_promedio || 0,
-          tareas_con_tiempo: tiempo.tareas_con_tiempo || 0
-        }
+        tiempo
       };
     } catch (error) {
       console.error('Error obteniendo estadísticas:', error);
@@ -118,30 +122,25 @@ class CoordinacionService {
   // Buscar tareas por texto
   async buscarTareas(organizationId, texto, limit = 20) {
     try {
-      const query = `
-        SELECT * FROM coordinacion_tareas 
-        WHERE organization_id = ? 
-        AND (
-          descripcion LIKE ? OR 
-          problema LIKE ? OR 
-          solucion LIKE ? OR 
-          resultado LIKE ?
-        )
-        ORDER BY fecha DESC 
-        LIMIT ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
       const searchTerm = `%${texto}%`;
-      const result = await tursoClient.execute(query, [
-        organizationId, 
-        searchTerm, 
-        searchTerm, 
-        searchTerm, 
-        searchTerm, 
-        limit
-      ]);
+      const result = await collection.find(
+        {
+          organization_id: organizationId,
+          $or: [
+            { descripcion: { $regex: searchTerm, $options: 'i' } },
+            { problema: { $regex: searchTerm, $options: 'i' } },
+            { solucion: { $regex: searchTerm, $options: 'i' } },
+            { resultado: { $regex: searchTerm, $options: 'i' } }
+          ]
+        },
+        {
+          sort: { fecha: -1 }
+        }
+      ).limit(limit).toArray();
       
-      return result.rows;
+      return result;
     } catch (error) {
       console.error('Error buscando tareas:', error);
       throw error;
@@ -149,17 +148,22 @@ class CoordinacionService {
   }
   
   // Obtener tareas por módulo
-  async obtenerTareasPorModulo(organizationId, modulo, limit = 20) {
+  async obtenerTareasPorModulo(organizationId = 2, modulo, limit = 20) {
     try {
-      const query = `
-        SELECT * FROM coordinacion_tareas 
-        WHERE organization_id = ? AND modulo = ?
-        ORDER BY fecha DESC 
-        LIMIT ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const result = await tursoClient.execute(query, [organizationId, modulo, limit]);
-      return result.rows;
+      const result = await collection.find(
+        { 
+          organization_id: organizationId,
+          modulo: modulo
+        },
+        {
+          sort: { fecha: -1, hora_inicio: -1 },
+          limit: limit
+        }
+      ).toArray();
+      
+      return result;
     } catch (error) {
       console.error('Error obteniendo tareas por módulo:', error);
       throw error;
@@ -167,17 +171,22 @@ class CoordinacionService {
   }
   
   // Obtener tareas por estado
-  async obtenerTareasPorEstado(organizationId, estado, limit = 20) {
+  async obtenerTareasPorEstado(organizationId = 2, estado, limit = 20) {
     try {
-      const query = `
-        SELECT * FROM coordinacion_tareas 
-        WHERE organization_id = ? AND estado = ?
-        ORDER BY fecha DESC 
-        LIMIT ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const result = await tursoClient.execute(query, [organizationId, estado, limit]);
-      return result.rows;
+      const result = await collection.find(
+        { 
+          organization_id: organizationId,
+          estado: estado
+        },
+        {
+          sort: { fecha: -1, hora_inicio: -1 },
+          limit: limit
+        }
+      ).toArray();
+      
+      return result;
     } catch (error) {
       console.error('Error obteniendo tareas por estado:', error);
       throw error;
@@ -187,34 +196,22 @@ class CoordinacionService {
   // Crear nueva tarea
   async crearTarea(tareaData) {
     try {
-      const query = `
-        INSERT INTO coordinacion_tareas (
-          organization_id, tarea_numero, fecha, hora_inicio, descripcion,
-          estado, prioridad, modulo, archivos_trabajados, archivos_creados,
-          problema, solucion, resultado, tiempo_estimado, tiempo_real
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const params = [
-        tareaData.organization_id || 2,
-        tareaData.tarea_numero,
-        tareaData.fecha,
-        tareaData.hora_inicio,
-        tareaData.descripcion,
-        tareaData.estado || 'en_proceso',
-        tareaData.prioridad || 'normal',
-        tareaData.modulo || 'sistema',
-        tareaData.archivos_trabajados || '',
-        tareaData.archivos_creados || '',
-        tareaData.problema || '',
-        tareaData.solucion || '',
-        tareaData.resultado || '',
-        tareaData.tiempo_estimado || 120,
-        tareaData.tiempo_real || 120
-      ];
+      // Agregar timestamps
+      const nuevaTarea = {
+        ...tareaData,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
       
-      const result = await tursoClient.execute(query, params);
-      return result.lastInsertRowid;
+      const result = await collection.insertOne(nuevaTarea);
+      
+      return {
+        success: true,
+        tarea_id: result.insertedId,
+        message: 'Tarea creada exitosamente'
+      };
     } catch (error) {
       console.error('Error creando tarea:', error);
       throw error;
@@ -222,38 +219,32 @@ class CoordinacionService {
   }
   
   // Actualizar tarea
-  async actualizarTarea(organizationId, tareaNumero, tareaData) {
+  async actualizarTarea(organizationId, tareaNumero, datosActualizacion) {
     try {
-      const query = `
-        UPDATE coordinacion_tareas 
-        SET 
-          fecha = ?, hora_inicio = ?, descripcion = ?, estado = ?,
-          prioridad = ?, modulo = ?, archivos_trabajados = ?, archivos_creados = ?,
-          problema = ?, solucion = ?, resultado = ?, tiempo_estimado = ?,
-          tiempo_real = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE organization_id = ? AND tarea_numero = ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const params = [
-        tareaData.fecha,
-        tareaData.hora_inicio,
-        tareaData.descripcion,
-        tareaData.estado,
-        tareaData.prioridad,
-        tareaData.modulo,
-        tareaData.archivos_trabajados,
-        tareaData.archivos_creados,
-        tareaData.problema,
-        tareaData.solucion,
-        tareaData.resultado,
-        tareaData.tiempo_estimado,
-        tareaData.tiempo_real,
-        organizationId,
-        tareaNumero
-      ];
+      const datosActualizados = {
+        ...datosActualizacion,
+        updated_at: new Date()
+      };
       
-      const result = await tursoClient.execute(query, params);
-      return result.changes > 0;
+      const result = await collection.updateOne(
+        {
+          organization_id: organizationId,
+          tarea_numero: tareaNumero
+        },
+        { $set: datosActualizados }
+      );
+      
+      if (result.matchedCount === 0) {
+        throw new Error('Tarea no encontrada');
+      }
+      
+      return {
+        success: true,
+        message: 'Tarea actualizada exitosamente',
+        modifiedCount: result.modifiedCount
+      };
     } catch (error) {
       console.error('Error actualizando tarea:', error);
       throw error;
@@ -263,13 +254,22 @@ class CoordinacionService {
   // Eliminar tarea
   async eliminarTarea(organizationId, tareaNumero) {
     try {
-      const query = `
-        DELETE FROM coordinacion_tareas 
-        WHERE organization_id = ? AND tarea_numero = ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const result = await tursoClient.execute(query, [organizationId, tareaNumero]);
-      return result.changes > 0;
+      const result = await collection.deleteOne({
+        organization_id: organizationId,
+        tarea_numero: tareaNumero
+      });
+      
+      if (result.deletedCount === 0) {
+        throw new Error('Tarea no encontrada');
+      }
+      
+      return {
+        success: true,
+        message: 'Tarea eliminada exitosamente',
+        deletedCount: result.deletedCount
+      };
     } catch (error) {
       console.error('Error eliminando tarea:', error);
       throw error;
@@ -279,20 +279,65 @@ class CoordinacionService {
   // Obtener siguiente número de tarea
   async obtenerSiguienteNumeroTarea(organizationId) {
     try {
-      const query = `
-        SELECT MAX(tarea_numero) as max_numero 
-        FROM coordinacion_tareas 
-        WHERE organization_id = ?
-      `;
+      const collection = mongoClient.collection('coordinacion_tareas');
       
-      const result = await tursoClient.execute(query, [organizationId]);
-      const maxNumero = result.rows[0].max_numero || 0;
+      const result = await collection.find(
+        { organization_id: organizationId },
+        { tarea_numero: 1, _id: 0 }
+      ).sort({ tarea_numero: -1 }).limit(1).toArray();
+      
+      const maxNumero = result.length > 0 ? result[0].tarea_numero : 0;
       return maxNumero + 1;
     } catch (error) {
       console.error('Error obteniendo siguiente número:', error);
       throw error;
     }
   }
+  
+  // Obtener tareas pendientes
+  async obtenerTareasPendientes(organizationId = 2) {
+    try {
+      const collection = mongoClient.collection('coordinacion_tareas');
+      
+      const result = await collection.find(
+        { 
+          organization_id: organizationId,
+          estado: { $in: ['pendiente', 'en_proceso'] }
+        },
+        {
+          sort: { prioridad: -1, fecha: 1 }
+        }
+      ).toArray();
+      
+      return result;
+    } catch (error) {
+      console.error('Error obteniendo tareas pendientes:', error);
+      throw error;
+    }
+  }
+  
+  // Obtener tareas completadas
+  async obtenerTareasCompletadas(organizationId = 2, limit = 50) {
+    try {
+      const collection = mongoClient.collection('coordinacion_tareas');
+      
+      const result = await collection.find(
+        { 
+          organization_id: organizationId,
+          estado: 'completada'
+        },
+        {
+          sort: { fecha: -1 },
+          limit: limit
+        }
+      ).toArray();
+      
+      return result;
+    } catch (error) {
+      console.error('Error obteniendo tareas completadas:', error);
+      throw error;
+    }
+  }
 }
 
-module.exports = new CoordinacionService();
+module.exports = CoordinacionService;

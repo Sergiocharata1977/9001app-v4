@@ -1,71 +1,27 @@
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 
-// Obtener todos los planes
-const getAllPlanes = async (req, res) => {
+// Obtener todos los planes de la organización
+const getOrganizationPlanes = async (req, res) => {
   try {
-    console.log('🔍 Obteniendo todos los planes...');
-    
-    // Datos de ejemplo para planes
-    const planes = [
-      {
-        id: 1,
-        nombre: 'Gratuito',
-        descripcion: 'Plan básico para pequeñas organizaciones',
-        precio_mensual: 0,
-        precio_anual: 0,
-        max_usuarios: 5,
-        max_departamentos: 2,
-        max_documentos: 50,
-        caracteristicas: JSON.stringify(['Acceso básico', 'Soporte por email', '5 usuarios']),
-        es_plan_gratuito: true,
-        is_active: 1
-      },
-      {
-        id: 2,
-        nombre: 'Básico',
-        descripcion: 'Plan ideal para organizaciones en crecimiento',
-        precio_mensual: 29.99,
-        precio_anual: 299.99,
-        max_usuarios: 25,
-        max_departamentos: 10,
-        max_documentos: 500,
-        caracteristicas: JSON.stringify(['Todo del plan gratuito', 'Soporte prioritario', '25 usuarios', 'Reportes básicos']),
-        es_plan_gratuito: false,
-        is_active: 1
-      },
-      {
-        id: 3,
-        nombre: 'Profesional',
-        descripcion: 'Plan completo para organizaciones establecidas',
-        precio_mensual: 79.99,
-        precio_anual: 799.99,
-        max_usuarios: 100,
-        max_departamentos: 25,
-        max_documentos: 2000,
-        caracteristicas: JSON.stringify(['Todo del plan básico', 'Soporte telefónico', '100 usuarios', 'Reportes avanzados', 'Integraciones']),
-        es_plan_gratuito: false,
-        is_active: 1
-      },
-      {
-        id: 4,
-        nombre: 'Empresarial',
-        descripcion: 'Plan premium para grandes organizaciones',
-        precio_mensual: 199.99,
-        precio_anual: 1999.99,
-        max_usuarios: 500,
-        max_departamentos: 50,
-        max_documentos: 10000,
-        caracteristicas: JSON.stringify(['Todo del plan profesional', 'Soporte 24/7', 'Usuarios ilimitados', 'API personalizada', 'SLA garantizado']),
-        es_plan_gratuito: false,
-        is_active: 1
-      }
-    ];
+    const currentUser = req.user;
+    const organizationId = currentUser.organization_id;
 
-    console.log(`✅ ${planes.length} planes encontrados`);
+    console.log(`📋 Obteniendo planes para organización ${organizationId}`);
+
+    const result = await mongoClient.execute({
+      sql: `SELECT id, title, description, status, start_date, end_date, 
+             responsible_id, responsible_name, created_at, updated_at
+             FROM planes 
+             WHERE organization_id = ?
+             ORDER BY created_at DESC`,
+      args: [organizationId]
+    });
+
+    console.log(`✅ Planes encontrados para organización ${organizationId}`);
     res.json({
       success: true,
-      data: planes,
-      total: planes.length
+      data: result.rows,
+      total: result.rows.length
     });
   } catch (error) {
     console.error('❌ Error obteniendo planes:', error);
@@ -173,7 +129,7 @@ const cancelSuscripcion = async (req, res) => {
 };
 
 module.exports = {
-  getAllPlanes,
+  getOrganizationPlanes,
   getSuscripcionActual,
   createSuscripcion,
   cancelSuscripcion

@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../lib/tursoClient.js');
+const db = require('../lib/mongoClient.js');
 
 // @desc    Registrar una nueva organización y su usuario admin
 // @route   POST /api/auth/register
@@ -153,6 +153,8 @@ const login = async (req, res) => {
       });
     }
 
+    console.log('🔍 Buscando usuario con email:', email);
+    
     // Buscar usuario
     const userResult = await db.execute({
       sql: `
@@ -165,7 +167,10 @@ const login = async (req, res) => {
       args: [email]
     });
 
+    console.log('📊 Resultado de búsqueda:', userResult.rows);
+
     if (userResult.rows.length === 0) {
+      console.log('❌ Usuario no encontrado');
       return res.status(401).json({
         success: false,
         message: 'Credenciales inválidas'
@@ -173,10 +178,16 @@ const login = async (req, res) => {
     }
 
     const user = userResult.rows[0];
+    console.log('✅ Usuario encontrado:', { id: user.id, email: user.email, role: user.role });
 
     // Verificar contraseña
-    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    console.log('🔐 Verificando contraseña...');
+    console.log('📝 Password del usuario:', user.password || user.password_hash);
+    const isValidPassword = await bcrypt.compare(password, user.password || user.password_hash || '');
+    console.log('✅ Contraseña válida:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('❌ Contraseña inválida');
       return res.status(401).json({
         success: false,
         message: 'Credenciales inválidas'
@@ -206,6 +217,7 @@ const login = async (req, res) => {
       args: [user.id, refreshToken]
     });
 
+    console.log('🎉 Login exitoso, enviando respuesta...');
     res.json({
       success: true,
       message: 'Login exitoso',

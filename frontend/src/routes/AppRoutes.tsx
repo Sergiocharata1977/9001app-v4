@@ -28,6 +28,7 @@ import AccessDirectoCRM from '../pages/AccessDirectoCRM';
 import AccessDirectoCalidad from '../pages/AccessDirectoCalidad';
 import AccessDirectoProcesos from '../pages/AccessDirectoProcesos';
 import AccessDirectoRRHH from '../pages/AccessDirectoRRHH';
+import DevBypass from '../pages/DevBypass';
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";

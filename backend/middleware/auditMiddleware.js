@@ -1,4 +1,4 @@
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 const { randomUUID } = require('crypto');
 
 // Función para registrar una acción en los logs de auditoría
@@ -17,11 +17,11 @@ const logAuditAction = async (userId, organizationId, action, resourceType, reso
     const ipAddress = req ? (req.ip || req.connection.remoteAddress || req.socket.remoteAddress) : null;
     const userAgent = req ? req.get('User-Agent') : null;
 
-    await tursoClient.execute({
-      sql: `INSERT INTO audit_logs 
-            (id, user_id, organization_id, action, resource_type, resource_id, details, ip_address, user_agent, timestamp) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [logId, userId, organizationId, action, resourceType, resourceId, details, ipAddress, userAgent, timestamp]
+    await mongoClient.execute({
+      sql: `INSERT INTO audit_logs (user_id, organization_id, action, resource_type, resource_id, details, ip_address, user_agent, created_at) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [userId, organizationId, action, resourceType, resourceId, JSON.stringify(details), 
+             ipAddress, userAgent, new Date().toISOString()]
     });
 
     console.log(`[AUDIT] ${action} - ${resourceType} - User: ${userId} - Org: ${organizationId}`);
@@ -203,7 +203,7 @@ const getAuditLogs = async (organizationId, limit = 100, offset = 0, filters = {
     sql += ` ORDER BY al.timestamp DESC LIMIT ? OFFSET ?`;
     args.push(limit, offset);
     
-    const result = await tursoClient.execute({ sql, args });
+    const result = await mongoClient.execute({ sql, args });
     return result.rows;
   } catch (error) {
     console.error('Error al obtener logs de auditoría:', error);

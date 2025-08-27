@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 const crypto = require('crypto');
 
 const router = Router();
@@ -8,11 +8,13 @@ const router = Router();
 router.get('/hallazgo/:hallazgoId', async (req, res) => {
   const { hallazgoId } = req.params;
   try {
-    const result = await tursoClient.execute({
-      sql: 'SELECT * FROM verificaciones WHERE hallazgoId = ? ORDER BY fechaVerificacion ASC',
-      args: [hallazgoId],
-    });
-    res.json(result.rows);
+    const collection = mongoClient.collection('verificaciones');
+    const result = await collection.find(
+      { hallazgoId: hallazgoId },
+      { sort: { fechaVerificacion: 1 } }
+    ).toArray();
+    
+    res.json(result);
   } catch (error) {
     console.error(`Error al obtener verificaciones para el hallazgo ${hallazgoId}:`, error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -23,15 +25,13 @@ router.get('/hallazgo/:hallazgoId', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const result = await tursoClient.execute({
-        sql: 'SELECT * FROM verificaciones WHERE id = ?',
-        args: [id],
-      });
+      const collection = mongoClient.collection('verificaciones');
+      const result = await collection.findOne({ id: id });
   
-      if (result.rows.length === 0) {
+      if (!result) {
         return res.status(404).json({ error: 'Verificación no encontrada.' });
       }
-      res.json(result.rows[0]);
+      res.json(result);
     } catch (error) {
       console.error(`Error al obtener la verificación ${id}:`, error);
       res.status(500).json({ error: 'Error interno del servidor' });
@@ -55,33 +55,31 @@ router.post('/', async (req, res) => {
 
   // Verificar que el hallazgo exista
   try {
-    const hallazgoExists = await tursoClient.execute({
-        sql: 'SELECT id FROM hallazgos WHERE id = ?',
-        args: [hallazgoId]
-    });
-    if (hallazgoExists.rows.length === 0) {
+    const hallazgosCollection = mongoClient.collection('hallazgos');
+    const hallazgoExists = await hallazgosCollection.findOne({ id: hallazgoId });
+    
+    if (!hallazgoExists) {
         return res.status(404).json({ error: 'El hallazgo especificado no existe.' });
     }
 
     const id = crypto.randomUUID();
+    const verificacionesCollection = mongoClient.collection('verificaciones');
     
-    await tursoClient.execute({
-      sql: `INSERT INTO verificaciones (
-              id, hallazgoId, responsableVerificacion, fechaVerificacion,
-              resultadoVerificacion, comentarios, estadoHallazgo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)`, 
-      args: [
-        id, hallazgoId, responsableVerificacion, fechaVerificacion,
-        resultadoVerificacion, comentarios, estadoHallazgo
-      ],
-    });
+    const nuevaVerificacion = {
+      id,
+      hallazgoId,
+      responsableVerificacion,
+      fechaVerificacion: new Date(fechaVerificacion),
+      resultadoVerificacion,
+      comentarios,
+      estadoHallazgo,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
 
-    const newVerificacionResult = await tursoClient.execute({
-        sql: 'SELECT * FROM verificaciones WHERE id = ?',
-        args: [id]
-    });
+    await verificacionesCollection.insertOne(nuevaVerificacion);
 
-    res.status(201).json(newVerificacionResult.rows[0]);
+    res.status(201).json(nuevaVerificacion);
   } catch (error) {
     console.error('Error al crear la verificación:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -91,49 +89,43 @@ router.post('/', async (req, res) => {
 // PUT /api/verificaciones/:id - Actualizar una verificacion
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { ...fieldsToUpdate } = req.body;
+  const { hallazgoId, ...fieldsToUpdate } = req.body;
 
   if (Object.keys(fieldsToUpdate).length === 0) {
     return res.status(400).json({ error: 'No se proporcionaron campos para actualizar.' });
   }
   
   // No permitir actualizar hallazgoId
-  if (fieldsToUpdate.hallazgoId) {
-      delete fieldsToUpdate.hallazgoId;
+  if (hallazgoId) {
+    return res.status(400).json({ error: 'No se puede modificar el hallazgoId de una verificación.' });
   }
-
-  const allowedFields = [
-    'responsableVerificacion', 'fechaVerificacion', 'resultadoVerificacion',
-    'comentarios', 'estadoHallazgo'
-  ];
-
-  const fields = Object.keys(fieldsToUpdate)
-    .filter(key => allowedFields.includes(key));
-    
-  if (fields.length === 0) {
-    return res.status(400).json({ error: 'Ninguno de los campos proporcionados es actualizable.' });
-  }
-
-  const sqlSetParts = fields.map(key => `${key} = ?`);
-  const sqlArgs = fields.map(key => fieldsToUpdate[key]);
-  sqlArgs.push(id);
 
   try {
-    const result = await tursoClient.execute({
-      sql: `UPDATE verificaciones SET ${sqlSetParts.join(', ')} WHERE id = ?`,
-      args: sqlArgs,
-    });
+    const collection = mongoClient.collection('verificaciones');
+    
+    // Preparar datos para actualización
+    const updateData = {
+      ...fieldsToUpdate,
+      updated_at: new Date()
+    };
 
-    if (result.rowsAffected === 0) {
-        return res.status(404).json({ error: 'Verificación no encontrada.' });
+    // Convertir fechaVerificacion a Date si existe
+    if (updateData.fechaVerificacion) {
+      updateData.fechaVerificacion = new Date(updateData.fechaVerificacion);
     }
 
-    const updatedVerificacionResult = await tursoClient.execute({
-        sql: 'SELECT * FROM verificaciones WHERE id = ?',
-        args: [id]
-    });
+    const result = await collection.updateOne(
+      { id: id },
+      { $set: updateData }
+    );
 
-    res.json(updatedVerificacionResult.rows[0]);
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Verificación no encontrada.' });
+    }
+
+    // Obtener la verificación actualizada
+    const updatedVerificacionResult = await collection.findOne({ id: id });
+    res.json(updatedVerificacionResult);
   } catch (error) {
     console.error(`Error al actualizar la verificación ${id}:`, error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -144,16 +136,14 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await tursoClient.execute({
-      sql: 'DELETE FROM verificaciones WHERE id = ?',
-      args: [id],
-    });
+    const collection = mongoClient.collection('verificaciones');
+    const result = await collection.deleteOne({ id: id });
 
-    if (result.rowsAffected === 0) {
+    if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Verificación no encontrada.' });
     }
-    
-    res.status(204).send();
+
+    res.json({ message: 'Verificación eliminada exitosamente.' });
   } catch (error) {
     console.error(`Error al eliminar la verificación ${id}:`, error);
     res.status(500).json({ error: 'Error interno del servidor' });

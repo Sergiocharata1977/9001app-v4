@@ -1,16 +1,12 @@
-const { createClient } = require('@libsql/client');
+const mongoClient = require('../lib/mongoClient.js');
 
 /**
  * Servicio RAG simplificado para el Sistema SGC ISO 9001
- * Integra con Turso y proporciona respuestas inteligentes
+ * Integra con MongoDB y proporciona respuestas inteligentes
  */
 class RAGService {
   constructor() {
-    // Configuración de Turso
-    this.tursoClient = createClient({
-      url: process.env.TURSO_DATABASE_URL || 'libsql://isoflow4-sergiocharata1977.turso.io',
-      authToken: process.env.TURSO_AUTH_TOKEN || ''
-    });
+    this.mongoClient = mongoClient;
   }
 
   /**
@@ -30,7 +26,7 @@ class RAGService {
         ...options
       };
 
-      // Paso 1: Buscar datos relevantes en Turso
+      // Paso 1: Buscar datos relevantes en MongoDB
       const relevantData = await this.searchData(question, organizationId);
       
       // Paso 2: Calcular relevancia y ordenar
@@ -66,48 +62,57 @@ class RAGService {
   }
 
   /**
-   * Busca datos relevantes en Turso
+   * Busca datos relevantes en MongoDB
    */
   async searchData(question, organizationId = 'default') {
     const questionLower = question.toLowerCase();
     const keywords = this.extractKeywords(questionLower);
     
-    // Construir consulta SQL dinámica
-    let sql = `
-      SELECT 
-        tipo, titulo, codigo, contenido, estado, 
-        fecha_creacion, fecha_actualizacion
-      FROM rag_data 
-      WHERE estado = 'activo'
-    `;
-    
-    const params = [];
-    
-    // Filtrar por organización
-    if (organizationId) {
-      sql += ` AND organizacion_id = ?`;
-      params.push(organizationId);
-    }
-    
-    // Filtrar por palabras clave
-    if (keywords.length > 0) {
-      const keywordConditions = keywords.map(() => 
-        `(titulo LIKE ? OR contenido LIKE ? OR codigo LIKE ?)`
-      ).join(' OR ');
-      sql += ` AND (${keywordConditions})`;
-      
-      keywords.forEach(keyword => {
-        params.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`);
-      });
-    }
-    
-    sql += ` ORDER BY fecha_actualizacion DESC LIMIT 50`;
-    
     try {
-      const result = await this.tursoClient.execute(sql, params);
-      return result.rows || [];
+      const collection = this.mongoClient.collection('rag_data');
+      
+      // Construir filtro de MongoDB
+      const filter = {
+        estado: 'activo'
+      };
+      
+      // Filtrar por organización
+      if (organizationId && organizationId !== 'default') {
+        filter.organizacion_id = organizationId;
+      }
+      
+      // Filtrar por palabras clave usando $or
+      if (keywords.length > 0) {
+        const keywordFilters = keywords.map(keyword => ({
+          $or: [
+            { titulo: { $regex: keyword, $options: 'i' } },
+            { contenido: { $regex: keyword, $options: 'i' } },
+            { codigo: { $regex: keyword, $options: 'i' } }
+          ]
+        }));
+        
+        filter.$or = keywordFilters.map(kf => kf.$or).flat();
+      }
+      
+      // Ejecutar consulta
+      const cursor = collection.find(filter, {
+        projection: {
+          tipo: 1,
+          titulo: 1,
+          codigo: 1,
+          contenido: 1,
+          estado: 1,
+          fecha_creacion: 1,
+          fecha_actualizacion: 1
+        }
+      });
+      
+      const results = await cursor.toArray();
+      
+      console.log(`🔍 Encontrados ${results.length} documentos relevantes`);
+      return results;
     } catch (error) {
-      console.error('Error buscando en Turso:', error);
+      console.error('❌ Error buscando datos en MongoDB:', error);
       return [];
     }
   }
@@ -116,387 +121,274 @@ class RAGService {
    * Extrae palabras clave de la pregunta
    */
   extractKeywords(question) {
-    const stopWords = ['el', 'la', 'los', 'las', 'de', 'del', 'a', 'al', 'con', 'por', 'para', 'en', 'es', 'son', 'está', 'están', 'como', 'qué', 'cuál', 'dónde', 'cuándo', 'por qué', 'que', 'cual', 'donde', 'cuando'];
-    
-    return question
-      .split(' ')
-      .filter(word => 
-        word.length > 2 && 
-        !stopWords.includes(word) &&
-        !word.match(/^[0-9]+$/)
-      )
-      .slice(0, 5); // Máximo 5 palabras clave
+    // Palabras comunes a excluir
+    const stopWords = new Set([
+      'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',
+      'y', 'o', 'pero', 'si', 'no', 'que', 'cual', 'como',
+      'cuando', 'donde', 'por', 'para', 'con', 'sin', 'sobre',
+      'entre', 'detras', 'delante', 'encima', 'debajo', 'cerca',
+      'lejos', 'antes', 'despues', 'durante', 'hasta', 'desde',
+      'hacia', 'contra', 'segun', 'mediante', 'excepto', 'ademas',
+      'tambien', 'muy', 'mas', 'menos', 'bien', 'mal', 'asi',
+      'aqui', 'alli', 'ahi', 'este', 'esta', 'estos', 'estas',
+      'ese', 'esa', 'esos', 'esas', 'aquel', 'aquella', 'aquellos', 'aquellas'
+    ]);
+
+    // Extraer palabras y filtrar
+    const words = question
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !stopWords.has(word));
+
+    return [...new Set(words)]; // Eliminar duplicados
   }
 
   /**
-   * Calcula el score de relevancia para un item
+   * Calcula puntuación de relevancia
    */
   calculateRelevanceScore(question, item) {
     const questionLower = question.toLowerCase();
     const titleLower = (item.titulo || '').toLowerCase();
     const contentLower = (item.contenido || '').toLowerCase();
     const codeLower = (item.codigo || '').toLowerCase();
-    
+
     let score = 0;
-    
-    // Coincidencia exacta en título (máxima prioridad)
+
+    // Puntuación por coincidencia exacta en título
     if (titleLower.includes(questionLower)) {
-      score += 20;
+      score += 100;
     }
-    
-    // Coincidencia exacta en código
-    if (codeLower.includes(questionLower)) {
-      score += 15;
-    }
-    
-    // Coincidencia exacta en contenido
-    if (contentLower.includes(questionLower)) {
-      score += 10;
-    }
-    
-    // Coincidencia de palabras clave
-    const keywords = this.extractKeywords(questionLower);
-    keywords.forEach(keyword => {
-      if (titleLower.includes(keyword)) {
-        score += 5;
-      }
-      if (codeLower.includes(keyword)) {
-        score += 3;
-      }
-      if (contentLower.includes(keyword)) {
-        score += 2;
-      }
-    });
-    
-    // Bonus por tipo de contenido
-    score += this.getTypeBonus(item.tipo, questionLower);
-    
-    return Math.min(score, 100);
-  }
 
-  /**
-   * Obtiene bonus por tipo de contenido
-   */
-  getTypeBonus(type, question) {
-    const typeKeywords = {
-      'norma': ['norma', 'iso', 'estándar', 'requisito', 'estandar'],
-      'proceso': ['proceso', 'procedimiento', 'flujo', 'procedimientos'],
-      'indicador': ['indicador', 'kpi', 'métrica', 'medición', 'indicadores'],
-      'auditoria': ['auditoría', 'auditoria', 'auditor', 'auditorias'],
-      'hallazgo': ['hallazgo', 'no conformidad', 'problema', 'hallazgos'],
-      'accion': ['acción', 'accion', 'correctiva', 'preventiva', 'acciones'],
-      'documento': ['documento', 'archivo', 'manual', 'documentos'],
-      'personal': ['personal', 'empleado', 'responsable', 'empleados'],
-      'capacitacion': ['capacitación', 'capacitacion', 'entrenamiento', 'formacion'],
-      'minuta': ['minuta', 'reunión', 'reunion', 'acta', 'minutas']
-    };
+    // Puntuación por palabras clave en título
+    const titleWords = titleLower.split(/\s+/);
+    const questionWords = questionLower.split(/\s+/);
+    const titleMatches = questionWords.filter(word => 
+      titleWords.some(titleWord => titleWord.includes(word))
+    ).length;
+    score += titleMatches * 20;
 
-    const keywords = typeKeywords[type] || [];
-    let bonus = 0;
-    
-    keywords.forEach(keyword => {
-      if (question.includes(keyword)) {
-        bonus += 3;
-      }
-    });
-    
-    return bonus;
+    // Puntuación por contenido
+    const contentMatches = questionWords.filter(word => 
+      contentLower.includes(word)
+    ).length;
+    score += contentMatches * 10;
+
+    // Puntuación por código
+    const codeMatches = questionWords.filter(word => 
+      codeLower.includes(word)
+    ).length;
+    score += codeMatches * 15;
+
+    // Bonus por tipo de documento
+    if (item.tipo === 'procedimiento' || item.tipo === 'instruccion') {
+      score += 5;
+    }
+
+    return Math.min(score, 100); // Máximo 100%
   }
 
   /**
    * Genera respuesta basada en los datos encontrados
    */
   generateResponse(question, topResults, totalResults) {
-    if (!topResults || topResults.length === 0) {
+    if (topResults.length === 0) {
       return {
-        answer: this.generateNoResultsResponse(question),
+        answer: 'Lo siento, no encontré información relevante para tu consulta. Te sugiero reformular la pregunta o contactar al administrador del sistema.',
         confidence: 0,
         sources: []
       };
     }
 
-    // Calcular confianza promedio
-    const avgConfidence = Math.round(
-      topResults.reduce((sum, item) => sum + item.relevance, 0) / topResults.length
-    );
+    // Calcular confianza basada en relevancia promedio
+    const avgRelevance = topResults.reduce((sum, item) => sum + item.relevance, 0) / topResults.length;
+    const confidence = Math.round(avgRelevance);
 
-    // Generar respuesta estructurada
-    const answer = this.buildStructuredAnswer(question, topResults, totalResults);
+    // Generar respuesta
+    let answer = '';
+    const sources = [];
+
+    if (topResults.length === 1) {
+      const result = topResults[0];
+      answer = `Basándome en la información disponible, ${result.titulo}: ${result.contenido}`;
+      sources.push({
+        tipo: result.tipo,
+        titulo: result.titulo,
+        codigo: result.codigo,
+        relevancia: result.relevance
+      });
+    } else {
+      answer = 'Encontré la siguiente información relevante:\n\n';
+      topResults.forEach((result, index) => {
+        answer += `${index + 1}. ${result.titulo}: ${result.contenido}\n\n`;
+        sources.push({
+          tipo: result.tipo,
+          titulo: result.titulo,
+          codigo: result.codigo,
+          relevancia: result.relevance
+        });
+      });
+    }
 
     return {
-      answer: answer,
-      confidence: avgConfidence,
-      sources: topResults.map(item => ({
-        tipo: item.tipo,
-        titulo: item.titulo,
-        codigo: item.codigo,
-        relevancia: item.relevance,
-        contenido: item.contenido.substring(0, 200) + '...'
-      }))
+      answer,
+      confidence,
+      sources
     };
   }
 
   /**
-   * Construye respuesta estructurada
+   * Obtiene estadísticas del sistema RAG
    */
-  buildStructuredAnswer(question, topResults, totalResults) {
-    let answer = "Basándome en la información del Sistema de Gestión de Calidad, aquí tienes lo que encontré:\n\n";
-    
-    // Agrupar por tipo
-    const groupedResults = this.groupByType(topResults);
-    
-    Object.entries(groupedResults).forEach(([type, items]) => {
-      const typeLabel = this.getTypeLabel(type);
-      answer += `**${typeLabel}:**\n`;
+  async getStats(organizationId = null) {
+    try {
+      const collection = this.mongoClient.collection('rag_data');
       
-      items.forEach((item, index) => {
-        answer += `${index + 1}. **${item.titulo}**\n`;
-        answer += `   ${item.contenido}\n`;
-        if (item.codigo && item.codigo !== item.titulo) {
-          answer += `   Código: ${item.codigo}\n`;
-        }
-        answer += `   Relevancia: ${item.relevance}%\n\n`;
-      });
-    });
-
-    // Agregar contexto adicional
-    if (totalResults > topResults.length) {
-      answer += `\n*Nota: Se encontraron ${totalResults} resultados relacionados. `;
-      answer += `Para información más específica, puedes reformular tu pregunta o consultar directamente los módulos correspondientes.*\n\n`;
-    }
-
-    // Agregar sugerencias de seguimiento
-    answer += this.generateFollowUpSuggestions(question, topResults);
-
-    return answer;
-  }
-
-  /**
-   * Agrupa resultados por tipo
-   */
-  groupByType(results) {
-    return results.reduce((groups, item) => {
-      const type = item.tipo;
-      if (!groups[type]) {
-        groups[type] = [];
+      const filter = {};
+      if (organizationId) {
+        filter.organizacion_id = organizationId;
       }
-      groups[type].push(item);
-      return groups;
-    }, {});
-  }
 
-  /**
-   * Obtiene etiqueta legible para tipo
-   */
-  getTypeLabel(type) {
-    const labels = {
-      'accion': 'Acciones Correctivas/Preventivas',
-      'auditoria': 'Auditorías',
-      'capacitacion': 'Capacitaciones',
-      'competencia': 'Competencias',
-      'departamento': 'Departamentos',
-      'documento': 'Documentos',
-      'encuesta': 'Encuestas',
-      'hallazgo': 'Hallazgos',
-      'indicador': 'Indicadores de Calidad',
-      'medicion': 'Mediciones',
-      'minuta': 'Minutas',
-      'norma': 'Normas ISO',
-      'objetivo_calidad': 'Objetivos de Calidad',
-      'personal': 'Personal',
-      'proceso': 'Procesos',
-      'producto': 'Productos',
-      'puesto': 'Puestos'
-    };
-    
-    return labels[type] || type.charAt(0).toUpperCase() + type.slice(1);
-  }
+      const statsQuery = [
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            activos: {
+              $sum: { $cond: [{ $eq: ['$estado', 'activo'] }, 1, 0] }
+            },
+            inactivos: {
+              $sum: { $cond: [{ $eq: ['$estado', 'inactivo'] }, 1, 0] }
+            }
+          }
+        }
+      ];
 
-  /**
-   * Genera respuesta cuando no hay resultados
-   */
-  generateNoResultsResponse(question) {
-    return `Lo siento, no encontré información específica sobre "${question}" en el Sistema de Gestión de Calidad.\n\n` +
-           `**Sugerencias:**\n` +
-           `• Reformula tu pregunta usando términos más generales\n` +
-           `• Consulta directamente los módulos específicos del sistema\n` +
-           `• Verifica que la información que buscas esté registrada en el sistema\n\n` +
-           `**Módulos disponibles:**\n` +
-           `• Auditorías y Hallazgos\n` +
-           `• Indicadores y Mediciones\n` +
-           `• Procesos y Documentos\n` +
-           `• Personal y Capacitaciones\n` +
-           `• Normas ISO 9001\n\n` +
-           `Si necesitas ayuda específica, contacta al administrador del sistema.`;
-  }
-
-  /**
-   * Genera sugerencias de seguimiento
-   */
-  generateFollowUpSuggestions(question, results) {
-    const suggestions = [];
-    
-    // Sugerencias basadas en tipos encontrados
-    const types = [...new Set(results.map(r => r.tipo))];
-    
-    if (types.includes('indicador')) {
-      suggestions.push('• Consultar mediciones recientes de indicadores');
-    }
-    
-    if (types.includes('auditoria')) {
-      suggestions.push('• Revisar hallazgos relacionados');
-    }
-    
-    if (types.includes('proceso')) {
-      suggestions.push('• Verificar documentación del proceso');
-    }
-    
-    if (types.includes('personal')) {
-      suggestions.push('• Consultar capacitaciones del personal');
-    }
-    
-    if (suggestions.length > 0) {
-      return `**Sugerencias de seguimiento:**\n${suggestions.join('\n')}\n\n`;
-    }
-    
-    return '';
-  }
-
-  /**
-   * Obtiene estadísticas del sistema
-   */
-  async getSystemStats(organizationId = 'default') {
-    try {
-      let sql = `
-        SELECT 
-          COUNT(*) as total,
-          tipo,
-          estado
-        FROM rag_data
-        WHERE organizacion_id = ?
-        GROUP BY tipo, estado
-      `;
+      const result = await collection.aggregate(statsQuery).toArray();
       
-      const result = await this.tursoClient.execute(sql, [organizationId]);
-      
-      // Procesar estadísticas
-      const stats = {
+      if (result.length === 0) {
+        return {
+          total: 0,
+          activos: 0,
+          inactivos: 0
+        };
+      }
+
+      return result[0];
+    } catch (error) {
+      console.error('❌ Error obteniendo estadísticas RAG:', error);
+      return {
         total: 0,
-        porTipo: {},
-        porEstado: {}
+        activos: 0,
+        inactivos: 0,
+        error: error.message
       };
-      
-      result.rows?.forEach((row) => {
-        stats.total += row.total;
-        stats.porTipo[row.tipo] = (stats.porTipo[row.tipo] || 0) + row.total;
-        stats.porEstado[row.estado] = (stats.porEstado[row.estado] || 0) + row.total;
-      });
-      
-      return stats;
-    } catch (error) {
-      console.error('Error obteniendo estadísticas:', error);
-      throw error;
     }
   }
 
   /**
-   * Crea la tabla RAG en Turso
+   * Inicializa el sistema RAG con datos de ejemplo
    */
-  async createRAGTable() {
+  async initializeRAGSystem(organizationId = 'default') {
     try {
-      console.log('🔧 Creando tabla RAG en Turso...');
+      console.log('🚀 Inicializando sistema RAG...');
+      
+      const collection = this.mongoClient.collection('rag_data');
+      
+      // Verificar si ya existen datos
+      const existingCount = await collection.countDocuments({ organizacion_id: organizationId });
+      
+      if (existingCount > 0) {
+        console.log(`✅ Sistema RAG ya inicializado con ${existingCount} documentos`);
+        return {
+          success: true,
+          message: `Sistema RAG ya inicializado con ${existingCount} documentos`,
+          existingCount
+        };
+      }
 
-      // SQL para crear la tabla RAG
-      const createTableSQL = `
-        CREATE TABLE IF NOT EXISTS rag_data (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          tipo TEXT NOT NULL,
-          titulo TEXT NOT NULL,
-          codigo TEXT,
-          contenido TEXT NOT NULL,
-          estado TEXT DEFAULT 'activo',
-          organizacion_id TEXT DEFAULT 'default',
-          fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-          fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-          metadata TEXT,
-          relevancia_score REAL DEFAULT 0
-        );
-      `;
+      // Datos de ejemplo para ISO 9001
+      const sampleData = [
+        {
+          organizacion_id: organizationId,
+          tipo: 'procedimiento',
+          titulo: 'Control de Documentos',
+          codigo: 'PROC-001',
+          contenido: 'Este procedimiento establece los requisitos para el control de documentos del sistema de gestión de calidad, incluyendo la identificación, distribución, acceso, recuperación, uso, almacenamiento, preservación, control de cambios y disposición final de los documentos.',
+          estado: 'activo',
+          fecha_creacion: new Date(),
+          fecha_actualizacion: new Date()
+        },
+        {
+          organizacion_id: organizationId,
+          tipo: 'instruccion',
+          titulo: 'Auditorías Internas',
+          codigo: 'INS-002',
+          contenido: 'Las auditorías internas deben realizarse al menos una vez al año para verificar que el sistema de gestión de calidad cumple con los requisitos establecidos y se implementa y mantiene eficazmente.',
+          estado: 'activo',
+          fecha_creacion: new Date(),
+          fecha_actualizacion: new Date()
+        },
+        {
+          organizacion_id: organizationId,
+          tipo: 'formulario',
+          titulo: 'Registro de No Conformidades',
+          codigo: 'FORM-003',
+          contenido: 'Formulario para registrar no conformidades identificadas durante auditorías, inspecciones o quejas de clientes, incluyendo descripción, clasificación, acciones correctivas y seguimiento.',
+          estado: 'activo',
+          fecha_creacion: new Date(),
+          fecha_actualizacion: new Date()
+        }
+      ];
 
-      // Crear índices
-      const createIndexesSQL = `
-        CREATE INDEX IF NOT EXISTS idx_rag_tipo ON rag_data(tipo);
-        CREATE INDEX IF NOT EXISTS idx_rag_titulo ON rag_data(titulo);
-        CREATE INDEX IF NOT EXISTS idx_rag_estado ON rag_data(estado);
-        CREATE INDEX IF NOT EXISTS idx_rag_organizacion ON rag_data(organizacion_id);
-        CREATE INDEX IF NOT EXISTS idx_rag_fecha ON rag_data(fecha_actualizacion);
-      `;
-
-      // Crear trigger
-      const createTriggerSQL = `
-        CREATE TRIGGER IF NOT EXISTS update_rag_timestamp 
-          AFTER UPDATE ON rag_data
-          FOR EACH ROW
-        BEGIN
-          UPDATE rag_data SET fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = NEW.id;
-        END;
-      `;
-
-      // Datos de ejemplo
-      const insertDataSQL = `
-        INSERT OR IGNORE INTO rag_data (tipo, titulo, codigo, contenido, organizacion_id) VALUES
-        ('norma', 'ISO 9001:2015 - Requisitos generales', 'ISO-9001-2015', 'La norma ISO 9001:2015 establece los requisitos para un sistema de gestión de calidad que puede ser utilizado para aplicación interna por las organizaciones, para certificación o con fines contractuales. Esta norma se basa en el ciclo PDCA (Planificar-Hacer-Verificar-Actuar) y el enfoque basado en procesos.', 'default'),
-        ('proceso', 'Proceso de Gestión de Calidad', 'PROC-001', 'Proceso principal que define cómo la organización gestiona la calidad de sus productos y servicios, incluyendo la planificación, implementación, control y mejora continua. Este proceso abarca desde la identificación de requisitos del cliente hasta la entrega del producto o servicio.', 'default'),
-        ('indicador', 'Indicador de Satisfacción del Cliente', 'IND-001', 'Medición de la satisfacción del cliente basada en encuestas y feedback recibido, con objetivo de mantener un nivel superior al 85%. Se calcula mediante encuestas semestrales y feedback continuo de los clientes.', 'default'),
-        ('auditoria', 'Auditoría Interna de Calidad', 'AUD-001', 'Proceso de auditoría interna que verifica el cumplimiento del sistema de gestión de calidad y la efectividad de los procesos implementados. Se realiza trimestralmente y cubre todos los procesos del SGC.', 'default'),
-        ('hallazgo', 'No Conformidad en Documentación', 'HAL-001', 'Hallazgo identificado durante auditoría interna relacionado con documentación desactualizada en el proceso de control de calidad. Se requiere actualización inmediata de procedimientos.', 'default'),
-        ('accion', 'Acción Correctiva - Actualización de Documentos', 'ACC-001', 'Acción correctiva implementada para actualizar toda la documentación del sistema de gestión de calidad y establecer proceso de revisión periódica. Incluye capacitación al personal en nuevos procedimientos.', 'default'),
-        ('documento', 'Manual de Calidad', 'DOC-001', 'Documento principal que describe el sistema de gestión de calidad de la organización, incluyendo políticas, objetivos, estructura organizacional y compromiso de la dirección con la mejora continua.', 'default'),
-        ('personal', 'Responsable de Calidad', 'PER-001', 'Descripción del puesto y responsabilidades del responsable del sistema de gestión de calidad, incluyendo competencias requeridas, formación necesaria y autoridad para tomar decisiones en materia de calidad.', 'default'),
-        ('capacitacion', 'Capacitación en ISO 9001', 'CAP-001', 'Programa de capacitación para todo el personal sobre los requisitos de la norma ISO 9001:2015 y su aplicación en la organización. Incluye formación inicial y actualizaciones periódicas.', 'default'),
-        ('minuta', 'Reunión de Revisión por la Dirección', 'MIN-001', 'Minuta de la reunión mensual de revisión por la dirección donde se analizan los indicadores de calidad, se revisan las acciones correctivas y se toman decisiones de mejora del sistema.', 'default');
-      `;
-
-      // Ejecutar las consultas
-      await this.tursoClient.execute(createTableSQL);
-      await this.tursoClient.execute(createIndexesSQL);
-      await this.tursoClient.execute(createTriggerSQL);
-      await this.tursoClient.execute(insertDataSQL);
-
-      // Verificar que se creó correctamente
-      const result = await this.tursoClient.execute('SELECT COUNT(*) as count FROM rag_data');
-      const count = result.rows?.[0]?.count || 0;
-
-      console.log(`✅ Tabla RAG creada exitosamente con ${count} registros`);
-
+      // Insertar datos de ejemplo
+      const result = await collection.insertMany(sampleData);
+      
+      console.log(`✅ Sistema RAG inicializado con ${result.insertedCount} documentos`);
+      
       return {
         success: true,
-        message: 'Tabla RAG creada exitosamente',
-        recordsCount: count,
-        timestamp: new Date().toISOString()
-      };
-
-    } catch (error) {
-      console.error('❌ Error creando tabla RAG:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Prueba la conectividad con Turso
-   */
-  async testConnection() {
-    try {
-      const result = await this.tursoClient.execute('SELECT COUNT(*) as count FROM rag_data');
-      return {
-        success: true,
-        message: 'Conexión exitosa con Turso',
-        dataCount: result.rows?.[0]?.count || 0
+        message: `Sistema RAG inicializado con ${result.insertedCount} documentos`,
+        insertedCount: result.insertedCount
       };
     } catch (error) {
+      console.error('❌ Error inicializando sistema RAG:', error);
       return {
         success: false,
-        message: 'Error de conectividad con Turso',
+        message: `Error inicializando sistema RAG: ${error.message}`,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Verifica el estado del sistema RAG
+   */
+  async checkRAGStatus(organizationId = null) {
+    try {
+      const collection = this.mongoClient.collection('rag_data');
+      
+      const filter = {};
+      if (organizationId) {
+        filter.organizacion_id = organizationId;
+      }
+
+      const result = await collection.countDocuments(filter);
+      
+      return {
+        success: true,
+        totalDocuments: result,
+        status: result > 0 ? 'active' : 'inactive',
+        message: result > 0 ? 
+          `Sistema RAG activo con ${result} documentos` : 
+          'Sistema RAG inactivo - no hay documentos'
+      };
+    } catch (error) {
+      console.error('❌ Error verificando estado RAG:', error);
+      return {
+        success: false,
+        message: `Error verificando estado RAG: ${error.message}`,
         error: error.message
       };
     }

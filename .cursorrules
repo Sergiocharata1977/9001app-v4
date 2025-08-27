@@ -50,6 +50,6 @@
 - Este es un proyecto de gestión de calidad ISO 9001
 - Backend en Node.js con Express + TypeScript
 - Frontend en React con Vite + TypeScript
-- Base de datos SQLite con Turso
+- Base de datos MongoDB
 - Sistema de autenticación y autorización implementado
 - MIGRACIÓN COMPLETADA: Backend 100% TypeScript, Frontend 80% TypeScript

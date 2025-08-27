@@ -1,4 +1,4 @@
-const RAGService = require('../services/ragService');
+const mongoClient = require('../lib/mongoClient.js');
 
 /**
  * Controlador para el sistema RAG

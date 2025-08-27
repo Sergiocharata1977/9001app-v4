@@ -1,4 +1,4 @@
-import { createClient } from '@libsql/client';
+import { MongoClient } from 'mongodb';
 import OpenAI from 'openai';
 
 interface RAGQuery {
@@ -27,26 +27,23 @@ interface RAGSource {
   contenido: string;
 }
 
-interface TursoConfig {
+interface MongoConfig {
   url: string;
-  authToken: string;
+  database: string;
 }
 
 /**
- * Servicio RAG optimizado para Turso
- * Integra OpenAI con base de datos Turso para respuestas inteligentes
+ * Servicio RAG optimizado para MongoDB
+ * Integra OpenAI con base de datos MongoDB para respuestas inteligentes
  */
-export class TursoRAGService {
-  private tursoClient: any;
+export class MongoRAGService {
+  private mongoClient: any;
   private openai: OpenAI;
-  private config: TursoConfig;
+  private config: MongoConfig;
 
-  constructor(config: TursoConfig, openaiApiKey: string) {
+  constructor(config: MongoConfig, openaiApiKey: string) {
     this.config = config;
-    this.tursoClient = createClient({
-      url: config.url,
-      authToken: config.authToken
-    });
+    this.mongoClient = new MongoClient(config.url);
     
     this.openai = new OpenAI({
       apiKey: openaiApiKey
@@ -58,12 +55,12 @@ export class TursoRAGService {
    */
   async processQuery(query: RAGQuery): Promise<RAGResponse> {
     try {
-      console.log(`🔄 Procesando consulta RAG con Turso: "${query.question}"`);
+      console.log(`🔄 Procesando consulta RAG con MongoDB: "${query.question}"`);
       
       const startTime = Date.now();
       
-      // Paso 1: Buscar datos relevantes en Turso
-      const relevantData = await this.searchTursoData(query.question, query.organizationId);
+      // Paso 1: Buscar datos relevantes en MongoDB
+      const relevantData = await this.searchMongoData(query.question, query.organizationId);
       
       // Paso 2: Calcular relevancia
       const scoredData = relevantData.map(item => ({
@@ -93,15 +90,15 @@ export class TursoRAGService {
       console.log(`✅ Consulta procesada en ${processingTime}ms con confianza ${aiResponse.confidence}%`);
       return result;
     } catch (error) {
-      console.error('❌ Error procesando consulta RAG con Turso:', error);
+      console.error('❌ Error procesando consulta RAG con MongoDB:', error);
       throw error;
     }
   }
 
   /**
-   * Busca datos relevantes en Turso
+   * Busca datos relevantes en MongoDB
    */
-  private async searchTursoData(question: string, organizationId?: string): Promise<any[]> {
+  private async searchMongoData(question: string, organizationId?: string): Promise<any[]> {
     const questionLower = question.toLowerCase();
     const keywords = this.extractKeywords(questionLower);
     
@@ -137,10 +134,10 @@ export class TursoRAGService {
     sql += ` ORDER BY fecha_actualizacion DESC LIMIT 50`;
     
     try {
-      const result = await this.tursoClient.execute(sql, params);
+      const result = await this.mongoClient.execute(sql, params);
       return result.rows || [];
     } catch (error) {
-      console.error('Error buscando en Turso:', error);
+      console.error('Error buscando en MongoDB:', error);
       return [];
     }
   }
@@ -354,7 +351,7 @@ export class TursoRAGService {
       
       sql += ` GROUP BY tipo, estado`;
       
-      const result = await this.tursoClient.execute(sql, params);
+      const result = await this.mongoClient.execute(sql, params);
       
       // Procesar estadísticas
       const stats = {

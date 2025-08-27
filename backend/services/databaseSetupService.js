@@ -1,32 +1,27 @@
-const tursoClient = require('../lib/tursoClient');
+const mongoClient = require('../lib/mongoClient.js');
 
 class DatabaseSetupService {
     constructor() {
-        this.tursoClient = tursoClient;
+        this.mongoClient = mongoClient;
     }
 
     /**
-     * Crear tabla personalizada
+     * Crear colección personalizada
      */
-    async createTable(tableName, columns) {
+    async createCollection(collectionName, options = {}) {
         try {
-            const columnDefinitions = columns.map(col => 
-                `${col.name} ${col.type}${col.primary ? ' PRIMARY KEY' : ''}${col.autoIncrement ? ' AUTOINCREMENT' : ''}${col.notNull ? ' NOT NULL' : ''}${col.unique ? ' UNIQUE' : ''}${col.default ? ` DEFAULT ${col.default}` : ''}`
-            ).join(', ');
-
-            const query = `CREATE TABLE IF NOT EXISTS ${tableName} (${columnDefinitions})`;
+            const db = await this.mongoClient.connect();
+            await db.createCollection(collectionName, options);
             
-            const result = await this.tursoClient.execute(query);
             return {
                 success: true,
-                message: `Tabla ${tableName} creada exitosamente`,
-                result
+                message: `Colección ${collectionName} creada exitosamente`
             };
         } catch (error) {
-            console.error('Error creando tabla:', error);
+            console.error('Error creando colección:', error);
             return {
                 success: false,
-                message: `Error creando tabla ${tableName}: ${error.message}`,
+                message: `Error creando colección ${collectionName}: ${error.message}`,
                 error: error.message
             };
         }
@@ -35,22 +30,20 @@ class DatabaseSetupService {
     /**
      * Crear índice
      */
-    async createIndex(tableName, indexName, columns) {
+    async createIndex(collectionName, indexSpec, options = {}) {
         try {
-            const columnList = Array.isArray(columns) ? columns.join(', ') : columns;
-            const query = `CREATE INDEX IF NOT EXISTS ${indexName} ON ${tableName} (${columnList})`;
+            const collection = this.mongoClient.collection(collectionName);
+            await collection.createIndex(indexSpec, options);
             
-            const result = await this.tursoClient.execute(query);
             return {
                 success: true,
-                message: `Índice ${indexName} creado exitosamente`,
-                result
+                message: `Índice creado exitosamente en ${collectionName}`
             };
         } catch (error) {
             console.error('Error creando índice:', error);
             return {
                 success: false,
-                message: `Error creando índice ${indexName}: ${error.message}`,
+                message: `Error creando índice en ${collectionName}: ${error.message}`,
                 error: error.message
             };
         }
@@ -59,73 +52,149 @@ class DatabaseSetupService {
     /**
      * Insertar datos
      */
-    async insertData(tableName, data) {
+    async insertData(collectionName, data) {
         try {
-            const columns = Object.keys(data);
-            const values = Object.values(data);
-            const placeholders = values.map(() => '?').join(', ');
+            const collection = this.mongoClient.collection(collectionName);
             
-            const query = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
+            // Agregar timestamps si no existen
+            if (!data.created_at) {
+                data.created_at = new Date();
+            }
+            if (!data.updated_at) {
+                data.updated_at = new Date();
+            }
             
-            const result = await this.tursoClient.execute(query, values);
+            const result = await collection.insertOne(data);
+            
             return {
                 success: true,
-                message: `Datos insertados en ${tableName} exitosamente`,
-                result
+                message: `Datos insertados en ${collectionName} exitosamente`,
+                insertedId: result.insertedId
             };
         } catch (error) {
             console.error('Error insertando datos:', error);
             return {
                 success: false,
-                message: `Error insertando datos en ${tableName}: ${error.message}`,
+                message: `Error insertando datos en ${collectionName}: ${error.message}`,
                 error: error.message
             };
         }
     }
 
     /**
-     * Verificar si tabla existe
+     * Insertar múltiples documentos
      */
-    async tableExists(tableName) {
+    async insertMany(collectionName, documents) {
         try {
-            const query = `SELECT name FROM sqlite_master WHERE type='table' AND name=?`;
-            const result = await this.tursoClient.query(query, [tableName]);
+            const collection = this.mongoClient.collection(collectionName);
+            
+            // Agregar timestamps a todos los documentos
+            const documentsWithTimestamps = documents.map(doc => ({
+                ...doc,
+                created_at: doc.created_at || new Date(),
+                updated_at: doc.updated_at || new Date()
+            }));
+            
+            const result = await collection.insertMany(documentsWithTimestamps);
+            
             return {
-                exists: result.length > 0,
                 success: true,
-                message: result.length > 0 ? `Tabla ${tableName} existe` : `Tabla ${tableName} no existe`
+                message: `${result.insertedCount} documentos insertados en ${collectionName}`,
+                insertedIds: result.insertedIds
             };
         } catch (error) {
-            console.error('Error verificando tabla:', error);
+            console.error('Error insertando múltiples documentos:', error);
+            return {
+                success: false,
+                message: `Error insertando documentos en ${collectionName}: ${error.message}`,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Verificar si colección existe
+     */
+    async collectionExists(collectionName) {
+        try {
+            const db = await this.mongoClient.connect();
+            const collections = await db.listCollections({ name: collectionName }).toArray();
+            
+            return {
+                exists: collections.length > 0,
+                success: true,
+                message: collections.length > 0 ? `Colección ${collectionName} existe` : `Colección ${collectionName} no existe`
+            };
+        } catch (error) {
+            console.error('Error verificando colección:', error);
             return {
                 exists: false,
                 success: false,
-                message: `Error verificando tabla ${tableName}: ${error.message}`,
+                message: `Error verificando colección ${collectionName}: ${error.message}`,
                 error: error.message
             };
         }
     }
 
     /**
-     * Obtener estructura de tabla
+     * Obtener estructura de colección (esquema de documentos)
      */
-    async getTableStructure(tableName) {
+    async getCollectionStructure(collectionName) {
         try {
-            const query = `PRAGMA table_info(${tableName})`;
-            const result = await this.tursoClient.query(query);
+            const collection = this.mongoClient.collection(collectionName);
+            const sample = await collection.findOne();
+            
+            if (!sample) {
+                return {
+                    success: true,
+                    structure: {},
+                    message: `Colección ${collectionName} está vacía`
+                };
+            }
+            
+            // Analizar estructura del documento
+            const structure = this.analyzeDocumentStructure(sample);
+            
             return {
                 success: true,
-                structure: result,
-                message: `Estructura de tabla ${tableName} obtenida`
+                structure,
+                message: `Estructura de colección ${collectionName} obtenida`
             };
         } catch (error) {
             console.error('Error obteniendo estructura:', error);
             return {
                 success: false,
-                message: `Error obteniendo estructura de ${tableName}: ${error.message}`,
+                message: `Error obteniendo estructura de ${collectionName}: ${error.message}`,
                 error: error.message
             };
         }
+    }
+
+    /**
+     * Analizar estructura de documento
+     */
+    analyzeDocumentStructure(doc, prefix = '') {
+        const structure = {};
+        
+        for (const [key, value] of Object.entries(doc)) {
+            const fullKey = prefix ? `${prefix}.${key}` : key;
+            
+            if (value === null) {
+                structure[fullKey] = 'null';
+            } else if (Array.isArray(value)) {
+                structure[fullKey] = 'array';
+                if (value.length > 0) {
+                    structure[`${fullKey}[0]`] = typeof value[0];
+                }
+            } else if (typeof value === 'object') {
+                structure[fullKey] = 'object';
+                Object.assign(structure, this.analyzeDocumentStructure(value, fullKey));
+            } else {
+                structure[fullKey] = typeof value;
+            }
+        }
+        
+        return structure;
     }
 
     /**
@@ -134,116 +203,55 @@ class DatabaseSetupService {
     async setupCRM() {
         const results = [];
 
-        // Verificar tablas existentes antes de crear
-        const tablesToCheck = ['clientes_agro', 'oportunidades_agro', 'contactos', 'crm_analisis_riesgo'];
+        // Verificar colecciones existentes antes de crear
+        const collectionsToCheck = ['clientes_agro', 'oportunidades_agro', 'contactos', 'crm_analisis_riesgo'];
         
-        for (const tableName of tablesToCheck) {
-            const exists = await this.tableExists(tableName);
+        for (const collectionName of collectionsToCheck) {
+            const exists = await this.collectionExists(collectionName);
             if (exists.exists) {
-                console.log(`✅ Tabla ${tableName} ya existe, saltando creación`);
+                console.log(`✅ Colección ${collectionName} ya existe, saltando creación`);
                 results.push({
                     success: true,
-                    message: `Tabla ${tableName} ya existe`,
+                    message: `Colección ${collectionName} ya existe`,
                     skipped: true
                 });
                 continue;
             }
         }
 
-        // 1. Crear tabla clientes_agro (solo si no existe)
-        const clientesExists = await this.tableExists('clientes_agro');
+        // 1. Crear colección clientes_agro (solo si no existe)
+        const clientesExists = await this.collectionExists('clientes_agro');
         if (!clientesExists.exists) {
-            const clientesColumns = [
-                { name: 'id', type: 'INTEGER', primary: true, autoIncrement: true },
-                { name: 'nombre', type: 'TEXT', notNull: true },
-                { name: 'tipo_cliente', type: 'TEXT', notNull: true },
-                { name: 'sector', type: 'TEXT' },
-                { name: 'tamanio', type: 'TEXT' },
-                { name: 'ubicacion', type: 'TEXT' },
-                { name: 'contacto_principal', type: 'TEXT' },
-                { name: 'telefono', type: 'TEXT' },
-                { name: 'email', type: 'TEXT' },
-                { name: 'estado', type: 'TEXT', default: "'Activo'" },
-                { name: 'fecha_registro', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
-                { name: 'notas', type: 'TEXT' }
-            ];
-            results.push(await this.createTable('clientes_agro', clientesColumns));
+            results.push(await this.createCollection('clientes_agro'));
         }
 
-        // 2. Crear tabla oportunidades_agro (solo si no existe)
-        const oportunidadesExists = await this.tableExists('oportunidades_agro');
+        // 2. Crear colección oportunidades_agro (solo si no existe)
+        const oportunidadesExists = await this.collectionExists('oportunidades_agro');
         if (!oportunidadesExists.exists) {
-            const oportunidadesColumns = [
-                { name: 'id', type: 'INTEGER', primary: true, autoIncrement: true },
-                { name: 'cliente_id', type: 'INTEGER', notNull: true },
-                { name: 'titulo', type: 'TEXT', notNull: true },
-                { name: 'descripcion', type: 'TEXT' },
-                { name: 'valor_estimado', type: 'REAL' },
-                { name: 'etapa', type: 'TEXT', notNull: true },
-                { name: 'probabilidad', type: 'INTEGER' },
-                { name: 'fecha_cierre_esperada', type: 'DATE' },
-                { name: 'fuente', type: 'TEXT' },
-                { name: 'estado', type: 'TEXT', default: "'Activa'" },
-                { name: 'fecha_creacion', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
-                { name: 'notas', type: 'TEXT' }
-            ];
-            results.push(await this.createTable('oportunidades_agro', oportunidadesColumns));
+            results.push(await this.createCollection('oportunidades_agro'));
         }
 
-        // 3. Crear tabla contactos (solo si no existe)
-        const contactosExists = await this.tableExists('contactos');
+        // 3. Crear colección contactos (solo si no existe)
+        const contactosExists = await this.collectionExists('contactos');
         if (!contactosExists.exists) {
-            const contactosColumns = [
-                { name: 'id', type: 'INTEGER', primary: true, autoIncrement: true },
-                { name: 'cliente_id', type: 'INTEGER', notNull: true },
-                { name: 'nombre', type: 'TEXT', notNull: true },
-                { name: 'cargo', type: 'TEXT' },
-                { name: 'telefono', type: 'TEXT' },
-                { name: 'email', type: 'TEXT' },
-                { name: 'tipo_contacto', type: 'TEXT' },
-                { name: 'es_decision_maker', type: 'BOOLEAN', default: '0' },
-                { name: 'fecha_registro', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
-                { name: 'notas', type: 'TEXT' }
-            ];
-            results.push(await this.createTable('contactos', contactosColumns));
+            results.push(await this.createCollection('contactos'));
         }
 
-        // 4. Crear tabla crm_analisis_riesgo (solo si no existe)
-        const analisisRiesgoExists = await this.tableExists('crm_analisis_riesgo');
+        // 4. Crear colección crm_analisis_riesgo (solo si no existe)
+        const analisisRiesgoExists = await this.collectionExists('crm_analisis_riesgo');
         if (!analisisRiesgoExists.exists) {
-            const analisisRiesgoColumns = [
-                { name: 'id', type: 'INTEGER', primary: true, autoIncrement: true },
-                { name: 'organization_id', type: 'TEXT', notNull: true },
-                { name: 'cliente_id', type: 'INTEGER', notNull: true },
-                { name: 'fecha_analisis', type: 'DATE', notNull: true },
-                { name: 'periodo_analisis', type: 'TEXT', notNull: true },
-                { name: 'puntaje_riesgo', type: 'INTEGER', notNull: true },
-                { name: 'categoria_riesgo', type: 'TEXT', notNull: true },
-                { name: 'capacidad_pago', type: 'REAL', default: '0' },
-                { name: 'ingresos_mensuales', type: 'REAL', default: '0' },
-                { name: 'gastos_mensuales', type: 'REAL', default: '0' },
-                { name: 'margen_utilidad', type: 'REAL', default: '0' },
-                { name: 'liquidez', type: 'REAL', default: '0' },
-                { name: 'solvencia', type: 'REAL', default: '0' },
-                { name: 'endeudamiento', type: 'REAL', default: '0' },
-                { name: 'recomendaciones', type: 'TEXT' },
-                { name: 'observaciones', type: 'TEXT' },
-                { name: 'estado', type: 'TEXT', default: "'identificado'" },
-                { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
-                { name: 'updated_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
-                { name: 'created_by', type: 'TEXT' },
-                { name: 'updated_by', type: 'TEXT' },
-                { name: 'is_active', type: 'INTEGER', default: '1' }
-            ];
-            results.push(await this.createTable('crm_analisis_riesgo', analisisRiesgoColumns));
+            results.push(await this.createCollection('crm_analisis_riesgo'));
         }
 
         // 5. Crear índices
-        results.push(await this.createIndex('clientes_agro', 'idx_clientes_nombre', 'nombre'));
-        results.push(await this.createIndex('oportunidades_agro', 'idx_oportunidades_cliente', 'cliente_id'));
-        results.push(await this.createIndex('contactos', 'idx_contactos_cliente', 'cliente_id'));
-        results.push(await this.createIndex('crm_analisis_riesgo', 'idx_analisis_cliente', 'cliente_id'));
-        results.push(await this.createIndex('crm_analisis_riesgo', 'idx_analisis_fecha', 'fecha_analisis'));
+        results.push(await this.createIndex('clientes_agro', { nombre: 1 }));
+        results.push(await this.createIndex('clientes_agro', { tipo_cliente: 1 }));
+        results.push(await this.createIndex('oportunidades_agro', { cliente_id: 1 }));
+        results.push(await this.createIndex('oportunidades_agro', { etapa: 1 }));
+        results.push(await this.createIndex('contactos', { cliente_id: 1 }));
+        results.push(await this.createIndex('crm_analisis_riesgo', { cliente_id: 1 }));
+        results.push(await this.createIndex('crm_analisis_riesgo', { fecha_analisis: 1 }));
+        results.push(await this.createIndex('crm_analisis_riesgo', { organization_id: 1 }));
 
         return {
             success: results.every(r => r.success),
@@ -269,7 +277,8 @@ class DatabaseSetupService {
                 contacto_principal: 'Juan Pérez',
                 telefono: '+54 11 1234-5678',
                 email: 'juan.perez@agronorte.com',
-                notas: 'Gran productor de maíz, 2500 hectáreas'
+                notas: 'Gran productor de maíz, 2500 hectáreas',
+                estado: 'Activo'
             },
             {
                 nombre: 'Hortalizas Frescas del Valle',
@@ -280,7 +289,8 @@ class DatabaseSetupService {
                 contacto_principal: 'María González',
                 telefono: '+54 11 2345-6789',
                 email: 'maria@hortalizasvalle.com',
-                notas: 'Productor de hortalizas, 150 hectáreas'
+                notas: 'Productor de hortalizas, 150 hectáreas',
+                estado: 'Activo'
             },
             {
                 nombre: 'Cooperativa Campesina Unidos',
@@ -291,13 +301,12 @@ class DatabaseSetupService {
                 contacto_principal: 'Carlos Rodríguez',
                 telefono: '+54 11 3456-7890',
                 email: 'carlos@coopunidos.org',
-                notas: 'Cooperativa con 25 socios, 500 hectáreas'
+                notas: 'Cooperativa con 25 socios, 500 hectáreas',
+                estado: 'Activo'
             }
         ];
 
-        for (const cliente of clientes) {
-            results.push(await this.insertData('clientes_agro', cliente));
-        }
+        results.push(await this.insertMany('clientes_agro', clientes));
 
         // Datos de oportunidades
         const oportunidades = [
@@ -308,9 +317,10 @@ class DatabaseSetupService {
                 valor_estimado: 2500000,
                 etapa: 'Negociación',
                 probabilidad: 75,
-                fecha_cierre_esperada: '2024-06-30',
+                fecha_cierre_esperada: new Date('2024-06-30'),
                 fuente: 'Referencia',
-                notas: 'Proyecto de alta prioridad para el cliente'
+                notas: 'Proyecto de alta prioridad para el cliente',
+                estado: 'Activa'
             },
             {
                 cliente_id: 2,
@@ -319,20 +329,54 @@ class DatabaseSetupService {
                 valor_estimado: 450000,
                 etapa: 'Propuesta Técnica',
                 probabilidad: 60,
-                fecha_cierre_esperada: '2024-05-15',
+                fecha_cierre_esperada: new Date('2024-05-15'),
                 fuente: 'Feria Agrícola',
-                notas: 'Cliente interesado en productos orgánicos'
+                notas: 'Cliente interesado en productos orgánicos',
+                estado: 'Activa'
             }
         ];
 
-        for (const oportunidad of oportunidades) {
-            results.push(await this.insertData('oportunidades_agro', oportunidad));
-        }
+        results.push(await this.insertMany('oportunidades_agro', oportunidades));
 
         return {
             success: results.every(r => r.success),
             results,
             message: 'Datos de ejemplo CRM insertados'
+        };
+    }
+
+    /**
+     * Configurar índices para todas las colecciones principales
+     */
+    async setupIndexes() {
+        const results = [];
+
+        // Índices para usuarios
+        results.push(await this.createIndex('users', { email: 1 }, { unique: true }));
+        results.push(await this.createIndex('users', { organization_id: 1 }));
+
+        // Índices para acciones
+        results.push(await this.createIndex('acciones', { organization_id: 1 }));
+        results.push(await this.createIndex('acciones', { estado: 1 }));
+        results.push(await this.createIndex('acciones', { created_at: -1 }));
+
+        // Índices para hallazgos
+        results.push(await this.createIndex('hallazgos', { organization_id: 1 }));
+        results.push(await this.createIndex('hallazgos', { estado: 1 }));
+        results.push(await this.createIndex('hallazgos', { created_at: -1 }));
+
+        // Índices para auditorias
+        results.push(await this.createIndex('auditorias', { organization_id: 1 }));
+        results.push(await this.createIndex('auditorias', { fecha: -1 }));
+
+        // Índices para procesos
+        results.push(await this.createIndex('procesos', { organization_id: 1 }));
+        results.push(await this.createIndex('procesos', { estado: 1 }));
+
+        return {
+            success: results.every(r => r.success),
+            results,
+            message: 'Índices configurados exitosamente'
         };
     }
 }

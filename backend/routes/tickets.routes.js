@@ -1,7 +1,8 @@
 const express = require('express');
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
 const { ensureTenant, secureQuery, logTenantOperation, checkPermission } = require('../middleware/tenantMiddleware.js');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(ensureTenant);
 
-const TABLE_NAME = 'tickets';
+const COLLECTION_NAME = 'tickets';
 
 // @route   GET api/tickets
 // @desc    Obtener todos los tickets de la organización
@@ -17,16 +18,17 @@ const TABLE_NAME = 'tickets';
 router.get('/', async (req, res, next) => {
   try {
     const query = secureQuery(req);
+    const collection = mongoClient.collection(COLLECTION_NAME);
     
-    const result = await tursoClient.execute({
-      sql: `SELECT * FROM ${TABLE_NAME} WHERE ${query.where()} ORDER BY created_at DESC`,
-      args: query.args()
-    });
+    const result = await collection.find(
+      { organization_id: query.organizationId },
+      { sort: { created_at: -1 } }
+    ).toArray();
 
-    const tickets = result.rows.map(ticket => ({
+    const tickets = result.map(ticket => ({
       ...ticket,
-      comentarios: ticket.comentarios ? JSON.parse(ticket.comentarios) : [],
-      archivos: ticket.archivos ? JSON.parse(ticket.archivos) : [],
+      comentarios: ticket.comentarios || [],
+      archivos: ticket.archivos || [],
     }));
 
     logTenantOperation(req, 'GET_TICKETS', { count: tickets.length });
@@ -55,27 +57,23 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ message: 'Los campos "titulo" y "descripcion" son obligatorios.' });
     }
 
+    const collection = mongoClient.collection(COLLECTION_NAME);
+
     // Agregar organization_id a los datos del ticket
     const ticketWithOrg = {
+      id: crypto.randomUUID(),
       ...newTicketData,
       organization_id: query.organizationId,
       created_by: req.user.id,
-      created_at: new Date().toISOString()
+      created_at: new Date(),
+      updated_at: new Date(),
+      comentarios: newTicketData.comentarios || [],
+      archivos: newTicketData.archivos || []
     };
 
-    // Preparar los datos para la inserción
-    const keys = Object.keys(ticketWithOrg);
-    const values = Object.values(ticketWithOrg);
+    const result = await collection.insertOne(ticketWithOrg);
     
-    const placeholders = keys.map(() => '?').join(', ');
-    const fieldsString = keys.join(', ');
-    
-    const result = await tursoClient.execute({
-      sql: `INSERT INTO ${TABLE_NAME} (${fieldsString}) VALUES (${placeholders}) RETURNING *`,
-      args: values
-    });
-    
-    const createdTicket = result.rows[0];
+    const createdTicket = { ...ticketWithOrg, _id: result.insertedId };
     
     logTenantOperation(req, 'CREATE_TICKET', { ticketId: createdTicket.id, titulo: newTicketData.titulo });
     console.log('Ticket creado y guardado en la base de datos:', createdTicket);
@@ -93,30 +91,33 @@ router.get('/:id', async (req, res, next) => {
   const { id } = req.params;
   try {
     const query = secureQuery(req);
+    const collection = mongoClient.collection(COLLECTION_NAME);
     
-    const result = await tursoClient.execute({
-      sql: `SELECT * FROM ${TABLE_NAME} WHERE id = ? AND ${query.where()}`,
-      args: [id, ...query.args()]
+    const result = await collection.findOne({
+      id: id,
+      organization_id: query.organizationId
     });
 
-    if (result.rows.length === 0) {
+    if (!result) {
       return res.status(404).json({ message: 'Ticket no encontrado' });
     }
 
-    const ticket = result.rows[0];
-    ticket.comentarios = ticket.comentarios ? JSON.parse(ticket.comentarios) : [];
-    ticket.archivos = ticket.archivos ? JSON.parse(ticket.archivos) : [];
+    const ticket = {
+      ...result,
+      comentarios: result.comentarios || [],
+      archivos: result.archivos || []
+    };
 
     logTenantOperation(req, 'GET_TICKET', { ticketId: id });
     res.json(ticket);
   } catch (error) {
-    console.error(`Error al obtener el ticket ${id}:`, error);
+    console.error('Error al obtener ticket desde la base de datos:', error);
     next(error);
   }
 });
 
 // @route   PUT api/tickets/:id
-// @desc    Actualizar un ticket (solo de la organización)
+// @desc    Actualizar un ticket por ID (solo de la organización)
 // @access  Private
 router.put('/:id', async (req, res, next) => {
   const { id } = req.params;
@@ -126,59 +127,79 @@ router.put('/:id', async (req, res, next) => {
     }
 
     const query = secureQuery(req);
-    const updateData = {
-      ...req.body,
-      updated_at: new Date().toISOString(),
-      updated_by: req.user.id
-    };
-
-    // Preparar los datos para la actualización
-    const keys = Object.keys(updateData);
-    const values = Object.values(updateData);
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
+    const collection = mongoClient.collection(COLLECTION_NAME);
     
-    const result = await tursoClient.execute({
-      sql: `UPDATE ${TABLE_NAME} SET ${setClause} WHERE id = ? AND ${query.where()} RETURNING *`,
-      args: [...values, id, ...query.args()]
+    // Verificar que el ticket existe y pertenece a la organización
+    const existingTicket = await collection.findOne({
+      id: id,
+      organization_id: query.organizationId
     });
 
-    if (result.rows.length === 0) {
+    if (!existingTicket) {
       return res.status(404).json({ message: 'Ticket no encontrado' });
     }
 
+    // Preparar datos para actualización
+    const updateData = {
+      ...req.body,
+      updated_at: new Date()
+    };
+
+    // Mantener campos que no deben actualizarse
+    delete updateData.id;
+    delete updateData.organization_id;
+    delete updateData.created_by;
+    delete updateData.created_at;
+
+    const result = await collection.updateOne(
+      { id: id, organization_id: query.organizationId },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Ticket no encontrado' });
+    }
+
+    // Obtener el ticket actualizado
+    const updatedTicket = await collection.findOne({
+      id: id,
+      organization_id: query.organizationId
+    });
+
     logTenantOperation(req, 'UPDATE_TICKET', { ticketId: id });
-    res.json(result.rows[0]);
+    res.json(updatedTicket);
   } catch (error) {
-    console.error(`Error al actualizar el ticket ${id}:`, error);
+    console.error('Error al actualizar ticket en la base de datos:', error);
     next(error);
   }
 });
 
 // @route   DELETE api/tickets/:id
-// @desc    Eliminar un ticket (solo de la organización)
+// @desc    Eliminar un ticket por ID (solo de la organización)
 // @access  Private
 router.delete('/:id', async (req, res, next) => {
   const { id } = req.params;
   try {
-    if (!checkPermission(req, 'manager')) {
-      return res.status(403).json({ error: 'Permisos insuficientes - se requiere rol manager o superior' });
+    if (!checkPermission(req, 'admin')) {
+      return res.status(403).json({ error: 'Permisos insuficientes' });
     }
 
     const query = secureQuery(req);
+    const collection = mongoClient.collection(COLLECTION_NAME);
     
-    const result = await tursoClient.execute({
-      sql: `DELETE FROM ${TABLE_NAME} WHERE id = ? AND ${query.where()}`,
-      args: [id, ...query.args()]
+    const result = await collection.deleteOne({
+      id: id,
+      organization_id: query.organizationId
     });
 
-    if (result.changes === 0) {
+    if (result.deletedCount === 0) {
       return res.status(404).json({ message: 'Ticket no encontrado' });
     }
 
     logTenantOperation(req, 'DELETE_TICKET', { ticketId: id });
-    res.status(204).send();
+    res.json({ message: 'Ticket eliminado exitosamente' });
   } catch (error) {
-    console.error(`Error al eliminar el ticket ${id}:`, error);
+    console.error('Error al eliminar ticket de la base de datos:', error);
     next(error);
   }
 });

@@ -1,6 +1,7 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import jwt from 'jsonwebtoken';
 
 // Importar middleware de autenticación
 import authMiddleware from '../middleware/authMiddleware.js';
@@ -15,43 +16,43 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Importar rutas
+import accionesRoutes from '../routes/acciones.routes.js';
+import adminRoutes from '../routes/admin.routes.js';
+import auditoriasRoutes from '../routes/auditorias.routes.js';
 import authRoutes from '../routes/authRoutes.js';
-import userRoutes from '../routes/userRoutes.js';
-import departamentosRoutes from '../routes/departamentos.routes.js';
-import personalRoutes from '../routes/personal.routes.js';
-import puestosRoutes from '../routes/puestos.routes.js';
 import capacitacionesRoutes from '../routes/capacitaciones.routes.js';
 import competenciasRoutes from '../routes/competencias.routes.js';
-import documentosRoutes from '../routes/documentos.routes.js';
-import normasRoutes from '../routes/normas.routes.js';
-import procesosRoutes from '../routes/procesos.routes.js';
-import objetivosCalidadRoutes from '../routes/objetivos-calidad.routes.js';
-import indicadoresRoutes from '../routes/indicadores.routes.js';
-import medicionesRoutes from '../routes/mediciones.routes.js';
-import hallazgosRoutes from '../routes/hallazgos.routes.js';
-import accionesRoutes from '../routes/acciones.routes.js';
-import auditoriasRoutes from '../routes/auditorias.routes.js';
-import productosRoutes from '../routes/productos.routes.js';
-import minutasRoutes from '../routes/minutas.routes.js';
-import politicaCalidadRoutes from '../routes/politica-calidad.routes.js';
-import eventsRoutes from '../routes/events.routes.js';
-import adminRoutes from '../routes/admin.routes.js';
-import planesRoutes from '../routes/planes.js';
-import suscripcionesRoutes from '../routes/suscripciones.js';
 import coordinacionRoutes from '../routes/coordinacion.routes.js';
 import crmRoutes from '../routes/crm.routes.js';
 import databaseRoutes from '../routes/database.routes.js';
+import departamentosRoutes from '../routes/departamentos.routes.js';
+import documentosRoutes from '../routes/documentos.routes.js';
+import eventsRoutes from '../routes/events.routes.js';
 import fileStructureRoutes from '../routes/fileStructure.routes.js';
+import hallazgosRoutes from '../routes/hallazgos.routes.js';
+import indicadoresRoutes from '../routes/indicadores.routes.js';
+import medicionesRoutes from '../routes/mediciones.routes.js';
+import minutasRoutes from '../routes/minutas.routes.js';
+import normasRoutes from '../routes/normas.routes.js';
+import objetivosCalidadRoutes from '../routes/objetivos-calidad.routes.js';
+import personalRoutes from '../routes/personal.routes.js';
+import planesRoutes from '../routes/planes.js';
+import politicaCalidadRoutes from '../routes/politica-calidad.routes.js';
+import procesosRoutes from '../routes/procesos.routes.js';
+import productosRoutes from '../routes/productos.routes.js';
+import puestosRoutes from '../routes/puestos.routes.js';
+import suscripcionesRoutes from '../routes/suscripciones.js';
+import userRoutes from '../routes/userRoutes.js';
 
-// Importar rutas RAG del nuevo sistema
-let ragRoutes: any = null;
-try {
-  ragRoutes = require('../RAG-System/routes/ragRoutes.js');
-  console.log('✅ Nuevo sistema RAG cargado correctamente');
-} catch (error: any) {
-  console.log('⚠️  Nuevo módulo RAG no encontrado, continuando sin RAG...');
-  console.log('Error:', error.message);
-}
+// Importar rutas RAG del nuevo sistema - COMENTADO TEMPORALMENTE
+// let ragRoutes: any = null;
+// try {
+//   ragRoutes = require('../RAG-System/routes/ragRoutes.js');
+//   console.log('✅ Nuevo sistema RAG cargado correctamente');
+// } catch (error: any) {
+//   console.log('⚠️  Nuevo módulo RAG no encontrado, continuando sin RAG...');
+//   console.log('Error:', error.message);
+// }
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -131,23 +132,57 @@ app.use('/api/database', databaseRoutes);
 // Rutas de estructura de archivos
 app.use('/api/file-structure', fileStructureRoutes);
 
-// Rutas de RAG (si está disponible)
-if (ragRoutes) {
-  app.use('/api/rag', ragRoutes);
-  console.log('✅ Rutas RAG registradas');
-}
+// Rutas de RAG (si está disponible) - COMENTADO TEMPORALMENTE
+// if (ragRoutes) {
+//   app.use('/api/rag', ragRoutes);
+//   console.log('✅ Rutas RAG registradas');
+// }
 
 // Rutas de productos (requieren autenticación)
 app.use('/api/productos', authMiddleware, productosRoutes);
 
-// ===== SISTEMAS ALTERNATIVOS DE BÚSQUEDA =====
-import alternativeSearchRoutes from '../routes/alternativeSearch.routes.js';
-app.use('/api/alternative', alternativeSearchRoutes);
+// ===== SISTEMAS ALTERNATIVOS DE BÚSQUEDA ===== - COMENTADO TEMPORALMENTE
+// import alternativeSearchRoutes from '../routes/alternativeSearch.routes.js';
+// app.use('/api/alternative', alternativeSearchRoutes);
 // ===== FIN SISTEMAS ALTERNATIVOS =====
 
 // Ruta de prueba
 app.get('/api/test', (req: Request, res: Response) => {
   res.json({ message: 'Backend funcionando correctamente!' });
+});
+
+// RUTA DE BYPASS TEMPORAL PARA DESARROLLO
+app.get('/api/dev/bypass', (req: Request, res: Response) => {
+  const mockUser = {
+    id: 1,
+    email: 'admin@9001app.com',
+    role: 'admin',
+    organization_id: 1,
+    organization_name: '9001app Demo',
+    organization_plan: 'premium'
+  };
+
+  const accessToken = jwt.sign(
+    { 
+      userId: mockUser.id, 
+      organizationId: mockUser.organization_id, 
+      role: mockUser.role 
+    },
+    process.env.JWT_SECRET || 'fallback-secret',
+    { expiresIn: '24h' }
+  );
+
+  res.json({
+    success: true,
+    message: 'Bypass de desarrollo activado',
+    data: {
+      user: mockUser,
+      tokens: {
+        accessToken,
+        refreshToken: 'dev-bypass-token'
+      }
+    }
+  });
 });
 
 // Ruta de salud

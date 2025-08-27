@@ -118,7 +118,7 @@ export class AgentHierarchyManager {
     console.log(chalk.blue.bold('🔒 AUDITORÍA DE SEGURIDAD'));
     
     const checks = [
-      'Verificar TursoClient',
+      'Verificar MongoClient',
       'Validar variables de entorno',
       'Revisar middleware de autenticación'
     ];

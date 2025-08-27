@@ -1,4 +1,4 @@
-const turso = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 
 // Obtener todas las programaciones de evaluación de una organización
 const getProgramaciones = async (req, res) => {

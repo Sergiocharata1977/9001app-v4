@@ -1,6 +1,7 @@
 const express = require('express');
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -18,21 +19,29 @@ router.get('/', async (req, res) => {
 
     console.log(`🔍 Obteniendo usuarios para organización: ${organization_id}`);
 
-    const result = await tursoClient.execute({
-      sql: `SELECT 
-        id, name, email, role, organization_id, created_at, updated_at
-        FROM usuarios 
-        WHERE organization_id = ?
-        ORDER BY name ASC`,
-      args: [organization_id]
-    });
+    const collection = mongoClient.collection('usuarios');
+    const result = await collection.find(
+      { organization_id: organization_id },
+      {
+        projection: {
+          id: 1,
+          name: 1,
+          email: 1,
+          role: 1,
+          organization_id: 1,
+          created_at: 1,
+          updated_at: 1
+        },
+        sort: { name: 1 }
+      }
+    ).toArray();
 
-    console.log(`✅ Encontrados ${result.rows.length} usuarios para organización ${organization_id}`);
+    console.log(`✅ Encontrados ${result.length} usuarios para organización ${organization_id}`);
 
     res.json({
       success: true,
-      data: result.rows,
-      total: result.rows.length
+      data: result,
+      total: result.length
     });
 
   } catch (error) {
@@ -58,15 +67,26 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    const result = await tursoClient.execute({
-      sql: `SELECT 
-        id, name, email, role, organization_id, created_at, updated_at
-        FROM usuarios 
-        WHERE id = ? AND organization_id = ?`,
-      args: [id, organization_id]
-    });
+    const collection = mongoClient.collection('usuarios');
+    const result = await collection.findOne(
+      { 
+        id: id, 
+        organization_id: organization_id 
+      },
+      {
+        projection: {
+          id: 1,
+          name: 1,
+          email: 1,
+          role: 1,
+          organization_id: 1,
+          created_at: 1,
+          updated_at: 1
+        }
+      }
+    );
 
-    if (result.rows.length === 0) {
+    if (!result) {
       return res.status(404).json({
         success: false,
         message: 'Usuario no encontrado'
@@ -75,7 +95,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({
       success: true,
-      data: result.rows[0]
+      data: result
     });
 
   } catch (error) {
@@ -107,46 +127,54 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Validar campos requeridos
     if (!nombre || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'nombre, email y password son campos requeridos'
+        message: 'Los campos nombre, email y password son obligatorios.'
       });
     }
+
+    const collection = mongoClient.collection('usuarios');
 
     // Verificar si el email ya existe
-    const existingResult = await tursoClient.execute({
-      sql: 'SELECT id FROM usuarios WHERE email = ? AND organization_id = ?',
-      args: [email, organization_id]
+    const existingResult = await collection.findOne({ 
+      email: email,
+      organization_id: organization_id
     });
 
-    if (existingResult.rows.length > 0) {
+    if (existingResult) {
       return res.status(400).json({
         success: false,
-        message: 'El email ya está registrado'
+        message: 'Ya existe un usuario con ese email en la organización.'
       });
     }
 
-    // Hash de la contraseña (simplificado por ahora)
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash de la contraseña
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const result = await tursoClient.execute({
-      sql: `INSERT INTO usuarios (
-        nombre, email, password, role, organization_id, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-      RETURNING *`,
-      args: [nombre, email, hashedPassword, role, organization_id]
-    });
+    // Crear nuevo usuario
+    const nuevoUsuario = {
+      id: crypto.randomUUID(),
+      name: nombre,
+      email: email,
+      password: hashedPassword,
+      role: role,
+      organization_id: organization_id,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
 
-    console.log(`✅ Usuario creado con ID: ${result.rows[0].id}`);
+    const result = await collection.insertOne(nuevoUsuario);
 
-    // No devolver la contraseña
-    const { password: _, ...userData } = result.rows[0];
+    // Retornar usuario sin contraseña
+    const { password: _, ...usuarioSinPassword } = nuevoUsuario;
 
     res.status(201).json({
       success: true,
-      data: userData,
-      message: 'Usuario creado exitosamente'
+      message: 'Usuario creado exitosamente',
+      data: usuarioSinPassword
     });
 
   } catch (error) {
@@ -166,6 +194,7 @@ router.put('/:id', async (req, res) => {
     const {
       nombre,
       email,
+      password,
       role
     } = req.body;
 
@@ -178,36 +207,88 @@ router.put('/:id', async (req, res) => {
       });
     }
 
-    // Verificar que el usuario existe y pertenece a la organización
-    const existingResult = await tursoClient.execute({
-      sql: 'SELECT id FROM usuarios WHERE id = ? AND organization_id = ?',
-      args: [id, organization_id]
+    const collection = mongoClient.collection('usuarios');
+
+    // Verificar si el usuario existe
+    const existingResult = await collection.findOne({ 
+      id: id,
+      organization_id: organization_id
     });
 
-    if (existingResult.rows.length === 0) {
+    if (!existingResult) {
       return res.status(404).json({
         success: false,
         message: 'Usuario no encontrado'
       });
     }
 
-    const result = await tursoClient.execute({
-      sql: `UPDATE usuarios SET 
-        nombre = ?, email = ?, role = ?, updated_at = datetime('now')
-        WHERE id = ? AND organization_id = ?
-        RETURNING *`,
-      args: [nombre, email, role, id, organization_id]
-    });
+    // Preparar datos para actualización
+    const updateData = {
+      updated_at: new Date()
+    };
 
-    console.log(`✅ Usuario ${id} actualizado`);
+    if (nombre) updateData.name = nombre;
+    if (email) updateData.email = email;
+    if (role) updateData.role = role;
 
-    // No devolver la contraseña
-    const { password: _, ...userData } = result.rows[0];
+    // Si se proporciona nueva contraseña, hashearla
+    if (password) {
+      const saltRounds = 10;
+      updateData.password = await bcrypt.hash(password, saltRounds);
+    }
+
+    // Verificar si el email ya existe en otro usuario
+    if (email && email !== existingResult.email) {
+      const emailExists = await collection.findOne({ 
+        email: email,
+        organization_id: organization_id,
+        id: { $ne: id }
+      });
+
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Ya existe un usuario con ese email en la organización.'
+        });
+      }
+    }
+
+    // Actualizar usuario
+    const result = await collection.updateOne(
+      { 
+        id: id,
+        organization_id: organization_id
+      },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    // Obtener usuario actualizado
+    const updatedUser = await collection.findOne(
+      { id: id },
+      {
+        projection: {
+          id: 1,
+          name: 1,
+          email: 1,
+          role: 1,
+          organization_id: 1,
+          created_at: 1,
+          updated_at: 1
+        }
+      }
+    );
 
     res.json({
       success: true,
-      data: userData,
-      message: 'Usuario actualizado exitosamente'
+      message: 'Usuario actualizado exitosamente',
+      data: updatedUser
     });
 
   } catch (error) {
@@ -233,25 +314,48 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    // Verificar que el usuario existe y pertenece a la organización
-    const existingResult = await tursoClient.execute({
-      sql: 'SELECT id FROM usuarios WHERE id = ? AND organization_id = ?',
-      args: [id, organization_id]
+    const collection = mongoClient.collection('usuarios');
+
+    // Verificar si el usuario existe
+    const existingResult = await collection.findOne({ 
+      id: id,
+      organization_id: organization_id
     });
 
-    if (existingResult.rows.length === 0) {
+    if (!existingResult) {
       return res.status(404).json({
         success: false,
         message: 'Usuario no encontrado'
       });
     }
 
-    await tursoClient.execute({
-      sql: 'DELETE FROM usuarios WHERE id = ? AND organization_id = ?',
-      args: [id, organization_id]
+    // No permitir eliminar el último administrador
+    if (existingResult.role === 'admin') {
+      const adminCount = await collection.countDocuments({
+        organization_id: organization_id,
+        role: 'admin'
+      });
+
+      if (adminCount <= 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'No se puede eliminar el último administrador de la organización.'
+        });
+      }
+    }
+
+    // Eliminar usuario
+    const result = await collection.deleteOne({ 
+      id: id,
+      organization_id: organization_id
     });
 
-    console.log(`✅ Usuario ${id} eliminado`);
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
 
     res.json({
       success: true,

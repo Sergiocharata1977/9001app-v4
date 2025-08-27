@@ -1,6 +1,7 @@
 const express = require('express');
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -12,16 +13,17 @@ router.get('/', async (req, res) => {
   try {
     console.log('🔄 [RelacionesRoutes] Obteniendo todas las relaciones...');
     
-    const result = await tursoClient.execute({
-      sql: `SELECT * FROM relaciones_sgc WHERE organization_id = ? ORDER BY fecha_creacion DESC`,
-      args: [req.user.organization_id]
-    });
+    const collection = mongoClient.collection('relaciones_sgc');
+    const result = await collection.find(
+      { organization_id: req.user.organization_id },
+      { sort: { fecha_creacion: -1 } }
+    ).toArray();
 
-    console.log(`✅ [RelacionesRoutes] Encontradas ${result.rows.length} relaciones`);
+    console.log(`✅ [RelacionesRoutes] Encontradas ${result.length} relaciones`);
     res.json({
       success: true,
-      data: result.rows,
-      total: result.rows.length
+      data: result,
+      total: result.length
     });
   } catch (error) {
     console.error('❌ [RelacionesRoutes] Error al obtener relaciones:', error);
@@ -39,18 +41,20 @@ router.get('/origen/:tipo', async (req, res) => {
     const { tipo } = req.params;
     console.log(`🔄 [RelacionesRoutes] Obteniendo relaciones de origen: ${tipo}`);
     
-    const result = await tursoClient.execute({
-      sql: `SELECT * FROM relaciones_sgc 
-            WHERE organization_id = ? AND origen_tipo = ? 
-            ORDER BY fecha_creacion DESC`,
-      args: [req.user.organization_id, tipo]
-    });
+    const collection = mongoClient.collection('relaciones_sgc');
+    const result = await collection.find(
+      { 
+        organization_id: req.user.organization_id,
+        origen_tipo: tipo
+      },
+      { sort: { fecha_creacion: -1 } }
+    ).toArray();
 
-    console.log(`✅ [RelacionesRoutes] Encontradas ${result.rows.length} relaciones para origen ${tipo}`);
+    console.log(`✅ [RelacionesRoutes] Encontradas ${result.length} relaciones para origen ${tipo}`);
     res.json({
       success: true,
-      data: result.rows,
-      total: result.rows.length
+      data: result,
+      total: result.length
     });
   } catch (error) {
     console.error(`❌ [RelacionesRoutes] Error al obtener relaciones de origen ${req.params.tipo}:`, error);
@@ -68,18 +72,20 @@ router.get('/destino/:tipo', async (req, res) => {
     const { tipo } = req.params;
     console.log(`🔄 [RelacionesRoutes] Obteniendo relaciones de destino: ${tipo}`);
     
-    const result = await tursoClient.execute({
-      sql: `SELECT * FROM relaciones_sgc 
-            WHERE organization_id = ? AND destino_tipo = ? 
-            ORDER BY fecha_creacion DESC`,
-      args: [req.user.organization_id, tipo]
-    });
+    const collection = mongoClient.collection('relaciones_sgc');
+    const result = await collection.find(
+      { 
+        organization_id: req.user.organization_id,
+        destino_tipo: tipo
+      },
+      { sort: { fecha_creacion: -1 } }
+    ).toArray();
 
-    console.log(`✅ [RelacionesRoutes] Encontradas ${result.rows.length} relaciones para destino ${tipo}`);
+    console.log(`✅ [RelacionesRoutes] Encontradas ${result.length} relaciones para destino ${tipo}`);
     res.json({
       success: true,
-      data: result.rows,
-      total: result.rows.length
+      data: result,
+      total: result.length
     });
   } catch (error) {
     console.error(`❌ [RelacionesRoutes] Error al obtener relaciones de destino ${req.params.tipo}:`, error);
@@ -97,127 +103,32 @@ router.get('/relacion', async (req, res) => {
     const { origenTipo, origenId, destinoTipo, destinoId } = req.query;
     console.log(`🔄 [RelacionesRoutes] Obteniendo relación: ${origenTipo}:${origenId} -> ${destinoTipo}:${destinoId}`);
     
-    const result = await tursoClient.execute({
-      sql: `SELECT * FROM relaciones_sgc 
-            WHERE organization_id = ? 
-            AND origen_tipo = ? AND origen_id = ? 
-            AND destino_tipo = ? AND destino_id = ?`,
-      args: [req.user.organization_id, origenTipo, origenId, destinoTipo, destinoId]
+    const collection = mongoClient.collection('relaciones_sgc');
+    const result = await collection.findOne({
+      organization_id: req.user.organization_id,
+      origen_tipo: origenTipo,
+      origen_id: origenId,
+      destino_tipo: destinoTipo,
+      destino_id: destinoId
     });
 
-    if (result.rows.length === 0) {
+    if (!result) {
       return res.status(404).json({
         success: false,
         message: 'Relación no encontrada'
       });
     }
 
-    console.log('✅ [RelacionesRoutes] Relación encontrada');
+    console.log(`✅ [RelacionesRoutes] Relación encontrada`);
     res.json({
       success: true,
-      data: result.rows[0]
+      data: result
     });
   } catch (error) {
-    console.error('❌ [RelacionesRoutes] Error al obtener relación:', error);
+    console.error('❌ [RelacionesRoutes] Error al obtener relación específica:', error);
     res.status(500).json({
       success: false,
       message: 'Error al obtener la relación',
-      error: error.message
-    });
-  }
-});
-
-// GET /relaciones/entidades-relacionadas - Obtener entidades relacionadas
-router.get('/entidades-relacionadas', async (req, res) => {
-  try {
-    const { origenTipo, origenId, destinoTipo } = req.query;
-    console.log(`🔄 [RelacionesRoutes] Obteniendo ${destinoTipo} relacionados con ${origenTipo}:${origenId}`);
-    
-    // Obtener IDs de entidades relacionadas
-    const relacionesResult = await tursoClient.execute({
-      sql: `SELECT destino_id FROM relaciones_sgc 
-            WHERE organization_id = ? 
-            AND origen_tipo = ? AND origen_id = ? 
-            AND destino_tipo = ?`,
-      args: [req.user.organization_id, origenTipo, origenId, destinoTipo]
-    });
-
-    if (relacionesResult.rows.length === 0) {
-      return res.json({
-        success: true,
-        data: [],
-        total: 0
-      });
-    }
-
-    const destinoIds = relacionesResult.rows.map(row => row.destino_id);
-    const placeholders = destinoIds.map(() => '?').join(',');
-    
-    // Obtener datos de las entidades relacionadas
-    let entidadesResult;
-    switch (destinoTipo) {
-      case 'personal':
-        entidadesResult = await tursoClient.execute({
-          sql: `SELECT * FROM personal WHERE id IN (${placeholders}) AND organization_id = ?`,
-          args: [...destinoIds, req.user.organization_id]
-        });
-        break;
-      case 'puesto':
-      case 'puestos':
-        entidadesResult = await tursoClient.execute({
-          sql: `SELECT 
-                  id,
-                  organization_id,
-                  COALESCE(nombre, titulo_puesto) as nombre,
-                  COALESCE(descripcion, descripcion_responsabilidades) as descripcion,
-                  departamento_id,
-                  COALESCE(requisitos_experiencia, experiencia_requerida) as requisitos_experiencia,
-                  COALESCE(requisitos_formacion, formacion_requerida) as requisitos_formacion,
-                  COALESCE(estado, estado_puesto) as estado,
-                  codigo_puesto,
-                  created_at,
-                  updated_at
-                FROM puestos WHERE id IN (${placeholders}) AND organization_id = ?`,
-          args: [...destinoIds, req.user.organization_id]
-        });
-        break;
-      case 'departamento':
-      case 'departamentos':
-        entidadesResult = await tursoClient.execute({
-          sql: `SELECT * FROM departamentos WHERE id IN (${placeholders}) AND organization_id = ?`,
-          args: [...destinoIds, req.user.organization_id]
-        });
-        break;
-      case 'competencias':
-        entidadesResult = await tursoClient.execute({
-          sql: `SELECT * FROM competencias WHERE id IN (${placeholders}) AND organization_id = ?`,
-          args: [...destinoIds, req.user.organization_id]
-        });
-        break;
-      case 'evaluaciones':
-        entidadesResult = await tursoClient.execute({
-          sql: `SELECT * FROM evaluaciones WHERE id IN (${placeholders}) AND organization_id = ?`,
-          args: [...destinoIds, req.user.organization_id]
-        });
-        break;
-      default:
-        return res.status(400).json({
-          success: false,
-          message: `Tipo de destino no soportado: ${destinoTipo}`
-        });
-    }
-
-    console.log(`✅ [RelacionesRoutes] Encontradas ${entidadesResult.rows.length} entidades relacionadas`);
-    res.json({
-      success: true,
-      data: entidadesResult.rows,
-      total: entidadesResult.rows.length
-    });
-  } catch (error) {
-    console.error('❌ [RelacionesRoutes] Error al obtener entidades relacionadas:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener entidades relacionadas',
       error: error.message
     });
   }
@@ -227,69 +138,66 @@ router.get('/entidades-relacionadas', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const {
-      organization_id,
       origen_tipo,
       origen_id,
       destino_tipo,
       destino_id,
+      tipo_relacion,
       descripcion,
-      usuario_creador
+      metadata
     } = req.body;
 
-    console.log('🔄 [RelacionesRoutes] Creando nueva relación:', {
-      organization_id,
+    // Validar campos requeridos
+    if (!origen_tipo || !origen_id || !destino_tipo || !destino_id || !tipo_relacion) {
+      return res.status(400).json({
+        success: false,
+        message: 'Los campos origen_tipo, origen_id, destino_tipo, destino_id y tipo_relacion son obligatorios'
+      });
+    }
+
+    console.log(`🔄 [RelacionesRoutes] Creando relación: ${origen_tipo}:${origen_id} -> ${destino_tipo}:${destino_id}`);
+
+    const collection = mongoClient.collection('relaciones_sgc');
+
+    // Verificar si la relación ya existe
+    const existingResult = await collection.findOne({
+      organization_id: req.user.organization_id,
       origen_tipo,
       origen_id,
       destino_tipo,
       destino_id
     });
 
-    // Validar campos obligatorios
-    if (!organization_id || !origen_tipo || !origen_id || !destino_tipo || !destino_id) {
+    if (existingResult) {
       return res.status(400).json({
         success: false,
-        message: 'Faltan campos obligatorios: organization_id, origen_tipo, origen_id, destino_tipo, destino_id'
+        message: 'Ya existe una relación entre estas entidades'
       });
     }
 
-    // Verificar que no exista la relación
-    const existingResult = await tursoClient.execute({
-      sql: `SELECT id FROM relaciones_sgc 
-            WHERE organization_id = ? 
-            AND origen_tipo = ? AND origen_id = ? 
-            AND destino_tipo = ? AND destino_id = ?`,
-      args: [organization_id, origen_tipo, origen_id, destino_tipo, destino_id]
-    });
+    // Crear nueva relación
+    const nuevaRelacion = {
+      id: crypto.randomUUID(),
+      organization_id: req.user.organization_id,
+      origen_tipo,
+      origen_id,
+      destino_tipo,
+      destino_id,
+      tipo_relacion,
+      descripcion: descripcion || '',
+      metadata: metadata || {},
+      created_by: req.user.id,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
 
-    if (existingResult.rows.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'La relación ya existe'
-      });
-    }
+    const result = await collection.insertOne(nuevaRelacion);
 
-    // Crear la relación
-    const result = await tursoClient.execute({
-      sql: `INSERT INTO relaciones_sgc 
-            (organization_id, origen_tipo, origen_id, destino_tipo, destino_id, descripcion, usuario_creador, fecha_creacion) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-      args: [organization_id, origen_tipo, origen_id, destino_tipo, destino_id, descripcion, usuario_creador]
-    });
-
-    console.log('✅ [RelacionesRoutes] Relación creada exitosamente');
+    console.log(`✅ [RelacionesRoutes] Relación creada con ID: ${nuevaRelacion.id}`);
     res.status(201).json({
       success: true,
-      message: 'Relación creada exitosamente',
-      data: {
-        id: result.lastInsertRowid,
-        organization_id,
-        origen_tipo,
-        origen_id,
-        destino_tipo,
-        destino_id,
-        descripcion,
-        usuario_creador
-      }
+      data: nuevaRelacion,
+      message: 'Relación creada exitosamente'
     });
   } catch (error) {
     console.error('❌ [RelacionesRoutes] Error al crear relación:', error);
@@ -305,31 +213,64 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { descripcion, usuario_creador } = req.body;
+    const {
+      tipo_relacion,
+      descripcion,
+      metadata
+    } = req.body;
 
-    console.log(`🔄 [RelacionesRoutes] Actualizando relación ${id}`);
+    console.log(`🔄 [RelacionesRoutes] Actualizando relación: ${id}`);
 
-    const result = await tursoClient.execute({
-      sql: `UPDATE relaciones_sgc 
-            SET descripcion = ?, usuario_creador = ? 
-            WHERE id = ? AND organization_id = ?`,
-      args: [descripcion, usuario_creador, id, req.user.organization_id]
+    const collection = mongoClient.collection('relaciones_sgc');
+
+    // Verificar que la relación existe
+    const existingResult = await collection.findOne({
+      id: id,
+      organization_id: req.user.organization_id
     });
 
-    if (result.changes === 0) {
+    if (!existingResult) {
       return res.status(404).json({
         success: false,
         message: 'Relación no encontrada'
       });
     }
 
-    console.log('✅ [RelacionesRoutes] Relación actualizada exitosamente');
+    // Preparar datos para actualización
+    const updateData = {
+      updated_at: new Date()
+    };
+
+    if (tipo_relacion !== undefined) updateData.tipo_relacion = tipo_relacion;
+    if (descripcion !== undefined) updateData.descripcion = descripcion;
+    if (metadata !== undefined) updateData.metadata = metadata;
+
+    const result = await collection.updateOne(
+      { id: id, organization_id: req.user.organization_id },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Relación no encontrada'
+      });
+    }
+
+    // Obtener la relación actualizada
+    const updatedRelacion = await collection.findOne({
+      id: id,
+      organization_id: req.user.organization_id
+    });
+
+    console.log(`✅ [RelacionesRoutes] Relación actualizada: ${id}`);
     res.json({
       success: true,
+      data: updatedRelacion,
       message: 'Relación actualizada exitosamente'
     });
   } catch (error) {
-    console.error(`❌ [RelacionesRoutes] Error al actualizar relación ${req.params.id}:`, error);
+    console.error('❌ [RelacionesRoutes] Error al actualizar relación:', error);
     res.status(500).json({
       success: false,
       message: 'Error al actualizar la relación',
@@ -342,30 +283,95 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(`🔄 [RelacionesRoutes] Eliminando relación ${id}`);
+    console.log(`🔄 [RelacionesRoutes] Eliminando relación: ${id}`);
 
-    const result = await tursoClient.execute({
-      sql: `DELETE FROM relaciones_sgc WHERE id = ? AND organization_id = ?`,
-      args: [id, req.user.organization_id]
+    const collection = mongoClient.collection('relaciones_sgc');
+    const result = await collection.deleteOne({
+      id: id,
+      organization_id: req.user.organization_id
     });
 
-    if (result.changes === 0) {
+    if (result.deletedCount === 0) {
       return res.status(404).json({
         success: false,
         message: 'Relación no encontrada'
       });
     }
 
-    console.log('✅ [RelacionesRoutes] Relación eliminada exitosamente');
+    console.log(`✅ [RelacionesRoutes] Relación eliminada: ${id}`);
     res.json({
       success: true,
       message: 'Relación eliminada exitosamente'
     });
   } catch (error) {
-    console.error(`❌ [RelacionesRoutes] Error al eliminar relación ${req.params.id}:`, error);
+    console.error('❌ [RelacionesRoutes] Error al eliminar relación:', error);
     res.status(500).json({
       success: false,
       message: 'Error al eliminar la relación',
+      error: error.message
+    });
+  }
+});
+
+// GET /relaciones/entidades/:tipo - Obtener entidades relacionadas por tipo
+router.get('/entidades/:tipo', async (req, res) => {
+  try {
+    const { tipo } = req.params;
+    console.log(`🔄 [RelacionesRoutes] Obteniendo entidades relacionadas de tipo: ${tipo}`);
+
+    const collection = mongoClient.collection('relaciones_sgc');
+    
+    // Obtener relaciones donde el tipo aparece como origen o destino
+    const result = await collection.find({
+      organization_id: req.user.organization_id,
+      $or: [
+        { origen_tipo: tipo },
+        { destino_tipo: tipo }
+      ]
+    }, {
+      sort: { fecha_creacion: -1 }
+    }).toArray();
+
+    // Agrupar entidades relacionadas
+    const entidadesRelacionadas = {};
+    
+    result.forEach(relacion => {
+      if (relacion.origen_tipo === tipo) {
+        const entidadId = relacion.origen_id;
+        if (!entidadesRelacionadas[entidadId]) {
+          entidadesRelacionadas[entidadId] = {
+            entidad_id: entidadId,
+            relaciones_salientes: [],
+            relaciones_entrantes: []
+          };
+        }
+        entidadesRelacionadas[entidadId].relaciones_salientes.push(relacion);
+      }
+      
+      if (relacion.destino_tipo === tipo) {
+        const entidadId = relacion.destino_id;
+        if (!entidadesRelacionadas[entidadId]) {
+          entidadesRelacionadas[entidadId] = {
+            entidad_id: entidadId,
+            relaciones_salientes: [],
+            relaciones_entrantes: []
+          };
+        }
+        entidadesRelacionadas[entidadId].relaciones_entrantes.push(relacion);
+      }
+    });
+
+    console.log(`✅ [RelacionesRoutes] Encontradas ${Object.keys(entidadesRelacionadas).length} entidades relacionadas`);
+    res.json({
+      success: true,
+      data: Object.values(entidadesRelacionadas),
+      total: Object.keys(entidadesRelacionadas).length
+    });
+  } catch (error) {
+    console.error(`❌ [RelacionesRoutes] Error al obtener entidades relacionadas:`, error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener entidades relacionadas',
       error: error.message
     });
   }

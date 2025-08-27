@@ -5,68 +5,93 @@
  * Sistema básico de búsqueda en base de datos sin IA
  */
 
-const tursoClient = require('../lib/tursoClient.js');
+const mongoClient = require('../lib/mongoClient.js');
 
 class SimpleSearchSystem {
   static async search(query, organizationId = 1) {
     try {
-      const searchQuery = `
-        SELECT 
-          'personal' as tipo,
-          id,
-          nombres || ' ' || apellidos as titulo,
-          email || ' | ' || COALESCE(telefono, 'Sin teléfono') as contenido,
-          'Personal' as codigo,
-          estado,
-          organization_id,
-          created_at,
-          updated_at
-        FROM personal 
-        WHERE organization_id = ? 
-          AND (nombres LIKE ? OR apellidos LIKE ? OR email LIKE ?)
-        
-        UNION ALL
-        
-        SELECT 
-          'normas' as tipo,
-          id,
-          titulo,
-          descripcion || ' | ' || codigo as contenido,
-          codigo,
-          estado,
-          organization_id,
-          created_at,
-          updated_at
-        FROM normas 
-        WHERE (organization_id = ? OR organization_id = 0)
-          AND (titulo LIKE ? OR descripcion LIKE ? OR codigo LIKE ?)
-        
-        UNION ALL
-        
-        SELECT 
-          'procesos' as tipo,
-          id,
-          nombre as titulo,
-          descripcion as contenido,
-          'Proceso' as codigo,
-          'activo' as estado,
-          organization_id,
-          created_at,
-          updated_at
-        FROM procesos 
-        WHERE organization_id = ?
-          AND (nombre LIKE ? OR descripcion LIKE ?)
-        
-        LIMIT 20
-      `;
-      
-      const searchTerm = `%${query}%`;
-      const result = await tursoClient.execute({
-        sql: searchQuery,
-        args: [organizationId, searchTerm, searchTerm, searchTerm, organizationId, searchTerm, searchTerm, searchTerm, organizationId, searchTerm, searchTerm]
-      });
-      
-      return result.rows;
+      const searchTerm = new RegExp(query, 'i');
+      const results = [];
+
+      // Buscar en personal
+      const personalCollection = mongoClient.collection('personal');
+      const personalResults = await personalCollection.find({
+        organization_id: organizationId,
+        $or: [
+          { nombres: searchTerm },
+          { apellidos: searchTerm },
+          { email: searchTerm }
+        ]
+      }, {
+        projection: {
+          tipo: { $literal: 'personal' },
+          id: 1,
+          titulo: { $concat: ['$nombres', ' ', '$apellidos'] },
+          contenido: { $concat: ['$email', ' | ', { $ifNull: ['$telefono', 'Sin teléfono'] }] },
+          codigo: { $literal: 'Personal' },
+          estado: 1,
+          organization_id: 1,
+          created_at: 1,
+          updated_at: 1
+        }
+      }).limit(20).toArray();
+
+      results.push(...personalResults);
+
+      // Buscar en normas
+      const normasCollection = mongoClient.collection('normas');
+      const normasResults = await normasCollection.find({
+        $or: [
+          { organization_id: organizationId },
+          { organization_id: 0 }
+        ],
+        $or: [
+          { titulo: searchTerm },
+          { descripcion: searchTerm },
+          { codigo: searchTerm }
+        ]
+      }, {
+        projection: {
+          tipo: { $literal: 'normas' },
+          id: 1,
+          titulo: 1,
+          contenido: { $concat: ['$descripcion', ' | ', '$codigo'] },
+          codigo: 1,
+          estado: 1,
+          organization_id: 1,
+          created_at: 1,
+          updated_at: 1
+        }
+      }).limit(20).toArray();
+
+      results.push(...normasResults);
+
+      // Buscar en procesos
+      const procesosCollection = mongoClient.collection('procesos');
+      const procesosResults = await procesosCollection.find({
+        organization_id: organizationId,
+        $or: [
+          { nombre: searchTerm },
+          { descripcion: searchTerm }
+        ]
+      }, {
+        projection: {
+          tipo: { $literal: 'procesos' },
+          id: 1,
+          titulo: '$nombre',
+          contenido: '$descripcion',
+          codigo: { $literal: 'Proceso' },
+          estado: { $literal: 'activo' },
+          organization_id: 1,
+          created_at: 1,
+          updated_at: 1
+        }
+      }).limit(20).toArray();
+
+      results.push(...procesosResults);
+
+      // Ordenar por relevancia y limitar a 20 resultados totales
+      return results.slice(0, 20);
     } catch (error) {
       console.error('Error en búsqueda simple:', error);
       return [];
@@ -75,19 +100,34 @@ class SimpleSearchSystem {
   
   static async getStats() {
     try {
-      const statsQuery = `
-        SELECT 
-          'personal' as tabla, COUNT(*) as count FROM personal WHERE organization_id = 1
-        UNION ALL
-        SELECT 'normas' as tabla, COUNT(*) as count FROM normas WHERE organization_id = 0 OR organization_id = 1
-        UNION ALL
-        SELECT 'procesos' as tabla, COUNT(*) as count FROM procesos WHERE organization_id = 1
-        UNION ALL
-        SELECT 'documentos' as tabla, COUNT(*) as count FROM documentos WHERE organization_id = 1
-      `;
-      
-      const result = await tursoClient.execute(statsQuery);
-      return result.rows;
+      const stats = [];
+
+      // Estadísticas de personal
+      const personalCollection = mongoClient.collection('personal');
+      const personalCount = await personalCollection.countDocuments({ organization_id: 1 });
+      stats.push({ tabla: 'personal', count: personalCount });
+
+      // Estadísticas de normas
+      const normasCollection = mongoClient.collection('normas');
+      const normasCount = await normasCollection.countDocuments({
+        $or: [
+          { organization_id: 0 },
+          { organization_id: 1 }
+        ]
+      });
+      stats.push({ tabla: 'normas', count: normasCount });
+
+      // Estadísticas de procesos
+      const procesosCollection = mongoClient.collection('procesos');
+      const procesosCount = await procesosCollection.countDocuments({ organization_id: 1 });
+      stats.push({ tabla: 'procesos', count: procesosCount });
+
+      // Estadísticas de documentos
+      const documentosCollection = mongoClient.collection('documentos');
+      const documentosCount = await documentosCollection.countDocuments({ organization_id: 1 });
+      stats.push({ tabla: 'documentos', count: documentosCount });
+
+      return stats;
     } catch (error) {
       console.error('Error obteniendo estadísticas:', error);
       return [];

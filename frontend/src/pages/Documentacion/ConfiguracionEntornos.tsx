@@ -246,7 +246,7 @@ const ConfiguracionEntornos = () => {
                 <h4 className="font-semibold mb-2">🔧 Archivos de Sistema:</h4>
                 <div className="text-sm space-y-1">
                   <div><code>backend/config/env-setup.js</code> - Cargador</div>
-                  <div><code>backend/lib/tursoClient.js</code> - Cliente DB</div>
+                  <div><code>backend/lib/mongoClient.js</code> - Cliente DB</div>
                   <div><code>.gitignore</code> - Protección</div>
                 </div>
               </div>
