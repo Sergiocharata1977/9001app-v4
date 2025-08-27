@@ -10,6 +10,77 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // ===============================================
+// RUTA PARA CREAR TABLAS CRM
+// ===============================================
+
+// POST /api/crm/setup-tables - Crear tablas del CRM usando el servicio general
+router.post('/setup-tables', async (req, res) => {
+  try {
+    console.log('🔧 Iniciando creación de tablas CRM...');
+    
+    const databaseSetupService = require('../services/databaseSetupService.js');
+    const result = await databaseSetupService.createCRMTables();
+
+    res.json({
+      success: true,
+      message: 'Tablas CRM creadas exitosamente',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('❌ Error creando tablas CRM:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al crear tablas CRM',
+      error: error.message
+    });
+  }
+});
+
+// GET /api/crm/check-tables - Verificar estado de las tablas
+router.get('/check-tables', async (req, res) => {
+  try {
+    console.log('🔍 Verificando estado de tablas CRM...');
+
+    const tables = ['contactos', 'clientes_agro', 'oportunidades_agro', 'crm_analisis_riesgo'];
+    const results = {};
+
+    for (const table of tables) {
+      try {
+        const result = await tursoClient.execute({
+          sql: `SELECT COUNT(*) as count FROM ${table}`
+        });
+        results[table] = {
+          exists: true,
+          count: result.rows[0].count
+        };
+      } catch (error) {
+        results[table] = {
+          exists: false,
+          error: error.message
+        };
+      }
+    }
+
+    console.log('✅ Verificación completada');
+
+    res.json({
+      success: true,
+      data: results,
+      message: 'Estado de tablas verificado'
+    });
+
+  } catch (error) {
+    console.error('❌ Error verificando tablas:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al verificar tablas',
+      error: error.message
+    });
+  }
+});
+
+// ===============================================
 // RUTAS PARA CONTACTOS
 // ===============================================
 
@@ -663,6 +734,255 @@ router.get('/personal/puesto/:puestoId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error al obtener personal por puesto',
+      error: error.message
+    });
+  }
+});
+
+// ===============================================
+// RUTAS PARA ANÁLISIS DE RIESGO
+// ===============================================
+
+// GET /api/crm/analisis-riesgo - Obtener todos los análisis de riesgo
+router.get('/analisis-riesgo', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    console.log('🛡️ Obteniendo análisis de riesgo para organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `SELECT ar.*, 
+            c.nombre as cliente_nombre,
+            c.tipo_cliente,
+            c.sector
+            FROM crm_analisis_riesgo ar
+            LEFT JOIN clientes_agro c ON ar.cliente_id = c.id
+            WHERE ar.organization_id = ? AND ar.is_active = 1
+            ORDER BY ar.fecha_analisis DESC`,
+      args: [orgId]
+    });
+
+    console.log(`✅ Encontrados ${result.rows.length} análisis de riesgo`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo análisis de riesgo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener análisis de riesgo',
+      error: error.message
+    });
+  }
+});
+
+// GET /api/crm/analisis-riesgo/:id - Obtener análisis de riesgo por ID
+router.get('/analisis-riesgo/:id', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    const { id } = req.params;
+    console.log('🛡️ Obteniendo análisis de riesgo:', id, 'organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `SELECT ar.*, 
+            c.nombre as cliente_nombre,
+            c.tipo_cliente,
+            c.sector
+            FROM crm_analisis_riesgo ar
+            LEFT JOIN clientes_agro c ON ar.cliente_id = c.id
+            WHERE ar.id = ? AND ar.organization_id = ? AND ar.is_active = 1`,
+      args: [id, orgId]
+    });
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Análisis de riesgo no encontrado'
+      });
+    }
+
+    console.log('✅ Análisis de riesgo encontrado');
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo análisis de riesgo por ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener análisis de riesgo',
+      error: error.message
+    });
+  }
+});
+
+// GET /api/crm/analisis-riesgo/cliente/:clienteId - Obtener análisis de riesgo por cliente
+router.get('/analisis-riesgo/cliente/:clienteId', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    const { clienteId } = req.params;
+    console.log('🛡️ Obteniendo análisis de riesgo para cliente:', clienteId, 'organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `SELECT ar.*, 
+            c.nombre as cliente_nombre,
+            c.tipo_cliente,
+            c.sector
+            FROM crm_analisis_riesgo ar
+            LEFT JOIN clientes_agro c ON ar.cliente_id = c.id
+            WHERE ar.cliente_id = ? AND ar.organization_id = ? AND ar.is_active = 1
+            ORDER BY ar.fecha_analisis DESC`,
+      args: [clienteId, orgId]
+    });
+
+    console.log(`✅ Encontrados ${result.rows.length} análisis de riesgo para cliente ${clienteId}`);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rows.length
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo análisis de riesgo por cliente:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener análisis de riesgo por cliente',
+      error: error.message
+    });
+  }
+});
+
+// POST /api/crm/analisis-riesgo - Crear nuevo análisis de riesgo
+router.post('/analisis-riesgo', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    const userId = req.user?.id;
+    const data = req.body;
+    console.log('🛡️ Creando análisis de riesgo para organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `INSERT INTO crm_analisis_riesgo (
+        organization_id, cliente_id, fecha_analisis, periodo_analisis,
+        puntaje_riesgo, categoria_riesgo, capacidad_pago, ingresos_mensuales,
+        gastos_mensuales, margen_utilidad, liquidez, solvencia, endeudamiento,
+        recomendaciones, observaciones, estado, created_by, updated_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        orgId, data.cliente_id, data.fecha_analisis, data.periodo_analisis,
+        data.puntaje_riesgo, data.categoria_riesgo, data.capacidad_pago || 0,
+        data.ingresos_mensuales || 0, data.gastos_mensuales || 0,
+        data.margen_utilidad || 0, data.liquidez || 0, data.solvencia || 0,
+        data.endeudamiento || 0, data.recomendaciones || '', data.observaciones || '',
+        data.estado || 'identificado', userId, userId
+      ]
+    });
+
+    console.log('✅ Análisis de riesgo creado exitosamente');
+
+    res.status(201).json({
+      success: true,
+      message: 'Análisis de riesgo creado exitosamente',
+      data: { id: result.lastInsertRowid }
+    });
+
+  } catch (error) {
+    console.error('Error creando análisis de riesgo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al crear análisis de riesgo',
+      error: error.message
+    });
+  }
+});
+
+// PUT /api/crm/analisis-riesgo/:id - Actualizar análisis de riesgo
+router.put('/analisis-riesgo/:id', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const data = req.body;
+    console.log('🛡️ Actualizando análisis de riesgo:', id, 'organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `UPDATE crm_analisis_riesgo SET
+        fecha_analisis = ?, periodo_analisis = ?, puntaje_riesgo = ?,
+        categoria_riesgo = ?, capacidad_pago = ?, ingresos_mensuales = ?,
+        gastos_mensuales = ?, margen_utilidad = ?, liquidez = ?, solvencia = ?,
+        endeudamiento = ?, recomendaciones = ?, observaciones = ?, estado = ?,
+        updated_by = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND organization_id = ?`,
+      args: [
+        data.fecha_analisis, data.periodo_analisis, data.puntaje_riesgo,
+        data.categoria_riesgo, data.capacidad_pago || 0, data.ingresos_mensuales || 0,
+        data.gastos_mensuales || 0, data.margen_utilidad || 0, data.liquidez || 0,
+        data.solvencia || 0, data.endeudamiento || 0, data.recomendaciones || '',
+        data.observaciones || '', data.estado || 'identificado', userId, id, orgId
+      ]
+    });
+
+    if (result.changes === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Análisis de riesgo no encontrado'
+      });
+    }
+
+    console.log('✅ Análisis de riesgo actualizado exitosamente');
+
+    res.json({
+      success: true,
+      message: 'Análisis de riesgo actualizado exitosamente'
+    });
+
+  } catch (error) {
+    console.error('Error actualizando análisis de riesgo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al actualizar análisis de riesgo',
+      error: error.message
+    });
+  }
+});
+
+// DELETE /api/crm/analisis-riesgo/:id - Eliminar análisis de riesgo
+router.delete('/analisis-riesgo/:id', async (req, res) => {
+  try {
+    const orgId = req.user?.organization_id;
+    const { id } = req.params;
+    console.log('🛡️ Eliminando análisis de riesgo:', id, 'organización:', orgId);
+
+    const result = await tursoClient.execute({
+      sql: `UPDATE crm_analisis_riesgo SET is_active = 0, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND organization_id = ?`,
+      args: [id, orgId]
+    });
+
+    if (result.changes === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Análisis de riesgo no encontrado'
+      });
+    }
+
+    console.log('✅ Análisis de riesgo eliminado exitosamente');
+
+    res.json({
+      success: true,
+      message: 'Análisis de riesgo eliminado exitosamente'
+    });
+
+  } catch (error) {
+    console.error('Error eliminando análisis de riesgo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al eliminar análisis de riesgo',
       error: error.message
     });
   }

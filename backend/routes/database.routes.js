@@ -1,238 +1,238 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-const { DatabaseSchemaUpdater } = require('../scripts/database-schema-updater');
+const DatabaseSetupService = require('../services/databaseSetupService');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Ruta para obtener el esquema de la base de datos
-router.get('/schema', async (req, res) => {
-  try {
-    const schemaPath = path.join(__dirname, '..', '..', 'frontend', 'src', 'data', 'database-schema.json');
-    
-    if (fs.existsSync(schemaPath)) {
-      const schemaData = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-      res.json(schemaData);
-    } else {
-      // Si no existe el archivo, generar uno nuevo
-      const updater = new DatabaseSchemaUpdater();
-      const schemaData = await updater.updateDocumentation();
-      res.json(schemaData);
-    }
-  } catch (error) {
-    console.error('Error obteniendo esquema:', error);
-    res.status(500).json({ 
-      error: 'Error obteniendo esquema de base de datos',
-      message: error.message 
-    });
-  }
-});
+const dbService = new DatabaseSetupService();
 
-// Ruta para actualizar el esquema manualmente
-router.post('/schema/update', async (req, res) => {
-  try {
-    const updater = new DatabaseSchemaUpdater();
-    const schemaData = await updater.updateDocumentation();
-    
-    res.json({
-      success: true,
-      message: 'Esquema actualizado exitosamente',
-      data: {
-        lastUpdate: schemaData.lastUpdate,
-        totalTables: schemaData.totalTables,
-        executionTime: Date.now() - new Date(schemaData.lastUpdate).getTime()
-      }
-    });
-  } catch (error) {
-    console.error('Error actualizando esquema:', error);
-    res.status(500).json({ 
-      error: 'Error actualizando esquema de base de datos',
-      message: error.message 
-    });
-  }
-});
+// Middleware de autenticación para todas las rutas
+router.use(authMiddleware);
 
-// Ruta para obtener el estado del actualizador
-router.get('/schema/status', async (req, res) => {
-  try {
-    const updater = new DatabaseSchemaUpdater();
-    const status = updater.getStatus();
-    
-    res.json({
-      success: true,
-      status
-    });
-  } catch (error) {
-    console.error('Error obteniendo estado:', error);
-    res.status(500).json({ 
-      error: 'Error obteniendo estado del actualizador',
-      message: error.message 
-    });
-  }
-});
-
-// Ruta para obtener estadísticas de la base de datos
-router.get('/stats', async (req, res) => {
-  try {
-    const schemaPath = path.join(__dirname, '..', '..', 'frontend', 'src', 'data', 'database-schema.json');
-    
-    if (fs.existsSync(schemaPath)) {
-      const schemaData = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-      
-      const stats = {
-        totalTables: schemaData.totalTables,
-        totalColumns: Object.values(schemaData.tables).reduce((sum, table) => sum + table.columns.length, 0),
-        totalRelations: Object.values(schemaData.tables).reduce((sum, table) => sum + table.relations.length, 0),
-        totalRecords: Object.values(schemaData.tables).reduce((sum, table) => sum + table.recordCount, 0),
-        lastUpdate: schemaData.lastUpdate,
-        tableCategories: {
-          'Organizaciones y Usuarios': ['organizations', 'users', 'organization_features', 'user_feature_permissions'],
-          'Gestión de Personal': ['personal', 'departamentos', 'puestos', 'competencias', 'evaluaciones'],
-          'Sistema SGC': ['sgc_personal_relaciones', 'sgc_documentos_relacionados', 'sgc_normas_relacionadas'],
-          'Procesos y Documentos': ['procesos', 'documentos', 'normas'],
-          'Auditorías y Calidad': ['auditorias', 'hallazgos', 'acciones'],
-          'Indicadores y Objetivos': ['indicadores', 'mediciones', 'objetivos_calidad'],
-          'Comunicación': ['minutas', 'minutas_participantes', 'minutas_documentos'],
-          'Capacitación': ['capacitaciones', 'capacitaciones_personal'],
-          'Productos': ['productos']
-        }
-      };
-      
-      // Calcular estadísticas por categoría
-      stats.categoryStats = {};
-      for (const [category, tableNames] of Object.entries(stats.tableCategories)) {
-        const categoryTables = tableNames.filter(name => schemaData.tables[name]);
-        stats.categoryStats[category] = {
-          tableCount: categoryTables.length,
-          totalRecords: categoryTables.reduce((sum, tableName) => sum + schemaData.tables[tableName].recordCount, 0),
-          totalColumns: categoryTables.reduce((sum, tableName) => sum + schemaData.tables[tableName].columns.length, 0)
-        };
-      }
-      
-      res.json({
-        success: true,
-        stats
-      });
-    } else {
-      res.status(404).json({ 
-        error: 'Archivo de esquema no encontrado',
-        message: 'Ejecuta una actualización del esquema primero' 
-      });
-    }
-  } catch (error) {
-    console.error('Error obteniendo estadísticas:', error);
-    res.status(500).json({ 
-      error: 'Error obteniendo estadísticas de base de datos',
-      message: error.message 
-    });
-  }
-});
-
-// Ruta para obtener información detallada de una tabla específica
-router.get('/table/:tableName', async (req, res) => {
-  try {
-    const { tableName } = req.params;
-    const schemaPath = path.join(__dirname, '..', '..', 'frontend', 'src', 'data', 'database-schema.json');
-    
-    if (fs.existsSync(schemaPath)) {
-      const schemaData = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-      
-      if (schemaData.tables[tableName]) {
-        res.json({
-          success: true,
-          table: {
-            name: tableName,
-            ...schemaData.tables[tableName]
-          }
-        });
-      } else {
-        res.status(404).json({ 
-          error: 'Tabla no encontrada',
-          message: `La tabla '${tableName}' no existe en el esquema` 
-        });
-      }
-    } else {
-      res.status(404).json({ 
-        error: 'Archivo de esquema no encontrado',
-        message: 'Ejecuta una actualización del esquema primero' 
-      });
-    }
-  } catch (error) {
-    console.error('Error obteniendo información de tabla:', error);
-    res.status(500).json({ 
-      error: 'Error obteniendo información de tabla',
-      message: error.message 
-    });
-  }
-});
-
-// Ruta para buscar tablas y campos
-router.get('/search', async (req, res) => {
-  try {
-    const { q } = req.query; // Término de búsqueda
-    
-    if (!q) {
-      return res.status(400).json({ 
-        error: 'Término de búsqueda requerido',
-        message: 'Proporciona un parámetro "q" para buscar' 
-      });
-    }
-    
-    const schemaPath = path.join(__dirname, '..', '..', 'frontend', 'src', 'data', 'database-schema.json');
-    
-    if (fs.existsSync(schemaPath)) {
-      const schemaData = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-      const searchTerm = q.toLowerCase();
-      
-      const results = {
-        tables: [],
-        columns: [],
-        totalResults: 0
-      };
-      
-      // Buscar en tablas
-      for (const [tableName, table] of Object.entries(schemaData.tables)) {
-        if (tableName.toLowerCase().includes(searchTerm)) {
-          results.tables.push({
-            name: tableName,
-            recordCount: table.recordCount,
-            columnCount: table.columns.length
-          });
-        }
+/**
+ * @route POST /api/database/create-table
+ * @desc Crear tabla personalizada
+ */
+router.post('/create-table', async (req, res) => {
+    try {
+        const { tableName, columns } = req.body;
         
-        // Buscar en columnas
-        for (const column of table.columns) {
-          if (column.name.toLowerCase().includes(searchTerm)) {
-            results.columns.push({
-              tableName,
-              columnName: column.name,
-              type: column.type,
-              isPrimary: column.primaryKey,
-              isRequired: column.notNull
+        if (!tableName || !columns || !Array.isArray(columns)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Se requiere tableName y columns (array)'
             });
-          }
         }
-      }
-      
-      results.totalResults = results.tables.length + results.columns.length;
-      
-      res.json({
-        success: true,
-        searchTerm: q,
-        results
-      });
-    } else {
-      res.status(404).json({ 
-        error: 'Archivo de esquema no encontrado',
-        message: 'Ejecuta una actualización del esquema primero' 
-      });
+
+        const result = await dbService.createTable(tableName, columns);
+        
+        if (result.success) {
+            res.status(201).json(result);
+        } else {
+            res.status(400).json(result);
+        }
+    } catch (error) {
+        console.error('Error en create-table:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
     }
-  } catch (error) {
-    console.error('Error en búsqueda:', error);
-    res.status(500).json({ 
-      error: 'Error realizando búsqueda',
-      message: error.message 
-    });
-  }
+});
+
+/**
+ * @route POST /api/database/create-index
+ * @desc Crear índice
+ */
+router.post('/create-index', async (req, res) => {
+    try {
+        const { tableName, indexName, columns } = req.body;
+        
+        if (!tableName || !indexName || !columns) {
+            return res.status(400).json({
+                success: false,
+                message: 'Se requiere tableName, indexName y columns'
+            });
+        }
+
+        const result = await dbService.createIndex(tableName, indexName, columns);
+        
+        if (result.success) {
+            res.status(201).json(result);
+        } else {
+            res.status(400).json(result);
+        }
+    } catch (error) {
+        console.error('Error en create-index:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route POST /api/database/insert-data
+ * @desc Insertar datos en tabla
+ */
+router.post('/insert-data', async (req, res) => {
+    try {
+        const { tableName, data } = req.body;
+        
+        if (!tableName || !data) {
+            return res.status(400).json({
+                success: false,
+                message: 'Se requiere tableName y data'
+            });
+        }
+
+        const result = await dbService.insertData(tableName, data);
+        
+        if (result.success) {
+            res.status(201).json(result);
+        } else {
+            res.status(400).json(result);
+        }
+    } catch (error) {
+        console.error('Error en insert-data:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route GET /api/database/table-exists/:tableName
+ * @desc Verificar si tabla existe
+ */
+router.get('/table-exists/:tableName', async (req, res) => {
+    try {
+        const { tableName } = req.params;
+        
+        if (!tableName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Se requiere tableName'
+            });
+        }
+
+        const result = await dbService.tableExists(tableName);
+        res.json(result);
+    } catch (error) {
+        console.error('Error en table-exists:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route GET /api/database/table-structure/:tableName
+ * @desc Obtener estructura de tabla
+ */
+router.get('/table-structure/:tableName', async (req, res) => {
+    try {
+        const { tableName } = req.params;
+        
+        if (!tableName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Se requiere tableName'
+            });
+        }
+
+        const result = await dbService.getTableStructure(tableName);
+        
+        if (result.success) {
+            res.json(result);
+        } else {
+            res.status(404).json(result);
+        }
+    } catch (error) {
+        console.error('Error en table-structure:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route POST /api/database/setup-crm
+ * @desc Configurar tablas CRM
+ */
+router.post('/setup-crm', async (req, res) => {
+    try {
+        const result = await dbService.setupCRM();
+        
+        if (result.success) {
+            res.status(201).json(result);
+        } else {
+            res.status(400).json(result);
+        }
+    } catch (error) {
+        console.error('Error en setup-crm:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route POST /api/database/insert-crm-data
+ * @desc Insertar datos de ejemplo CRM
+ */
+router.post('/insert-crm-data', async (req, res) => {
+    try {
+        const result = await dbService.insertCRMData();
+        
+        if (result.success) {
+            res.status(201).json(result);
+        } else {
+            res.status(400).json(result);
+        }
+    } catch (error) {
+        console.error('Error en insert-crm-data:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route GET /api/database/info
+ * @desc Información general de la base de datos
+ */
+router.get('/info', async (req, res) => {
+    try {
+        // Obtener lista de tablas
+        const tablesQuery = `SELECT name FROM sqlite_master WHERE type='table'`;
+        const tables = await dbService.tursoClient.query(tablesQuery);
+        
+        res.json({
+            success: true,
+            message: 'Información de base de datos',
+            tables: tables.map(t => t.name),
+            totalTables: tables.length
+        });
+    } catch (error) {
+        console.error('Error en database-info:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
 });
 
 module.exports = router;

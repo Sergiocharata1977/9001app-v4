@@ -1,0 +1,65 @@
+{
+  "name": "ISO 9001 Project",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.powershell",
+        "ms-vscode.powershell-preview",
+        "qwtel.sqlite-viewer",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-sqlite",
+        "ms-vscode.vscode-typescript-next",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "dsznajder.es7-react-js-snippets",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "TabNine.tabnine-vscode",
+        "formulahendry.auto-rename-tag",
+        "formulahendry.auto-close-tag",
+        "christian-kohler.path-intellisense",
+        "PKief.material-icon-theme",
+        "Equinusocio.vsc-material-theme",
+        "yzhang.markdown-all-in-one",
+        "hediet.vscode-drawio",
+        "SonarSource.sonarlint-vscode",
+        "kisstkondoros.vscode-codemetrics",
+        "pranaygp.vscode-css-peek",
+        "naumovs.color-highlight",
+        "bradlc.vscode-tailwindcss",
+        "xabikos.JavaScriptSnippets",
+        "burkeholland.simple-react-snippets",
+        "wix.vscode-import-cost",
+        "dracula-theme.theme-dracula",
+        "bierner.markdown-preview-github-styles",
+        "jebbs.plantuml",
+        "GitHub.codespaces"
+      ],
+      "settings": {
+        "typescript.preferences.includePackageJsonAutoImports": "on",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "files.autoSave": "afterDelay",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.defaultProfile.windows": "PowerShell"
+      }
+    }
+  },
+  "forwardPorts": [3000, 5000, 8080, 5173],
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "npm install",
+  "remoteUser": "node",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/data,target=/workspaces/data,type=bind,consistency=cached"
+  ]
+}

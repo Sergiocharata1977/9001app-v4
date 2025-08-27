@@ -1,40 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  ArrowLeft, 
-  Building, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Users, 
-  Target, 
-  Leaf, 
-  Droplets, 
-  Sun, 
-  Calendar,
-  FileText,
-  Pencil,
-  Trash2,
-  Hash,
-  Globe,
-  Thermometer,
-  TreePine,
-  Sprout,
-  Tractor,
-  UserCheck,
-  UserCog,
-  Eye
-} from 'lucide-react';
-import { clientesAgroService, contactosService } from '@/services/crmService';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import analisisRiesgoService, { AnalisisRiesgo } from '@/services/analisisRiesgoService';
+import { clientesAgroService, contactosService } from '@/services/crmService';
+import {
+    AlertTriangle,
+    ArrowLeft,
+    BarChart3,
+    Building,
+    Calendar,
+    Droplets,
+    Eye,
+    FileText,
+    Globe,
+    Hash,
+    Leaf,
+    Mail,
+    MapPin,
+    Pencil,
+    Phone,
+    Plus,
+    Sprout,
+    Target,
+    Thermometer,
+    Trash2,
+    TreePine,
+    TrendingDown,
+    TrendingUp,
+    UserCheck,
+    UserCog,
+    Users
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const ClienteAgroSingle = () => {
   const [cliente, setCliente] = useState(null);
   const [contacto, setContacto] = useState(null);
+  const [analisisRiesgo, setAnalisisRiesgo] = useState<AnalisisRiesgo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
@@ -53,6 +58,15 @@ const ClienteAgroSingle = () => {
         if (response.data?.contacto_id) {
           const contactoResponse = await contactosService.getContacto(response.data.contacto_id);
           setContacto(contactoResponse.data);
+        }
+        
+        // Cargar análisis de riesgo del cliente
+        try {
+          const analisisResponse = await analisisRiesgoService.getByCliente(id);
+          setAnalisisRiesgo(analisisResponse);
+        } catch (analisisError) {
+          console.log('No se encontraron análisis de riesgo para este cliente');
+          setAnalisisRiesgo([]);
         }
       } catch (err) {
         setError('No se pudo cargar el cliente. Es posible que haya sido eliminado.');
@@ -408,6 +422,82 @@ const ClienteAgroSingle = () => {
                     <span className="ml-2">{cliente.supervisor_comercial?.nombres || 'No asignado'}</span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Análisis de Riesgo */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+                  Análisis de Riesgo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analisisRiesgo.length > 0 ? (
+                  <div className="space-y-3">
+                    {analisisRiesgo.slice(0, 3).map((analisis) => (
+                      <div key={analisis.id} className="p-3 border rounded-lg bg-gray-50">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">{analisis.periodo_analisis}</span>
+                          <Badge 
+                            variant={
+                              analisis.categoria_riesgo === 'baja' ? 'default' :
+                              analisis.categoria_riesgo === 'media' ? 'secondary' :
+                              analisis.categoria_riesgo === 'alta' ? 'outline' : 'destructive'
+                            }
+                            className={
+                              analisis.categoria_riesgo === 'baja' ? 'bg-green-100 text-green-700' :
+                              analisis.categoria_riesgo === 'media' ? 'bg-yellow-100 text-yellow-700' :
+                              analisis.categoria_riesgo === 'alta' ? 'bg-orange-100 text-orange-700' :
+                              'bg-red-100 text-red-700'
+                            }
+                          >
+                            {analisis.categoria_riesgo.toUpperCase().replace('_', ' ')}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 mb-1">
+                          {analisis.puntaje_riesgo >= 80 ? <TrendingUp className="w-3 h-3 text-green-500" /> :
+                           analisis.puntaje_riesgo >= 60 ? <TrendingUp className="w-3 h-3 text-yellow-500" /> :
+                           analisis.puntaje_riesgo >= 40 ? <TrendingDown className="w-3 h-3 text-orange-500" /> :
+                           <TrendingDown className="w-3 h-3 text-red-500" />}
+                          <span className="text-xs text-gray-600">Puntaje: {analisis.puntaje_riesgo}/100</span>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {new Date(analisis.fecha_analisis).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                    {analisisRiesgo.length > 3 && (
+                      <p className="text-xs text-gray-500 text-center">
+                        +{analisisRiesgo.length - 3} análisis más
+                      </p>
+                    )}
+                    <Button 
+                      className="w-full mt-3" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate(`/app/crm/analisis-riesgo?cliente=${id}`)}
+                    >
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      Ver Todos
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <AlertTriangle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500 mb-3">No hay análisis de riesgo</p>
+                    <Button 
+                      className="w-full" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate(`/app/crm/analisis-riesgo?cliente=${id}`)}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Crear Análisis
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

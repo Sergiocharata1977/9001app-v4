@@ -288,6 +288,15 @@ export const moduleConfigurations = {
         description: 'Reportes y análisis',
         priority: 7,
         color: 'blue'
+      },
+      {
+        id: 'analisis-riesgo',
+        name: '🛡️ 8. Análisis de Riesgo',
+        icon: 'Shield',
+        path: '/app/crm/analisis-riesgo',
+        description: 'Sistema de manejo de riesgo crediticio',
+        priority: 8,
+        color: 'blue'
       }
     ]
   }

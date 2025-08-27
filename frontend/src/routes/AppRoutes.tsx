@@ -3,6 +3,7 @@ import ClienteAgroSingle from '@/components/crm/ClienteAgroSingle';
 import OportunidadAgroSingle from '@/components/crm/OportunidadAgroSingle';
 import TestClientes from '@/components/crm/TestClientes';
 import VendedoresListing from '@/components/crm/VendedoresListing';
+import AnalisisRiesgoListing from '@/components/crm/AnalisisRiesgoListing';
 import TestSimpleComponent from '@/components/TestSimpleComponent';
 import CalidadMenu from '@/components/menu/CalidadMenu';
 import MainMenuCards from '@/components/menu/MainMenuCards';
@@ -375,6 +376,7 @@ const AppRoutes = () => {
                 <Route path="satisfaccion" element={<SatisfaccionClientePage />} />
                 <Route path="reportes" element={<CRMDashboard />} />
                 <Route path="analytics" element={<CRMDashboard />} />
+                <Route path="analisis-riesgo" element={<AnalisisRiesgoListing />} />
               </Routes>
             </CRMLayout>
           </ProtectedRoute>

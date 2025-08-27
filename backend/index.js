@@ -49,7 +49,7 @@ const fileStructureRoutes = require('./routes/fileStructure.routes.js');
 // Importar rutas RAG del nuevo sistema
 let ragRoutes = null;
 try {
-  ragRoutes = require('./RAG-System/routes/ragRoutes.js');
+  ragRoutes = require('./routes/rag.routes.js');
   console.log('✅ Nuevo sistema RAG cargado correctamente');
 } catch (error) {
   console.log('⚠️  Nuevo módulo RAG no encontrado, continuando sin RAG...');
