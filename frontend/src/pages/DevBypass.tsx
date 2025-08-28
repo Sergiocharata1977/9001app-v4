@@ -20,7 +20,7 @@ const DevBypass: React.FC = () => {
         // Simular login exitoso
         await login(data.data.tokens.accessToken, data.data.user);
         console.log('✅ Bypass de desarrollo activado');
-        navigate('/dashboard');
+        navigate('/app/menu-cards');
       } else {
         setError('Error en el bypass de desarrollo');
       }
@@ -34,7 +34,7 @@ const DevBypass: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/app/menu-cards');
     }
   }, [isAuthenticated, navigate]);
 

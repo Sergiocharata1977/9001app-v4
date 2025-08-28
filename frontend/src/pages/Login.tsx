@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Building2, ArrowRight, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useAuthStore } from '../store/authStore';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,14 @@ const Login = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuthStore();
+
+  // Si ya está autenticado, redirigir
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/app/menu-cards');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -27,19 +36,19 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Simular login por ahora
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Usar el store de autenticación real
+      await login(formData);
       
       setIsSubmitted(true);
       toast.success('¡Inicio de sesión exitoso!');
       
       // Redirigir después de un breve delay
       setTimeout(() => {
-        navigate('/');
+        navigate('/app/menu-cards');
       }, 1000);
     } catch (error) {
-      toast.error(error.message || 'Error al iniciar sesión');
       console.error('Login error:', error);
+      toast.error(error.message || 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
     }

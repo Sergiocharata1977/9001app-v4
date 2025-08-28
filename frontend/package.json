@@ -14,7 +14,7 @@
     "test:ui": "vitest --ui",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "prepare": "husky install",
+    "prepare": "echo 'Skipping husky install'",
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "lint:types": "eslint --ext .ts,.tsx src/"

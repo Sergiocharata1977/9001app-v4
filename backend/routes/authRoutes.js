@@ -1,12 +1,12 @@
 const express = require('express');
-const { register, login, refreshToken, logout, getProfile, verifyToken } = require('../controllers/authController.js');
+const { register, login, refreshToken, logout, verifyToken } = require('../controllers/authController.js');
 const authenticateToken = require('../middleware/authMiddleware.js');
 const { auditLogin, auditLogout, auditRegister } = require('../middleware/auditMiddleware.js');
 
 const router = express.Router();
 
 // @route   POST api/auth/register
-// @desc    Registrar una nueva organización y su usuario admin
+// @desc    Registrar usuario
 // @access  Public
 router.post('/register', auditRegister, register);
 
@@ -21,14 +21,9 @@ router.post('/login', login);
 router.post('/refresh', refreshToken);
 
 // @route   POST api/auth/logout
-// @desc    Cerrar sesión y revocar refresh token
-// @access  Public
-router.post('/logout', auditLogout, logout);
-
-// @route   GET api/auth/profile
-// @desc    Obtener perfil del usuario autenticado
+// @desc    Cerrar sesión
 // @access  Private
-router.get('/profile', authenticateToken, getProfile);
+router.post('/logout', authenticateToken, auditLogout, logout);
 
 // @route   GET api/auth/verify
 // @desc    Verificar si el token es válido

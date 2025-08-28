@@ -1,134 +1,98 @@
+// Interfaces para el sistema de auditorías ISO 9001
+
 export interface Auditoria {
-  id: number;
-  codigo?: string;
-  titulo?: string;
-  descripcion?: string;
-  auditor_lider?: string;
-  equipo_auditor?: string;
-  fecha_inicio?: string;
-  fecha_fin?: string;
-  estado?: string;
-  tipo?: string;
-  alcance?: string;
-  criterios?: string;
-  areas_auditadas?: string;
-  hallazgos_count?: number;
-  no_conformidades_count?: number;
-  observaciones_count?: number;
+  id: string;
+  codigo: string;
+  titulo: string;
+  descripcion: string;
+  estado: AuditoriaEstado;
+  fecha_programada: string | null;
+  fecha_realizacion: string | null;
+  auditor_lider: string;
+  auditores: string[];
+  alcance: string;
+  criterios: string;
+  tipo: AuditoriaTipo;
+  areas: string[] | string; // Puede ser array o string JSON
+  duracion_estimada: string;
+  total_aspectos: number;
+  total_relaciones: number;
   created_at?: string;
   updated_at?: string;
+  organization_id?: number;
+}
+
+export type AuditoriaEstado = 
+  | 'programacion' 
+  | 'planificacion' 
+  | 'ejecucion' 
+  | 'informe' 
+  | 'seguimiento' 
+  | 'completada' 
+  | 'cancelada';
+
+export type AuditoriaTipo = 'interna' | 'externa' | 'proveedor' | 'cliente';
+
+export interface AuditoriaEstadoConfig {
+  value: AuditoriaEstado;
+  label: string;
+  color: string;
+  bgColor: string;
+  icon?: string;
 }
 
 export interface AuditoriaFormData {
   codigo: string;
   titulo: string;
   descripcion: string;
+  estado: AuditoriaEstado;
+  fecha_programada: string | null;
+  fecha_realizacion: string | null;
   auditor_lider: string;
-  equipo_auditor: string;
-  fecha_inicio: string;
-  fecha_fin: string;
-  estado: string;
-  tipo: string;
+  auditores: string[];
   alcance: string;
   criterios: string;
-  areas_auditadas: string;
+  tipo: AuditoriaTipo;
+  areas: string[];
+  duracion_estimada: string;
 }
 
-export interface CreateAuditoriaData {
-  codigo: string;
-  titulo: string;
-  descripcion: string;
-  auditor_lider: string;
-  equipo_auditor: string;
-  fecha_inicio: string;
-  fecha_fin: string;
-  estado: string;
-  tipo: string;
-  alcance: string;
-  criterios: string;
-  areas_auditadas: string;
-}
-
-export interface UpdateAuditoriaData {
-  codigo?: string;
-  titulo?: string;
-  descripcion?: string;
-  auditor_lider?: string;
-  equipo_auditor?: string;
-  fecha_inicio?: string;
-  fecha_fin?: string;
+export interface AuditoriaAspecto {
+  id: string;
+  auditoria_id: string;
+  aspecto: string;
+  cumplimiento: 'cumple' | 'no_cumple' | 'observacion';
+  observaciones: string;
+  accion_correctiva?: string;
+  responsable?: string;
+  fecha_limite?: string;
   estado?: string;
-  tipo?: string;
-  alcance?: string;
-  criterios?: string;
-  areas_auditadas?: string;
+}
+
+export interface AuditoriaRelacion {
+  id: string;
+  auditoria_id: string;
+  proceso_id: string;
+  indicador_id?: string;
+  hallazgo_id?: string;
+  accion_id?: string;
+  tipo_relacion: 'proceso' | 'indicador' | 'hallazgo' | 'accion';
+  observaciones?: string;
+}
+
+export interface AuditoriaFilters {
+  estado?: AuditoriaEstado;
+  tipo?: AuditoriaTipo;
+  auditor_lider?: string;
+  fecha_desde?: string;
+  fecha_hasta?: string;
+  areas?: string[];
 }
 
 export interface AuditoriaStats {
   total: number;
-  planificacion: number;
-  programacion: number;
-  ejecucion: number;
-  informe: number;
-  seguimiento: number;
-  cerrada: number;
-}
-
-export interface AuditoriaFilters {
-  search?: string;
-  estado?: string;
-  tipo?: string;
-  fechaDesde?: string;
-  fechaHasta?: string;
-  auditor?: string;
-  departamento?: string;
-  prioridad?: string;
-  proceso_sgc?: number;
-  norma?: number;
-  es_recurrente?: boolean;
-  activo?: boolean;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export type AuditoriaViewMode = 'kanban' | 'grid' | 'list';
-
-export type AuditoriaEstado = 'planificacion' | 'programacion' | 'ejecucion' | 'informe' | 'seguimiento' | 'cerrada';
-
-export interface EstadoConfig {
-  colorClasses: string;
-  label: string;
-  bgColor: string;
-}
-
-export interface AuditoriaField {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}
-
-export interface AuditoriaService {
-  getAllAuditorias: () => Promise<Auditoria[]>;
-  getAuditoriaById: (id: number) => Promise<Auditoria>;
-  createAuditoria: (data: AuditoriaFormData) => Promise<Auditoria>;
-  updateAuditoria: (id: number, data: Partial<AuditoriaFormData>) => Promise<Auditoria>;
-  deleteAuditoria: (id: number) => Promise<void>;
-  changeEstado: (id: number, estado: AuditoriaEstado) => Promise<void>;
-}
-
-export interface AuditoriaKanbanColumn {
-  id: AuditoriaEstado;
-  title: string;
-  color: string;
-  auditorias: Auditoria[];
-}
-
-export interface AuditoriaCardProps {
-  auditoria: Auditoria;
-  onClick: (id: number) => void;
-  onEdit: (auditoria: Auditoria) => void;
-  onDelete: (id: number) => void;
-  onStateChange: (id: number, estado: AuditoriaEstado) => void;
+  por_estado: Record<AuditoriaEstado, number>;
+  por_tipo: Record<AuditoriaTipo, number>;
+  proximas: number;
+  vencidas: number;
 }

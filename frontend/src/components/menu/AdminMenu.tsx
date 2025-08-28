@@ -3,111 +3,134 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import {
-    ArrowLeft,
-    ArrowRight,
-    Heart,
-    RefreshCw,
-    Shield,
-    Star as StarIcon,
-    Target,
-    Users
+  ArrowLeft,
+  ArrowRight,
+  Shield,
+  Users,
+  Building,
+  Settings,
+  FileText,
+  BarChart3,
+  UserCheck,
+  Key,
+  Database,
+  Bell
 } from 'lucide-react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const MainMenuCards = ({ onBackToSidebar }) => {
+const AdminMenu = ({ onBackToMainMenu }) => {
   const navigate = useNavigate();
 
-  // Configuración de módulos del sistema
-  const systemModules = [
+  // Configuración de módulos de administración
+  const adminModules = [
     {
-      id: 'calidad',
-      title: 'Calidad',
-      subtitle: 'Planificación y Gestión de Calidad',
-      description: 'Planificación, revisión por dirección, normas y documentos',
-      icon: Target,
-      color: 'emerald',
-      gradient: 'from-emerald-500 to-emerald-600',
-      hoverGradient: 'from-emerald-600 to-emerald-700',
-      path: '/app/calidad',
-      metrics: {
-        objetivos: '12',
-        auditorias: '4',
-        hallazgos: '8',
-        documentos: '45'
-      },
-      features: ['Planificación estratégica', 'Revisión por dirección', 'Normas ISO', 'Gestión documental']
-    },
-    {
-      id: 'rrhh',
-      title: 'RRHH',
-      subtitle: 'Recursos Humanos',
-      description: 'Gestión del capital humano y desarrollo organizacional',
+      id: 'usuarios',
+      title: 'Gestión de Usuarios',
+      subtitle: 'Administrar usuarios del sistema',
+      description: 'Crear, editar y gestionar usuarios, roles y permisos',
       icon: Users,
       color: 'blue',
       gradient: 'from-blue-500 to-blue-600',
       hoverGradient: 'from-blue-600 to-blue-700',
-      path: '/app/rrhh',
+      path: '/app/usuarios',
       metrics: {
-        empleados: '25',
-        capacitaciones: '8',
-        evaluaciones: '15',
-        competencias: '12'
+        activos: '18',
+        inactivos: '3',
+        roles: '5',
+        permisos: '12'
       },
-      features: ['Gestión de personal', 'Capacitaciones', 'Evaluaciones', 'Competencias']
+      features: ['Crear usuarios', 'Asignar roles', 'Gestionar permisos', 'Auditoría de acceso']
     },
     {
-      id: 'procesos',
-      title: 'Procesos',
-      subtitle: 'Gestión de Procesos',
-      description: 'Procesos internos, mejoras y optimización',
-      icon: RefreshCw,
+      id: 'organizaciones',
+      title: 'Organizaciones',
+      subtitle: 'Gestión multi-organización',
+      description: 'Administrar organizaciones, planes y configuraciones',
+      icon: Building,
+      color: 'emerald',
+      gradient: 'from-emerald-500 to-emerald-600',
+      hoverGradient: 'from-emerald-600 to-emerald-700',
+      path: '/app/admin/organization',
+      metrics: {
+        organizaciones: '3',
+        planes: '4',
+        suscripciones: '8',
+        configuraciones: '15'
+      },
+      features: ['Crear organizaciones', 'Gestionar planes', 'Configuraciones', 'Suscripciones']
+    },
+    {
+      id: 'configuracion',
+      title: 'Configuración',
+      subtitle: 'Configuración del sistema',
+      description: 'Configuraciones generales, parámetros y ajustes',
+      icon: Settings,
       color: 'purple',
       gradient: 'from-purple-500 to-purple-600',
       hoverGradient: 'from-purple-600 to-purple-700',
-      path: '/app/procesos-menu',
+      path: '/app/configuracion',
       metrics: {
-        procesos: '15',
-        mejoras: '6',
-        indicadores: '22',
-        productos: '8'
+        parametros: '25',
+        ajustes: '12',
+        integraciones: '4',
+        backups: '8'
       },
-      features: ['Gestión de procesos', 'Mejoras continuas', 'Indicadores', 'Productos']
+      features: ['Parámetros del sistema', 'Integraciones', 'Backups', 'Mantenimiento']
     },
     {
-      id: 'crm-satisfaccion',
-      title: 'CRM y Satisfacción',
-      subtitle: 'Gestión de Clientes y Satisfacción',
-      description: 'CRM, satisfacción de clientes y gestión comercial',
-      icon: Heart,
-      color: 'indigo',
-      gradient: 'from-indigo-500 to-indigo-600',
-      hoverGradient: 'from-indigo-600 to-indigo-700',
-      path: '/app/crm',
+      id: 'reportes',
+      title: 'Reportes y Analytics',
+      subtitle: 'Reportes y análisis del sistema',
+      description: 'Generar reportes, estadísticas y análisis',
+      icon: BarChart3,
+      color: 'orange',
+      gradient: 'from-orange-500 to-orange-600',
+      hoverGradient: 'from-orange-600 to-orange-700',
+      path: '/app/reportes',
       metrics: {
-        clientes: '45',
-        oportunidades: '12',
-        satisfaccion: '92%',
-        ventas: '156'
+        reportes: '12',
+        dashboards: '6',
+        exportaciones: '45',
+        alertas: '8'
       },
-      features: ['Gestión de clientes', 'Satisfacción', 'Oportunidades', 'Ventas']
+      features: ['Reportes personalizados', 'Dashboards', 'Exportaciones', 'Alertas automáticas']
     },
     {
-      id: 'administracion',
-      title: 'Administración',
-      subtitle: 'Gestión de Organización',
-      description: 'Administración de usuarios, configuración y gestión organizacional',
+      id: 'seguridad',
+      title: 'Seguridad',
+      subtitle: 'Gestión de seguridad y auditoría',
+      description: 'Configurar seguridad, logs y auditoría del sistema',
       icon: Shield,
+      color: 'red',
+      gradient: 'from-red-500 to-red-600',
+      hoverGradient: 'from-red-600 to-red-700',
+      path: '/app/seguridad',
+      metrics: {
+        logs: '1,234',
+        alertas: '5',
+        intentos: '23',
+        bloqueos: '2'
+      },
+      features: ['Logs de auditoría', 'Alertas de seguridad', 'Políticas de acceso', 'Backup de seguridad']
+    },
+    {
+      id: 'documentacion',
+      title: 'Documentación',
+      subtitle: 'Documentación técnica y guías',
+      description: 'Acceso a documentación, APIs y guías técnicas',
+      icon: FileText,
       color: 'slate',
       gradient: 'from-slate-500 to-slate-600',
       hoverGradient: 'from-slate-600 to-slate-700',
-      path: '/app/administracion',
+      path: '/app/documentacion',
       metrics: {
-        usuarios: '18',
-        organizaciones: '3',
-        configuraciones: '12',
-        reportes: '8'
+        guias: '15',
+        apis: '8',
+        ejemplos: '25',
+        versiones: '3'
       },
-      features: ['Gestión de usuarios', 'Configuración organizacional', 'Reportes', 'Seguridad']
+      features: ['Guías de usuario', 'Documentación API', 'Ejemplos de uso', 'Changelog']
     }
   ];
 
@@ -118,10 +141,10 @@ const MainMenuCards = ({ onBackToSidebar }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-6">
       {/* Botón para volver al menú principal */}
-      {onBackToSidebar && (
+      {onBackToMainMenu && (
         <div className="max-w-6xl mx-auto mb-6">
           <Button
-            onClick={onBackToSidebar}
+            onClick={onBackToMainMenu}
             variant="outline"
             className="bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:border-slate-300 shadow-sm"
           >
@@ -140,19 +163,19 @@ const MainMenuCards = ({ onBackToSidebar }) => {
           className="flex items-center justify-center space-x-3 mb-4"
         >
           <div className="w-16 h-16 bg-gradient-to-br from-slate-600 to-slate-800 rounded-2xl flex items-center justify-center shadow-lg">
-            <StarIcon className="w-8 h-8 text-white" />
+            <Shield className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-slate-800">9001app</h1>
-            <p className="text-lg text-slate-600 mt-2">Accede a los diferentes módulos de tu sistema unificado</p>
+            <h1 className="text-4xl font-bold text-slate-800">Administración</h1>
+            <p className="text-lg text-slate-600 mt-2">Gestión completa de la organización y el sistema</p>
           </div>
         </motion.div>
       </div>
 
       {/* Grid de Tarjetas de Módulos */}
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {systemModules.map((module, index) => (
+          {adminModules.map((module, index) => (
             <motion.div
               key={module.id}
               initial={{ opacity: 0, y: 20 }}
@@ -205,7 +228,7 @@ const MainMenuCards = ({ onBackToSidebar }) => {
 
                   {/* Características del módulo */}
                   <div className="mb-6">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3">Características principales:</h4>
+                    <h4 className="text-sm font-semibold text-slate-700 mb-3">Funcionalidades:</h4>
                     <div className="space-y-2">
                       {module.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center space-x-2">
@@ -241,10 +264,10 @@ const MainMenuCards = ({ onBackToSidebar }) => {
           <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-200">
             <div className="flex items-center justify-center space-x-2 mb-3">
               <Shield className="w-5 h-5 text-slate-600" />
-              <span className="text-sm font-semibold text-slate-700">Sistema SGC ISO 9001</span>
+              <span className="text-sm font-semibold text-slate-700">Panel de Administración</span>
             </div>
             <p className="text-sm text-slate-600">
-              Sistema de Gestión de Calidad certificado bajo estándares ISO 9001:2015
+              Gestiona usuarios, organizaciones, configuraciones y seguridad del sistema
             </p>
           </div>
         </motion.div>
@@ -253,4 +276,4 @@ const MainMenuCards = ({ onBackToSidebar }) => {
   );
 };
 
-export default MainMenuCards;
+export default AdminMenu;

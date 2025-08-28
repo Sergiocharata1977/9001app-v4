@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/coordinator.js",
-    "dev": "ts-node src/coordinator.ts",
+    "dev": "echo 'Coordinador de agentes deshabilitado temporalmente'",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run dev",
     "security": "node dist/coordinator.js security",
     "structure": "node dist/coordinator.js structure",
     "typescript": "node dist/coordinator.js typescript",

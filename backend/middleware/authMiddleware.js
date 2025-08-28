@@ -38,9 +38,9 @@ const authMiddleware = async (req, res, next) => {
     
     // Obtener usuario actual de la base de datos
     const userResult = await mongoClient.execute({
-      sql: `SELECT id, organization_id, name, email, role, is_active 
+      sql: `SELECT _id as id, organization_id, name, email, role, is_active 
             FROM usuarios 
-            WHERE id = ? AND is_active = 1`,
+            WHERE _id = ? AND is_active = 1`,
       args: [userId]
     });
 

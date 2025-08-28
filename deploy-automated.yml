@@ -1,0 +1,116 @@
+name: 🚀 Despliegue Automático - Prueba y Producción
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+  PM2_APP_NAME: '9001app'
+
+jobs:
+  # 🧪 DESPLIEGUE DE PRUEBA (automático en cada push)
+  deploy-staging:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Instalar dependencias Backend
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: 📦 Instalar dependencias Frontend
+      working-directory: ./frontend
+      run: npm ci
+      
+    - name: 🏗️ Build Frontend
+      working-directory: ./frontend
+      run: npm run build
+      
+    - name: 🏗️ Build Backend
+      working-directory: ./backend
+      run: npm run build
+      
+    - name: 🧪 Tests
+      run: |
+        cd backend && npm test
+        cd ../frontend && npm test
+        
+    - name: 🚀 Desplegar a Staging
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          cd /var/www/9001app-staging
+          git pull origin develop
+          npm ci
+          npm run build
+          pm2 restart 9001app-staging
+          echo "✅ Staging desplegado en: https://staging.9001app.com"
+
+  # 🎯 DESPLIEGUE DE PRODUCCIÓN (manual desde main)
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: deploy-staging
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Instalar dependencias
+      run: |
+        cd backend && npm ci
+        cd ../frontend && npm ci
+        
+    - name: 🏗️ Build
+      run: |
+        cd frontend && npm run build
+        cd ../backend && npm run build
+        
+    - name: 🚀 Desplegar a Producción
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          cd /var/www/9001app
+          git pull origin main
+          npm ci
+          npm run build
+          pm2 restart 9001app
+          echo "✅ Producción desplegada en: https://9001app.com"
+
+  # 📊 Notificaciones
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: 📧 Notificar resultado
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}

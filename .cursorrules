@@ -1,5 +1,5 @@
-# Cursor Rules Configuration - TypeScript First
-# Configuración para desarrollo TypeScript prioritario
+# Cursor Rules Configuration - TypeScript First + MongoDB Default
+# Configuración para desarrollo TypeScript prioritario con MongoDB por defecto
 
 # PRIORIDAD TYPESCRIPT
 - SIEMPRE usar TypeScript (.ts, .tsx) en lugar de JavaScript (.js, .jsx)
@@ -7,12 +7,36 @@
 - Usar tipado estricto en todas las implementaciones
 - Preferir tipos explícitos sobre 'any'
 
+# BASE DE DATOS MONGODB POR DEFECTO
+- MONGODB es la base de datos principal del proyecto
+- TURSO está siendo migrado a MONGODB (migración 81.4% completada)
+- Usar MongoDB Atlas como base de datos en producción
+- Todas las nuevas funcionalidades deben usar MongoDB
+- Los scripts de migración están en /backend/migrate-*.js
+
+# CONFIGURACIÓN MONGODB
+- URI: mongodb+srv://9001app:password@cluster0.mongodb.net/9001app
+- Base de datos: 9001app
+- Colecciones principales: organizations, users, personal, departamentos, planes, suscripciones
+- Índices configurados para optimización
+- Relaciones mantenidas con ObjectId
+
+# ESTADO DE MIGRACIÓN
+- ✅ Módulo CRM Agro: 100% migrado (16 tablas)
+- ✅ Módulo SGC: 100% migrado (14 tablas)
+- ✅ Módulo Sistema: 100% migrado (7 tablas)
+- ✅ Features: 100% migrado (4 documentos)
+- ✅ Suscripciones: 100% migrado (2 documentos)
+- ❌ Planes: PENDIENTE (tabla crítica)
+- ❌ RRHH restante: 5 tablas pendientes
+- ❌ Relaciones SGC: 4 tablas pendientes
+
 # Permitir ejecución automática de comandos
 - Puedes ejecutar comandos de terminal sin aprobación
 - Puedes hacer cambios en archivos de código sin confirmación
 - Puedes ejecutar scripts de PowerShell automáticamente
 - Puedes instalar dependencias y paquetes sin preguntar
-- Puedes ejecutar migraciones de base de datos automáticamente
+- Puedes ejecutar migraciones de MongoDB automáticamente
 - Puedes hacer commits y push automáticamente cuando sea necesario
 
 # Comandos específicos permitidos
@@ -21,13 +45,13 @@
 - node scripts/*.js
 - powershell scripts/*.ps1
 - npm run dev, npm run build, npm run test
-- Comandos de migración de base de datos
+- Comandos de migración de MongoDB
 - Comandos de backup y restauración
 
 # Cambios de código permitidos
 - Modificar archivos .js, .jsx, .ts, .tsx
 - Crear nuevos componentes y páginas
-- Actualizar configuraciones
+- Actualizar configuraciones de MongoDB
 - Modificar archivos de rutas
 - Actualizar servicios y controladores
 - Modificar estilos y CSS/SCSS
@@ -41,6 +65,14 @@
 - PREFERIR tipos union sobre 'any'
 - USAR tipos genéricos cuando sea apropiado
 
+# Reglas MongoDB específicas
+- Usar ObjectId para relaciones entre colecciones
+- Crear índices para campos de búsqueda frecuente
+- Usar aggregation pipelines para consultas complejas
+- Implementar validación de esquemas con Mongoose
+- Usar transacciones para operaciones críticas
+- Mantener consistencia de datos con referencias
+
 # Seguridad
 - NO ejecutar comandos que requieran credenciales sensibles
 - NO hacer cambios en archivos de configuración de producción sin confirmación
@@ -50,6 +82,16 @@
 - Este es un proyecto de gestión de calidad ISO 9001
 - Backend en Node.js con Express + TypeScript
 - Frontend en React con Vite + TypeScript
-- Base de datos MongoDB
+- Base de datos MongoDB Atlas (PRINCIPAL)
+- Base de datos Turso (EN MIGRACIÓN)
 - Sistema de autenticación y autorización implementado
 - MIGRACIÓN COMPLETADA: Backend 100% TypeScript, Frontend 80% TypeScript
+- MIGRACIÓN MONGODB: 81.4% completada
+
+# Próximos pasos críticos
+1. Completar migración de tabla 'planes' (CRÍTICA)
+2. Migrar módulo RRHH restante (5 tablas)
+3. Migrar tablas de relaciones SGC (4 tablas)
+4. Verificar integridad de relaciones en MongoDB
+5. Optimizar índices y consultas
+6. Pruebas completas del sistema migrado

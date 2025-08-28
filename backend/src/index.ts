@@ -15,6 +15,61 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ===== RUTAS PÚBLICAS (SIN AUTENTICACIÓN) =====
+
+// RUTA DE BYPASS TEMPORAL PARA DESARROLLO - DEBE IR PRIMERO
+app.get('/api/dev/bypass', (req: Request, res: Response) => {
+  const mockUser = {
+    id: 1,
+    email: 'admin@9001app.com',
+    role: 'admin',
+    organization_id: 1,
+    organization_name: '9001app Demo',
+    organization_plan: 'premium'
+  };
+
+  const accessToken = jwt.sign(
+    { 
+      userId: mockUser.id, 
+      organizationId: mockUser.organization_id, 
+      role: mockUser.role 
+    },
+    process.env.JWT_SECRET || 'fallback-secret',
+    { expiresIn: '24h' }
+  );
+
+  res.json({
+    success: true,
+    message: 'Bypass de desarrollo activado',
+    data: {
+      user: mockUser,
+      tokens: {
+        accessToken,
+        refreshToken: 'dev-bypass-token'
+      }
+    }
+  });
+});
+
+// Ruta de salud
+app.get('/api/health', (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+  });
+});
+
+// Ruta de prueba
+app.get('/api/test', (req: Request, res: Response) => {
+  res.json({ message: 'Backend funcionando correctamente!' });
+});
+
+// ===== FIN RUTAS PÚBLICAS =====
+
 // Importar rutas
 import accionesRoutes from '../routes/acciones.routes.js';
 import adminRoutes from '../routes/admin.routes.js';
@@ -44,15 +99,7 @@ import puestosRoutes from '../routes/puestos.routes.js';
 import suscripcionesRoutes from '../routes/suscripciones.js';
 import userRoutes from '../routes/userRoutes.js';
 
-// Importar rutas RAG del nuevo sistema - COMENTADO TEMPORALMENTE
-// let ragRoutes: any = null;
-// try {
-//   ragRoutes = require('../RAG-System/routes/ragRoutes.js');
-//   console.log('✅ Nuevo sistema RAG cargado correctamente');
-// } catch (error: any) {
-//   console.log('⚠️  Nuevo módulo RAG no encontrado, continuando sin RAG...');
-//   console.log('Error:', error.message);
-// }
+// ===== RUTAS CON AUTENTICACIÓN =====
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -102,22 +149,22 @@ app.use('/api/indicadores', indicadoresRoutes);
 // Rutas de mediciones
 app.use('/api/mediciones', medicionesRoutes);
 
+// Rutas de auditorías
+app.use('/api/auditorias', auditoriasRoutes);
+
 // Rutas de hallazgos
 app.use('/api/hallazgos', hallazgosRoutes);
 
 // Rutas de acciones
 app.use('/api/acciones', accionesRoutes);
 
-// Rutas de auditorías
-app.use('/api/auditorias', auditoriasRoutes);
-
 // Rutas de minutas
 app.use('/api/minutas', minutasRoutes);
 
-// Rutas de políticas de calidad
+// Rutas de política de calidad
 app.use('/api/politica-calidad', politicaCalidadRoutes);
 
-// Rutas de events (básico)
+// Rutas de eventos
 app.use('/api/events', eventsRoutes);
 
 // Rutas de coordinación de agentes
@@ -132,70 +179,10 @@ app.use('/api/database', databaseRoutes);
 // Rutas de estructura de archivos
 app.use('/api/file-structure', fileStructureRoutes);
 
-// Rutas de RAG (si está disponible) - COMENTADO TEMPORALMENTE
-// if (ragRoutes) {
-//   app.use('/api/rag', ragRoutes);
-//   console.log('✅ Rutas RAG registradas');
-// }
-
 // Rutas de productos (requieren autenticación)
 app.use('/api/productos', authMiddleware, productosRoutes);
 
-// ===== SISTEMAS ALTERNATIVOS DE BÚSQUEDA ===== - COMENTADO TEMPORALMENTE
-// import alternativeSearchRoutes from '../routes/alternativeSearch.routes.js';
-// app.use('/api/alternative', alternativeSearchRoutes);
-// ===== FIN SISTEMAS ALTERNATIVOS =====
-
-// Ruta de prueba
-app.get('/api/test', (req: Request, res: Response) => {
-  res.json({ message: 'Backend funcionando correctamente!' });
-});
-
-// RUTA DE BYPASS TEMPORAL PARA DESARROLLO
-app.get('/api/dev/bypass', (req: Request, res: Response) => {
-  const mockUser = {
-    id: 1,
-    email: 'admin@9001app.com',
-    role: 'admin',
-    organization_id: 1,
-    organization_name: '9001app Demo',
-    organization_plan: 'premium'
-  };
-
-  const accessToken = jwt.sign(
-    { 
-      userId: mockUser.id, 
-      organizationId: mockUser.organization_id, 
-      role: mockUser.role 
-    },
-    process.env.JWT_SECRET || 'fallback-secret',
-    { expiresIn: '24h' }
-  );
-
-  res.json({
-    success: true,
-    message: 'Bypass de desarrollo activado',
-    data: {
-      user: mockUser,
-      tokens: {
-        accessToken,
-        refreshToken: 'dev-bypass-token'
-      }
-    }
-  });
-});
-
-// Ruta de salud
-app.get('/api/health', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
-  });
-});
+// ===== FIN RUTAS CON AUTENTICACIÓN =====
 
 // Manejo de errores
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

@@ -11,7 +11,6 @@ const {
   createOrganization,
   updateOrganizationPlan
 } = require('../controllers/userController.js');
-const { getProfile } = require('../controllers/authController.js');
 const { auditCreateUser, auditUpdateUser, auditDeleteUser } = require('../middleware/auditMiddleware.js');
 
 const router = express.Router();
@@ -57,7 +56,23 @@ router.delete('/:id',
 // @route   GET /api/users/profile
 // @desc    Obtener perfil del usuario actual
 // @access  Private (Todos los usuarios autenticados)
-router.get('/profile', getProfile);
+router.get('/profile', (req, res) => {
+  // El middleware de autenticación ya agregó el usuario al req
+  res.json({
+    success: true,
+    data: {
+      user: {
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+        organization_id: req.user.organization_id,
+        organization_name: req.user.organization_name,
+        organization_plan: req.user.organization_plan
+      }
+    }
+  });
+});
 
 // ===============================================
 // NIVEL 2: GESTIÓN GLOBAL (SUPER-ADMIN)
