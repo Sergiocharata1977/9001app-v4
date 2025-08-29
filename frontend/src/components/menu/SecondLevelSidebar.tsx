@@ -12,11 +12,12 @@ import {
     Package,
     RefreshCw,
     Search,
+    Settings,
     Star,
     Target,
     Users
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const SecondLevelSidebar = ({ moduleType, onBackToMainMenu }) => {
@@ -149,6 +150,43 @@ const SecondLevelSidebar = ({ moduleType, onBackToMainMenu }) => {
                         { name: 'Satisfacción', path: '/app/satisfaccion-cliente' },
                         { name: 'Encuestas', path: '/app/encuestas' },
                         { name: 'Reportes', path: '/app/reportes' }
+                    ]
+                }
+            ]
+        },
+        admin: {
+            title: 'Administración',
+            icon: Settings,
+            color: 'slate',
+            sections: [
+                {
+                    id: 'usuarios',
+                    title: 'Usuarios',
+                    icon: Users,
+                    items: [
+                        { name: 'Gestión de Usuarios', path: '/app/usuarios' },
+                        { name: 'Organizaciones', path: '/app/admin/organization' },
+                        { name: 'Super Admin', path: '/app/admin/super' }
+                    ]
+                },
+                {
+                    id: 'sistema',
+                    title: 'Sistema',
+                    icon: Settings,
+                    items: [
+                        { name: 'Configuración', path: '/app/configuracion' },
+                        { name: 'Seguridad', path: '/app/seguridad' },
+                        { name: 'Reportes', path: '/app/reportes' }
+                    ]
+                },
+                {
+                    id: 'documentacion',
+                    title: 'Documentación',
+                    icon: FileText,
+                    items: [
+                        { name: 'Documentación Técnica', path: '/app/documentacion' },
+                        { name: 'Manual de Usuario', path: '/app/documentacion/manual-usuario' },
+                        { name: 'API Docs', path: '/app/documentacion/api' }
                     ]
                 }
             ]

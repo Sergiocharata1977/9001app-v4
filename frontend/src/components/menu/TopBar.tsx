@@ -26,7 +26,7 @@ import {
 import useAuthStore from '@/store/authStore';
 import { useNavigate } from 'react-router-dom';
 
-const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
+const TopBar = ({ onToggleSidebar, sidebarOpen, showSidebarToggle = true }) => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
@@ -50,14 +50,16 @@ const TopBar = ({ onToggleSidebar, sidebarOpen }) => {
     >
       {/* Left Section */}
       <div className="flex items-center gap-sgc-gap">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onToggleSidebar}
-          className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sgc"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+        {showSidebarToggle && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleSidebar}
+            className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sgc"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
 
         {/* Search Bar */}
         <div className="relative hidden md:block">

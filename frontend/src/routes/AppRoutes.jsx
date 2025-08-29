@@ -97,11 +97,12 @@ const AuditoriaFormPage = lazy(() => import("../components/auditorias/AuditoriaF
 // Menú de Tarjetas
 const MainMenuCards = lazy(() => import("../components/menu/MainMenuCards"));
 
-// Menús de Segundo Nivel
-const CalidadMenu = lazy(() => import("../components/menu/CalidadMenu"));
-const RRHHMenu = lazy(() => import("../components/menu/RRHHMenu"));
-const ProcesosMenu = lazy(() => import("../components/menu/ProcesosMenu"));
-const CRMSatisfaccionMenu = lazy(() => import("../components/menu/CRMSatisfaccionMenu"));
+// Menús de Segundo Nivel - Ahora manejados por SecondLevelSidebar
+// const CalidadMenu = lazy(() => import("../components/menu/CalidadMenu"));
+// const RRHHMenu = lazy(() => import("../components/menu/RRHHMenu"));
+// const ProcesosMenu = lazy(() => import("../components/menu/ProcesosMenu"));
+// const CRMSatisfaccionMenu = lazy(() => import("../components/menu/CRMSatisfaccionMenu"));
+// const AdminMenu = lazy(() => import("../components/menu/AdminMenu"));
 
 // Páginas de Mejora
 const HallazgosPage = lazy(() => import("../pages/Hallazgos/HallazgosPage2"));
@@ -172,11 +173,12 @@ const AppRoutes = () => {
                   {/* Menú Principal de Tarjetas */}
                   <Route path="menu-cards" element={<MainMenuCards />} />
                   
-                  {/* Menús de Segundo Nivel */}
-                  <Route path="calidad" element={<CalidadMenu />} />
-                  <Route path="rrhh" element={<RRHHMenu />} />
-                  <Route path="procesos-menu" element={<ProcesosMenu />} />
-                  <Route path="crm" element={<CRMSatisfaccionMenu />} />
+                  {/* Menús de Segundo Nivel - Ahora manejados por SecondLevelSidebar */}
+                  <Route path="calidad" element={<div className="p-6"><h1>Módulo de Calidad</h1><p>Selecciona una opción del sidebar</p></div>} />
+                  <Route path="rrhh" element={<div className="p-6"><h1>Módulo de RRHH</h1><p>Selecciona una opción del sidebar</p></div>} />
+                  <Route path="procesos-menu" element={<div className="p-6"><h1>Módulo de Procesos</h1><p>Selecciona una opción del sidebar</p></div>} />
+                  <Route path="crm" element={<div className="p-6"><h1>Módulo CRM</h1><p>Selecciona una opción del sidebar</p></div>} />
+                  <Route path="administracion" element={<div className="p-6"><h1>Módulo de Administración</h1><p>Selecciona una opción del sidebar</p></div>} />
                   
                   {/* Páginas principales */}
                   <Route path="calendario" element={<CalendarPage />} />
