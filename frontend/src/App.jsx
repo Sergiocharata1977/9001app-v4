@@ -1,13 +1,14 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { ThemeProvider } from './context/ThemeContext.jsx';
-import { AuthProvider } from './context/AuthContext.jsx';
-import AppRoutes from './routes/AppRoutes.jsx';
-import { QueryProvider } from './hooks/useQueryClient.jsx';
-import { useAuthInitializer } from './hooks/useAuthInitializer.js';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import LoginDebug from './components/common/LoginDebug.jsx';
+import SuperAdminRedirect from './components/common/SuperAdminRedirect.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
+import { useAuthInitializer } from './hooks/useAuthInitializer.js';
+import { QueryProvider } from './hooks/useQueryClient.jsx';
 import './index.css';
+import AppRoutes from './routes/AppRoutes.jsx';
 
 // Componente interno que maneja la inicialización de auth
 const AppContent = () => {
@@ -27,6 +28,9 @@ const AppContent = () => {
 
   return (
     <div className="App">
+      {/* Componente de redirección automática para Super Admins */}
+      <SuperAdminRedirect />
+      
       <Routes>
         {/* Usar AppRoutes, toda la app va bajo /app y públicas fuera */}
         <Route path="/*" element={<AppRoutes />} />

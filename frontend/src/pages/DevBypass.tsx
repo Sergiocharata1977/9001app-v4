@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 
 const DevBypass: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated, isSuperAdmin } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,7 +20,13 @@ const DevBypass: React.FC = () => {
         // Simular login exitoso
         await login(data.data.tokens.accessToken, data.data.user);
         console.log('✅ Bypass de desarrollo activado');
-        navigate('/app/menu-cards');
+        
+        // Redirigir según el rol
+        if (isSuperAdmin()) {
+          navigate('/app/admin/super');
+        } else {
+          navigate('/app/menu-cards');
+        }
       } else {
         setError('Error en el bypass de desarrollo');
       }
@@ -34,9 +40,13 @@ const DevBypass: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/app/menu-cards');
+      if (isSuperAdmin()) {
+        navigate('/app/admin/super');
+      } else {
+        navigate('/app/menu-cards');
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, isSuperAdmin]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-700 flex items-center justify-center p-4">

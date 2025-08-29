@@ -15,14 +15,18 @@ const Login = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated, isSuperAdmin } = useAuthStore();
 
-  // Si ya está autenticado, redirigir
+  // Si ya está autenticado, redirigir según el rol
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate('/app/menu-cards');
+      if (isSuperAdmin()) {
+        navigate('/super-admin/dashboard');
+      } else {
+        navigate('/app/menu-cards');
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, isSuperAdmin]);
 
   const handleChange = (e) => {
     setFormData({
@@ -42,9 +46,13 @@ const Login = () => {
       setIsSubmitted(true);
       toast.success('¡Inicio de sesión exitoso!');
       
-      // Redirigir después de un breve delay
+      // Redirigir después de un breve delay según el rol
       setTimeout(() => {
-        navigate('/app/menu-cards');
+        if (isSuperAdmin()) {
+          navigate('/super-admin/dashboard');
+        } else {
+          navigate('/app/menu-cards');
+        }
       }, 1000);
     } catch (error) {
       console.error('Login error:', error);

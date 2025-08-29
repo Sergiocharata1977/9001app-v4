@@ -3,7 +3,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19+-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
-[![Turso](https://img.shields.io/badge/Database-Turso%20SQLite-orange.svg)](https://turso.tech/)
+[![MongoDB](https://img.shields.io/badge/Database-MongoDB%20Atlas-green.svg)](https://www.mongodb.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## 📋 Descripción
@@ -62,16 +62,18 @@
 ### **Backend**
 - **Node.js** con TypeScript
 - **Express.js** como framework
-- **Turso (SQLite)** como base de datos
+- **MongoDB Atlas** como base de datos principal
 - **JWT** para autenticación
 - **Multer** para uploads
 - **CORS** habilitado
 
 ### **Base de Datos**
-- **Turso SQLite** en la nube
-- **50+ tablas** organizadas por módulos
+- **MongoDB Atlas** en la nube (PRINCIPAL)
+- **Turso SQLite** en migración (LEGACY)
+- **35+ colecciones** organizadas por módulos
 - **Índices optimizados** para consultas
-- **Relaciones** bien definidas
+- **Relaciones** con ObjectId
+- **Migración 81.4% completada**
 
 ## 🚀 Instalación
 
@@ -79,6 +81,7 @@
 - Node.js 18+ 
 - npm o yarn
 - Git
+- MongoDB Atlas (cuenta gratuita)
 
 ### **1. Clonar el repositorio**
 ```bash
@@ -106,7 +109,7 @@ npm install
 # Backend
 cd backend
 cp env.example .env
-# Editar .env con tus configuraciones
+# Editar .env con tus configuraciones de MongoDB
 
 # Frontend
 cd ../frontend
@@ -114,10 +117,10 @@ cp env.example .env
 # Editar .env con tus configuraciones
 ```
 
-### **4. Configurar base de datos**
+### **4. Configurar base de datos MongoDB**
 ```bash
 cd backend
-npm run setup-database
+npm run setup-mongodb
 ```
 
 ### **5. Ejecutar el proyecto**
@@ -139,8 +142,8 @@ npm run dev
 │   ├── controllers/         # Controladores de la API
 │   ├── routes/             # Rutas de la API
 │   ├── middleware/         # Middleware personalizado
-│   ├── database/           # Migraciones y esquemas
-│   ├── scripts/            # Scripts de utilidad
+│   ├── models/             # Modelos MongoDB
+│   ├── scripts/            # Scripts de utilidad y migración
 │   └── RAG-System/         # Sistema de IA
 ├── frontend/               # Aplicación React
 │   ├── src/
@@ -159,7 +162,11 @@ npm run dev
 
 ### **Variables de Entorno Backend**
 ```env
-# Base de datos
+# MongoDB Atlas (PRINCIPAL)
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/9001app
+MONGODB_DB_NAME=9001app
+
+# Turso SQLite (LEGACY - en migración)
 TURSO_DATABASE_URL=libsql://your-database.turso.io
 TURSO_AUTH_TOKEN=your-auth-token
 
@@ -219,6 +226,22 @@ VITE_APP_NAME=9001app-v2
 - Asistencias y evaluaciones
 - Temas y programas
 
+## 🔄 Estado de Migración MongoDB
+
+### **✅ Módulos Completamente Migrados**
+- **CRM Agro**: 100% migrado (16 colecciones)
+- **SGC**: 100% migrado (14 colecciones)
+- **Sistema**: 100% migrado (7 colecciones)
+- **Features**: 100% migrado (4 documentos)
+- **Suscripciones**: 100% migrado (2 documentos)
+
+### **❌ Módulos Pendientes**
+- **Planes**: PENDIENTE (tabla crítica)
+- **RRHH restante**: 5 tablas pendientes
+- **Relaciones SGC**: 4 tablas pendientes
+
+### **📈 Progreso General**: 81.4% completado
+
 ## 🚀 Despliegue
 
 ### **Despliegue Local**
@@ -266,7 +289,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 🙏 Agradecimientos
 
-- **Turso** por la base de datos SQLite en la nube
+- **MongoDB Atlas** por la base de datos en la nube
 - **React** y **Node.js** por los frameworks
 - **Tailwind CSS** por el sistema de diseño
 - **Radix UI** por los componentes accesibles

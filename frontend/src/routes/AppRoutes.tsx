@@ -21,7 +21,7 @@ import MenuCardsLayout from "../components/layout/MenuCardsLayout";
 import SecondLevelLayout from "../components/layout/SecondLevelLayout";
 import useAuthStore from "../store/authStore";
 import ProtectedRoute, { OrganizationAdminRoute, SuperAdminRoute } from "./ProtectedRoute";
-import SuperAdminRoutes from "./SuperAdminRoutes";
+import SuperAdminRoutes from "../components/admin/super-admin/SuperAdminRoutes";
 
 // Páginas de Acceso Directo Temporal
 import AccessDirectoCRM from '../pages/AccessDirectoCRM';
@@ -279,11 +279,6 @@ const AppRoutes = () => {
                   {/* Administración */}
                   <Route path="usuarios" element={<UsersPage />} />
                   <Route path="usuarios-single" element={<UsuariosSingle />} />
-                  <Route path="admin/super" element={
-                    <SuperAdminRoute>
-                      <SuperAdminPage />
-                    </SuperAdminRoute>
-                  } />
                   <Route path="admin/organization" element={
                     <OrganizationAdminRoute>
                       <OrganizationAdminPage />
@@ -383,10 +378,17 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Rutas Super Admin */}
+        {/* Rutas Super Admin - Nuevo Sistema Unificado */}
         <Route path="/super-admin/*" element={
           <SuperAdminRoute>
             <SuperAdminRoutes />
+          </SuperAdminRoute>
+        } />
+        
+        {/* Redirección del Super Admin antiguo al nuevo */}
+        <Route path="/app/admin/super" element={
+          <SuperAdminRoute>
+            <Navigate to="/super-admin/dashboard" replace />
           </SuperAdminRoute>
         } />
 

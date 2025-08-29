@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import SuperAdminRedirect from '../common/SuperAdminRedirect';
+
 
 const MenuCardsLayout = ({ children }) => {
     const user = useAuthStore((state) => state.user);
@@ -44,8 +44,6 @@ const MenuCardsLayout = ({ children }) => {
 
     return (
         <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-            {/* Componente de redirección automática para Super Admins */}
-            <SuperAdminRedirect />
 
             {/* Main Content - Sin Sidebar */}
             <div className="flex-1 flex flex-col overflow-hidden">

@@ -144,8 +144,6 @@ const PoliticaCalidadPage = lazy(() => import("../pages/PoliticaCalidadPage"));
 
 const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  
-  console.log('🛣️ AppRoutes - Renderizando, isAuthenticated:', isAuthenticated);
 
   return (
     <Suspense fallback={<LoadingFallback />}>

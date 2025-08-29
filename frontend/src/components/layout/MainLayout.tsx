@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import SuperAdminRedirect from '../common/SuperAdminRedirect';
+
 import SecondLevelSidebar from '../menu/SecondLevelSidebar';
 import TopBar from '../menu/TopBar';
 
@@ -59,8 +59,6 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Componente de redirección automática para Super Admins */}
-      <SuperAdminRedirect />
 
       {/* Sidebar Principal - Solo se muestra si hay un módulo activo */}
       {currentModule && (
