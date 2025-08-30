@@ -13,16 +13,26 @@ router.get('/', authMiddleware, async (req, res, next) => {
     console.log('📊 Obteniendo indicadores para organización:', organizationId);
     
     const result = await mongoClient.execute({
-      sql: 'SELECT * FROM indicadores WHERE organization_id = ? ORDER BY created_at DESC',
+      sql: `SELECT 
+        id, nombre, descripcion, tipo, unidad, 
+        organization_id, created_at, updated_at, is_active
+      FROM indicadores 
+      WHERE organization_id = ? AND is_active = 1
+      ORDER BY created_at DESC`,
       args: [organizationId]
     });
     
     console.log(`✅ Encontrados ${result.rows.length} indicadores`);
-    res.json(result.rows);
+    res.json({ 
+      success: true, 
+      data: result.rows, 
+      total: result.rows.length,
+      message: 'Indicadores obtenidos exitosamente'
+    });
   } catch (error) {
     console.error('❌ Error al obtener indicadores:', error);
-    next({
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener indicadores',
       error: error.message
     });

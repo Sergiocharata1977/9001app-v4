@@ -1,137 +1,172 @@
 const { Router } = require('express');
-const mongoClient = require('../lib/mongoClient.js');
+const { MongoClient, ObjectId } = require('mongodb');
 const crypto = require('crypto');
-const { logTenantOperation, checkPermission } = require('../middleware/tenantMiddleware.js');
 const ActivityLogService = require('../services/activityLogService.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
+const mongoConfig = require('../config/mongodb.config.js');
 
 const router = Router();
 
-// Aplicar middleware de autenticación a todas las rutas
+// Aplicar autenticación para tener req.user y organization_id
 router.use(authMiddleware);
 
-// GET /api/puestos - Obtener todos los puestos de la organización
+// GET /api/puestos - Listar todos los puestos
 router.get('/', async (req, res, next) => {
   try {
-    const organizationId = req.user?.organization_id || req.organizationId;
+    const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log('🔓 Obteniendo puestos para organización:', organizationId);
     
-    const collection = mongoClient.collection('puestos');
-    const result = await collection.find(
-      { organization_id: String(organizationId) },
-      { sort: { created_at: -1 } }
-    ).toArray();
+    const client = new MongoClient(mongoConfig.uri);
+    await client.connect();
     
-    console.log(`🔓 Puestos cargados para organización ${organizationId}: ${result.length} registros`);
-    res.json(result);
+    const db = client.db('9001app');
+    const collection = db.collection('puestos');
+    
+    // Buscar puestos por organizationId con lookup a departamentos
+    const puestos = await collection.aggregate([
+      {
+        $match: { organizationId: organizationId }
+      },
+      {
+        $lookup: {
+          from: 'departamentos',
+          localField: 'departamentoId',
+          foreignField: '_id',
+          as: 'departamento'
+        }
+      },
+      {
+        $unwind: {
+          path: '$departamento',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]).toArray();
+    
+    await client.close();
+    
+    console.log(`✅ Encontrados ${puestos.length} puestos en organización ${organizationId}`);
+    res.json(puestos);
   } catch (error) {
-    console.error('❌ Error al cargar puestos:', error);
+    console.error('❌ Error obteniendo puestos:', error);
     next(error);
   }
 });
 
-// GET /api/puestos/:id - Obtener un puesto específico de la organización
+// GET /api/puestos/:id - Obtener un puesto por ID
 router.get('/:id', async (req, res, next) => {
   const { id } = req.params;
   try {
-    const organizationId = req.user?.organization_id || req.organizationId;
-    console.log(`🔓 Obteniendo puesto ${id} para organización:`, organizationId);
+    const organizationId = req.user?.organization_id || req.user?.org_id;
+    console.log(`🔓 Obteniendo puesto ${id} para organización ${organizationId}`);
     
-    const collection = mongoClient.collection('puestos');
-    const result = await collection.findOne({
-      id: id,
-      organization_id: String(organizationId)
-    });
+    const client = new MongoClient(mongoConfig.uri);
+    await client.connect();
+    
+    const db = client.db('9001app');
+    const collection = db.collection('puestos');
+    
+    // Buscar puesto por _id y organizationId con lookup a departamento
+    const puesto = await collection.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(id),
+          organizationId: organizationId
+        }
+      },
+      {
+        $lookup: {
+          from: 'departamentos',
+          localField: 'departamentoId',
+          foreignField: '_id',
+          as: 'departamento'
+        }
+      },
+      {
+        $unwind: {
+          path: '$departamento',
+          preserveNullAndEmptyArrays: true
+        }
+      }
+    ]).toArray();
 
-    if (!result) {
-      console.log(`❌ Puesto ${id} no encontrado en organización ${organizationId}`);
-      return res.status(404).json({ error: 'Puesto no encontrado' });
+    await client.close();
+
+    if (puesto.length === 0) {
+      const err = new Error('Puesto no encontrado en tu organización.');
+      err.statusCode = 404;
+      return next(err);
     }
-
-    console.log(`✅ Puesto ${id} cargado exitosamente`);
-    res.json(result);
+    res.json(puesto[0]);
   } catch (error) {
-    console.error(`❌ Error al cargar puesto ${id}:`, error);
+    console.error('❌ Error obteniendo puesto:', error);
     next(error);
   }
 });
 
 // POST /api/puestos - Crear un nuevo puesto
 router.post('/', async (req, res, next) => {
-  console.log('📝 POST /api/puestos - Datos recibidos:', req.body);
-  console.log('👤 Usuario:', req.user);
+  const { nombre, descripcion, responsabilidades, requisitos, departamentoId, organization_id } = req.body;
+  const usuario = req.user || { id: null, nombre: 'Sistema' };
+
+  if (!nombre || !organization_id) {
+    const err = new Error('Los campos "nombre" y "organization_id" son obligatorios.');
+    err.statusCode = 400;
+    return next(err);
+  }
 
   try {
-    // TEMPORAL: Comentado para permitir creación de puestos
-    // if (!checkPermission(req, 'employee')) {
-    //   return res.status(403).json({ error: 'Permisos insuficientes' });
-    // }
-
-    const {
-      nombre,
-      descripcion,
-      requisitos_experiencia,
-      requisitos_formacion
-    } = req.body;
-
-    // Usar organization_id directamente del usuario autenticado
-    const organizationId = String(req.user?.organization_id);
-    const usuario = req.user || { id: null, nombre: 'Sistema' };
-
-    console.log('🔍 Validando campos obligatorios:', { nombre, organization_id: organizationId });
-    if (!nombre) {
-      console.log('❌ Error: Falta campo nombre');
-      return res.status(400).json({ error: 'El campo "nombre" es obligatorio.' });
-    }
-
-    const collection = mongoClient.collection('puestos');
-
-    // Verificar si ya existe un puesto con el mismo nombre en la organización
-    console.log('🔍 Verificando si existe puesto:', { nombre, organization_id: organizationId });
-    const existente = await collection.findOne({
-      nombre: nombre,
-      organization_id: organizationId
-    });
+    const client = new MongoClient(mongoConfig.uri);
+    await client.connect();
     
-    if (existente) {
-      console.log('❌ Error: Puesto ya existe');
-      return res.status(409).json({ error: `Ya existe un puesto con el nombre '${nombre}' en la organización.` });
+    const db = client.db('9001app');
+    const collection = db.collection('puestos');
+    
+    // Verificar si ya existe un puesto con el mismo nombre en la misma organización
+    const existing = await collection.findOne({
+      nombre: nombre,
+      organizationId: organization_id
+    });
+
+    if (existing) {
+      const err = new Error('Ya existe un puesto con ese nombre en la organización.');
+      err.statusCode = 409; // Conflict
+      return next(err);
     }
 
-    const id = crypto.randomUUID();
     const now = new Date();
-
-    // Crear el nuevo puesto
-    const nuevoPuesto = {
-      id,
+    const newPuesto = {
       nombre,
-      descripcion: descripcion || '',
-      requisitos_experiencia: requisitos_experiencia || '',
-      requisitos_formacion: requisitos_formacion || '',
-      organization_id: organizationId,
-      created_by: usuario.id,
-      created_at: now,
-      updated_at: now
+      descripcion: descripcion || null,
+      responsabilidades: responsabilidades || null,
+      requisitos: requisitos || null,
+      departamentoId: departamentoId ? new ObjectId(departamentoId) : null,
+      organizationId: organization_id,
+      createdAt: now,
+      updatedAt: now
     };
 
-    await collection.insertOne(nuevoPuesto);
+    const result = await collection.insertOne(newPuesto);
+    newPuesto._id = result.insertedId;
 
-    // Registrar actividad
-    await ActivityLogService.registrarActividad({
-      tipo_entidad: 'puesto',
-      entidad_id: id,
-      accion: 'crear',
-      descripcion: `Puesto "${nombre}" creado`,
-      usuario_id: usuario.id,
-      usuario_nombre: usuario.nombre,
-      organization_id: organizationId,
-      datos_nuevos: nuevoPuesto
-    });
+    await client.close();
 
-    console.log(`✅ Puesto "${nombre}" creado exitosamente con ID: ${id}`);
-    res.status(201).json(nuevoPuesto);
+    // Registrar en la bitácora
+    await ActivityLogService.registrarCreacion(
+      'puesto',
+      result.insertedId.toString(),
+      newPuesto,
+      usuario,
+      organization_id
+    );
+
+    res.status(201).json(newPuesto);
+
   } catch (error) {
-    console.error('❌ Error al crear puesto:', error);
+    console.error('❌ Error creando puesto:', error);
     next(error);
   }
 });
@@ -139,92 +174,82 @@ router.post('/', async (req, res, next) => {
 // PUT /api/puestos/:id - Actualizar un puesto
 router.put('/:id', async (req, res, next) => {
   const { id } = req.params;
-  console.log(`📝 PUT /api/puestos/${id} - Datos recibidos:`, req.body);
+  const { nombre, descripcion, responsabilidades, requisitos, departamentoId } = req.body;
+  const usuario = req.user || { id: null, nombre: 'Sistema' };
 
   try {
-    // TEMPORAL: Comentado para permitir actualización de puestos
-    // if (!checkPermission(req, 'employee')) {
-    //   return res.status(403).json({ error: 'Permisos insuficientes' });
-    // }
-
-    const {
-      nombre,
-      descripcion,
-      requisitos_experiencia,
-      requisitos_formacion
-    } = req.body;
-
-    const organizationId = String(req.user?.organization_id);
-    const usuario = req.user || { id: null, nombre: 'Sistema' };
-
-    const collection = mongoClient.collection('puestos');
-
-    // Verificar que el puesto existe
-    const existente = await collection.findOne({
-      id: id,
-      organization_id: organizationId
-    });
-
-    if (!existente) {
-      console.log(`❌ Puesto ${id} no encontrado en organización ${organizationId}`);
-      return res.status(404).json({ error: 'Puesto no encontrado' });
-    }
-
-    // Si se está cambiando el nombre, verificar que no exista otro con el mismo nombre
-    if (nombre && nombre !== existente.nombre) {
-      const nombreExistente = await collection.findOne({
+    const client = new MongoClient(mongoConfig.uri);
+    await client.connect();
+    
+    const db = client.db('9001app');
+    const collection = db.collection('puestos');
+    
+    // Si se proporciona un nombre, verificar que no entre en conflicto con otro puesto
+    if (nombre) {
+      const existing = await collection.findOne({
         nombre: nombre,
-        organization_id: organizationId,
-        id: { $ne: id }
+        _id: { $ne: new ObjectId(id) }
       });
-
-      if (nombreExistente) {
-        return res.status(409).json({ error: `Ya existe un puesto con el nombre '${nombre}' en la organización.` });
+      if (existing) {
+        const err = new Error('Ya existe otro puesto con ese nombre.');
+        err.statusCode = 409;
+        return next(err);
       }
     }
 
-    // Preparar datos para actualización
-    const updateData = {
-      updated_at: new Date()
-    };
+    // Obtener datos anteriores para la bitácora
+    const prevData = await collection.findOne({ _id: new ObjectId(id) });
 
-    if (nombre !== undefined) updateData.nombre = nombre;
-    if (descripcion !== undefined) updateData.descripcion = descripcion;
-    if (requisitos_experiencia !== undefined) updateData.requisitos_experiencia = requisitos_experiencia;
-    if (requisitos_formacion !== undefined) updateData.requisitos_formacion = requisitos_formacion;
+    if (!prevData) {
+      const err = new Error('Puesto no encontrado.');
+      err.statusCode = 404;
+      return next(err);
+    }
+
+    const updateFields = {};
+    if (nombre !== undefined) updateFields.nombre = nombre;
+    if (descripcion !== undefined) updateFields.descripcion = descripcion === '' ? null : descripcion;
+    if (responsabilidades !== undefined) updateFields.responsabilidades = responsabilidades === '' ? null : responsabilidades;
+    if (requisitos !== undefined) updateFields.requisitos = requisitos === '' ? null : requisitos;
+    if (departamentoId !== undefined) updateFields.departamentoId = departamentoId ? new ObjectId(departamentoId) : null;
+    updateFields.updatedAt = new Date();
+
+    if (Object.keys(updateFields).length === 0) {
+      const err = new Error('No se proporcionaron campos para actualizar.');
+      err.statusCode = 400;
+      return next(err);
+    }
 
     const result = await collection.updateOne(
-      { id: id, organization_id: organizationId },
-      { $set: updateData }
+      { _id: new ObjectId(id) },
+      { $set: updateFields }
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).json({ error: 'Puesto no encontrado' });
+      const err = new Error('Puesto no encontrado.');
+      err.statusCode = 404;
+      return next(err);
     }
 
-    // Obtener el puesto actualizado
-    const puestoActualizado = await collection.findOne({
-      id: id,
-      organization_id: organizationId
-    });
+    // Devolver el puesto actualizado
+    const updatedPuesto = await collection.findOne({ _id: new ObjectId(id) });
 
-    // Registrar actividad
-    await ActivityLogService.registrarActividad({
-      tipo_entidad: 'puesto',
-      entidad_id: id,
-      accion: 'actualizar',
-      descripcion: `Puesto "${puestoActualizado.nombre}" actualizado`,
-      usuario_id: usuario.id,
-      usuario_nombre: usuario.nombre,
-      organization_id: organizationId,
-      datos_anteriores: existente,
-      datos_nuevos: puestoActualizado
-    });
+    await client.close();
 
-    console.log(`✅ Puesto ${id} actualizado exitosamente`);
-    res.json(puestoActualizado);
+    // Registrar en la bitácora
+    await ActivityLogService.registrarActualizacion(
+      'puesto',
+      id,
+      prevData,
+      updatedPuesto,
+      usuario,
+      updatedPuesto.organizationId
+    );
+
+    res.json(updatedPuesto);
+
   } catch (error) {
-    console.error(`❌ Error al actualizar puesto ${id}:`, error);
+    console.error('❌ Error actualizando puesto:', error);
     next(error);
   }
 });
@@ -232,55 +257,60 @@ router.put('/:id', async (req, res, next) => {
 // DELETE /api/puestos/:id - Eliminar un puesto
 router.delete('/:id', async (req, res, next) => {
   const { id } = req.params;
-  console.log(`🗑️ DELETE /api/puestos/${id}`);
+  const usuario = req.user || { id: null, nombre: 'Sistema' };
 
   try {
-    if (!checkPermission(req, 'admin')) {
-      return res.status(403).json({ error: 'Permisos insuficientes - se requiere rol admin' });
-    }
-
-    const organizationId = String(req.user?.organization_id);
-    const usuario = req.user || { id: null, nombre: 'Sistema' };
-
-    const collection = mongoClient.collection('puestos');
-
-    // Verificar que el puesto existe
-    const existente = await collection.findOne({
-      id: id,
-      organization_id: organizationId
+    const client = new MongoClient(mongoConfig.uri);
+    await client.connect();
+    
+    const db = client.db('9001app');
+    const puestosCollection = db.collection('puestos');
+    const personalCollection = db.collection('personal');
+    
+    // 1. Verificar si hay personal asociado
+    const personalCheck = await personalCollection.findOne({
+      puestoId: id
     });
 
-    if (!existente) {
-      console.log(`❌ Puesto ${id} no encontrado en organización ${organizationId}`);
-      return res.status(404).json({ error: 'Puesto no encontrado' });
+    if (personalCheck) {
+      const err = new Error('No se puede eliminar: El puesto tiene personal asociado.');
+      err.statusCode = 409; // Conflict
+      return next(err);
     }
 
-    // Eliminar el puesto
-    const result = await collection.deleteOne({
-      id: id,
-      organization_id: organizationId
-    });
+    // Obtener datos anteriores para la bitácora
+    const prevData = await puestosCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!prevData) {
+      const err = new Error('Puesto no encontrado.');
+      err.statusCode = 404;
+      return next(err);
+    }
+
+    // 2. Si no hay dependencias, proceder con la eliminación
+    const result = await puestosCollection.deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
-      return res.status(404).json({ error: 'Puesto no encontrado' });
+      const err = new Error('Puesto no encontrado.');
+      err.statusCode = 404;
+      return next(err);
     }
 
-    // Registrar actividad
-    await ActivityLogService.registrarActividad({
-      tipo_entidad: 'puesto',
-      entidad_id: id,
-      accion: 'eliminar',
-      descripcion: `Puesto "${existente.nombre}" eliminado`,
-      usuario_id: usuario.id,
-      usuario_nombre: usuario.nombre,
-      organization_id: organizationId,
-      datos_anteriores: existente
-    });
+    await client.close();
 
-    console.log(`✅ Puesto ${id} eliminado exitosamente`);
+    // Registrar en la bitácora
+    await ActivityLogService.registrarEliminacion(
+      'puesto',
+      id,
+      prevData,
+      usuario,
+      prevData.organizationId
+    );
+
     res.json({ message: 'Puesto eliminado exitosamente' });
+
   } catch (error) {
-    console.error(`❌ Error al eliminar puesto ${id}:`, error);
+    console.error('❌ Error eliminando puesto:', error);
     next(error);
   }
 });

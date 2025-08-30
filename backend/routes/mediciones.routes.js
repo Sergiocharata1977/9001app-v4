@@ -13,16 +13,28 @@ router.get('/', authMiddleware, async (req, res, next) => {
     console.log('📈 Obteniendo mediciones para organización:', organizationId);
     
     const result = await mongoClient.execute({
-      sql: 'SELECT * FROM mediciones WHERE organization_id = ? ORDER BY fecha_medicion DESC',
+      sql: `SELECT 
+        m.id, m.indicador_id, m.valor, m.fecha_medicion, m.observaciones,
+        m.organization_id, m.created_at, m.updated_at, m.is_active,
+        i.nombre as indicador_nombre, i.tipo as indicador_tipo, i.unidad as indicador_unidad
+      FROM mediciones m
+      LEFT JOIN indicadores i ON m.indicador_id = i.id
+      WHERE m.organization_id = ? AND m.is_active = 1
+      ORDER BY m.fecha_medicion DESC`,
       args: [organizationId]
     });
     
     console.log(`✅ Encontradas ${result.rows.length} mediciones`);
-    res.json(result.rows);
+    res.json({ 
+      success: true, 
+      data: result.rows, 
+      total: result.rows.length,
+      message: 'Mediciones obtenidas exitosamente'
+    });
   } catch (error) {
     console.error('❌ Error al obtener mediciones:', error);
-    next({
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener mediciones',
       error: error.message
     });

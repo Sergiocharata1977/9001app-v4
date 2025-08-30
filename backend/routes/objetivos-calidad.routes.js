@@ -12,17 +12,27 @@ router.get('/', authMiddleware, async (req, res, next) => {
     const organizationId = req.user?.organization_id || req.user?.org_id || 2;
     console.log('🎯 Obteniendo objetivos de calidad para organización:', organizationId);
     
-         const result = await mongoClient.execute({
-       sql: 'SELECT * FROM objetivos_calidad ORDER BY id DESC',
-       args: []
-     });
+    const result = await mongoClient.execute({
+      sql: `SELECT 
+        id, nombre_objetivo, descripcion, meta, responsable, 
+        fecha_limite, estado, organization_id, created_at, updated_at, is_active
+      FROM objetivos_calidad 
+      WHERE organization_id = ? AND is_active = 1
+      ORDER BY created_at DESC`,
+      args: [organizationId]
+    });
     
     console.log(`✅ Encontrados ${result.rows.length} objetivos de calidad`);
-    res.json(result.rows);
+    res.json({ 
+      success: true, 
+      data: result.rows, 
+      total: result.rows.length,
+      message: 'Objetivos de calidad obtenidos exitosamente'
+    });
   } catch (error) {
     console.error('❌ Error al obtener objetivos de calidad:', error);
-    next({
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
       message: 'Error al obtener objetivos de calidad',
       error: error.message
     });

@@ -6,7 +6,7 @@ class MongoClientWrapper {
     this.client = null;
     this.db = null;
     this.isConnected = false;
-    this.useMockData = false; // Cambiar a false para usar MongoDB real
+    this.useMockData = true; // Temporalmente usar datos mock
   }
 
   async connect() {
@@ -19,14 +19,15 @@ class MongoClientWrapper {
         return this;
       }
 
-      console.log('🔌 Conectando a MongoDB real...');
+      console.log('🔌 Intentando conectar a MongoDB...');
       console.log('📋 URI:', process.env.MONGODB_URI.replace(/\/\/.*@/, '//***:***@')); // Ocultar credenciales
       
       this.client = new MongoClient(process.env.MONGODB_URI);
       await this.client.connect();
       
-      this.db = this.client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
+      this.db = this.client.db(process.env.MONGODB_DB_NAME || '9001app');
       this.isConnected = true;
+      this.useMockData = false; // Si la conexión es exitosa, usar datos reales
       
       console.log('✅ Conexión exitosa a MongoDB');
       console.log('📊 Base de datos:', this.db.databaseName);
@@ -44,7 +45,7 @@ class MongoClientWrapper {
       return this;
     } catch (error) {
       console.error('❌ Error conectando a MongoDB:', error.message);
-      console.log('🔄 Cambiando a datos mock...');
+      console.log('🔄 Usando datos mock...');
       this.useMockData = true;
       this.isConnected = true;
       return this;
@@ -104,7 +105,7 @@ class MongoClientWrapper {
   async executeMock(query) {
     console.log('🎭 Usando datos mock');
     
-    // Datos mock
+    // Datos mock CRM
     const mockData = {
       users: [
         {
@@ -125,6 +126,144 @@ class MongoClientWrapper {
           name: '9001app Demo',
           description: 'Organización de demostración',
           is_active: true,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ],
+      crm_contactos: [
+        {
+          id: 1,
+          organization_id: 1,
+          nombre: 'Juan Pérez',
+          apellidos: 'García',
+          email: 'juan.perez@agro.com',
+          telefono: '+54 11 1234-5678',
+          cargo: 'Gerente de Compras',
+          empresa: 'Agroindustria del Norte S.A.',
+          is_active: 1,
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        {
+          id: 2,
+          organization_id: 1,
+          nombre: 'María González',
+          apellidos: 'López',
+          email: 'maria.gonzalez@coop.com',
+          telefono: '+54 291 9876-5432',
+          cargo: 'Directora Comercial',
+          empresa: 'Cooperativa Agropecuaria Sur',
+          is_active: 1,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ],
+      crm_clientes_agro: [
+        {
+          id: 1,
+          organization_id: 1,
+          nombre_empresa: 'Agroindustria del Norte S.A.',
+          tipo_cliente: 'productor',
+          cuit: '30-12345678-9',
+          supervisor_comercial_id: 'SUP_001',
+          asesor_tecnico_id: 'TEC_001',
+          vendedor_asignado_id: 'VEN_001',
+          direccion: 'Ruta 9 KM 100, San Nicolas',
+          telefono: '+54 11 1234-5678',
+          email: 'info@agronorte.com',
+          sitio_web: 'www.agronorte.com',
+          fecha_registro: '2023-01-15',
+          estado: 'activo',
+          observaciones: 'Cliente con alto potencial de crecimiento.',
+          is_active: 1,
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        {
+          id: 2,
+          organization_id: 1,
+          nombre_empresa: 'Cooperativa Agricola Sur',
+          tipo_cliente: 'cooperativa',
+          cuit: '30-87654321-0',
+          supervisor_comercial_id: 'SUP_002',
+          asesor_tecnico_id: 'TEC_002',
+          vendedor_asignado_id: 'VEN_002',
+          direccion: 'Av. San Martin 123, Bahia Blanca',
+          telefono: '+54 291 9876-5432',
+          email: 'info@coopagro.com',
+          sitio_web: 'www.coopagro.com',
+          fecha_registro: '2023-02-01',
+          estado: 'activo',
+          observaciones: 'Cooperativa con 50 productores asociados.',
+          is_active: 1,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ],
+      crm_oportunidades_agro: [
+        {
+          id: 1,
+          organization_id: 1,
+          supervisor_id: 'PRJ_001',
+          vendedor_id: 'VEN_001',
+          cliente_id: 'CLI_001',
+          nombre_oportunidad: 'Venta de fertilizantes, 2024',
+          descripcion: 'Oportunidad de venta de fertilizantes para la campaña 2024/25',
+          valor_estimado: 50000,
+          probabilidad: 80,
+          fecha_cierre_esperada: '2024-11-30',
+          estado: 'Negociación',
+          observaciones: 'Cliente interesado en productos premium',
+          is_active: 1,
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        {
+          id: 2,
+          organization_id: 1,
+          supervisor_id: 'PRJ_001',
+          vendedor_id: 'VEN_002',
+          cliente_id: 'CLI_002',
+          nombre_oportunidad: 'Servicios de Asesoramiento técnico',
+          descripcion: 'Contrato de asesoramiento técnico anual',
+          valor_estimado: 10000,
+          probabilidad: 90,
+          fecha_cierre_esperada: '2024-12-15',
+          estado: 'Propuesta enviada',
+          observaciones: 'Finalizando propuesta técnica',
+          is_active: 1,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ],
+      crm_productos_agro: [
+        {
+          id: 1,
+          organization_id: 1,
+          id_producto: 'prod_agro_001',
+          nombre_producto: 'Fertilizante NPK Premium',
+          descripcion: 'Fertilizante automatizado para cultivos colombianos',
+          categoria: 'Fertilizantes',
+          precio_unitario: 850,
+          cantidad_disponible: 10000,
+          stock_disponible: 10000,
+          observaciones: 'Producto estrella de la línea',
+          is_active: 1,
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        {
+          id: 2,
+          organization_id: 1,
+          id_producto: 'prod_agro_002',
+          nombre_producto: 'Herbicida Selectivo',
+          descripcion: 'Herbicida para control de malezas en soja',
+          categoria: 'Herbicidas',
+          precio_unitario: 1200,
+          cantidad_disponible: 5000,
+          stock_disponible: 5000,
+          observaciones: 'Producto de alta demanda',
+          is_active: 1,
           created_at: new Date(),
           updated_at: new Date()
         }
@@ -151,6 +290,63 @@ class MongoClientWrapper {
       }
       
       return { rows: usersWithOrg };
+    }
+    
+    // Consulta por _id (para authMiddleware)
+    if (query.sql.includes('SELECT') && query.sql.includes('usuarios') && query.sql.includes('_id')) {
+      if (query.args && query.args[0]) {
+        const user = mockData.users.find(u => u.id.toString() === query.args[0].toString());
+        if (user) {
+          return { 
+            rows: [{
+              id: user.id.toString(),
+              organization_id: user.organization_id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              is_active: user.is_active
+            }]
+          };
+        }
+      }
+      return { rows: [] };
+    }
+
+    // Consultas CRM específicas
+    if (query.sql.includes('crm_contactos')) {
+      let contactos = mockData.crm_contactos;
+      if (query.args && query.args[0]) {
+        contactos = contactos.filter(c => c.organization_id === parseInt(query.args[0]));
+      }
+      console.log('📊 Contactos CRM mock encontrados:', contactos.length);
+      return { rows: contactos };
+    }
+
+    if (query.sql.includes('crm_clientes_agro')) {
+      let clientes = mockData.crm_clientes_agro;
+      if (query.args && query.args[0]) {
+        clientes = clientes.filter(c => c.organization_id === parseInt(query.args[0]));
+      }
+      console.log('📊 Clientes CRM mock encontrados:', clientes.length);
+      return { rows: clientes };
+    }
+
+    if (query.sql.includes('crm_oportunidades_agro')) {
+      let oportunidades = mockData.crm_oportunidades_agro;
+      if (query.args && query.args[0]) {
+        oportunidades = oportunidades.filter(o => o.organization_id === parseInt(query.args[0]));
+      }
+      console.log('📊 Oportunidades CRM mock encontradas:', oportunidades.length);
+      return { rows: oportunidades };
+    }
+
+    if (query.sql.includes('crm_productos_agro')) {
+      let productos = mockData.crm_productos_agro;
+      if (query.args && query.args[0]) {
+        productos = productos.filter(p => p.organization_id === parseInt(query.args[0]));
+      }
+      console.log('📊 Productos CRM mock encontrados:', productos.length);
+      return { rows: productos };
     }
     
     return { rows: [] };
@@ -237,6 +433,59 @@ class MongoClientWrapper {
       }
       
       return { rows: [] };
+    }
+
+    // Consultas CRM específicas
+    if (query.sql.includes('crm_contactos')) {
+      const contactosCollection = this.db.collection('crm_contactos');
+      let filter = { is_active: 1 };
+      
+      if (query.args && query.args[0]) {
+        filter.organization_id = parseInt(query.args[0]);
+      }
+      
+      const contactos = await contactosCollection.find(filter).toArray();
+      console.log('📊 Contactos CRM encontrados:', contactos.length);
+      return { rows: contactos };
+    }
+
+    if (query.sql.includes('crm_clientes_agro')) {
+      const clientesCollection = this.db.collection('crm_clientes_agro');
+      let filter = { is_active: 1 };
+      
+      if (query.args && query.args[0]) {
+        filter.organization_id = parseInt(query.args[0]);
+      }
+      
+      const clientes = await clientesCollection.find(filter).toArray();
+      console.log('📊 Clientes CRM encontrados:', clientes.length);
+      return { rows: clientes };
+    }
+
+    if (query.sql.includes('crm_oportunidades_agro')) {
+      const oportunidadesCollection = this.db.collection('crm_oportunidades_agro');
+      let filter = { is_active: 1 };
+      
+      if (query.args && query.args[0]) {
+        filter.organization_id = parseInt(query.args[0]);
+      }
+      
+      const oportunidades = await oportunidadesCollection.find(filter).toArray();
+      console.log('📊 Oportunidades CRM encontradas:', oportunidades.length);
+      return { rows: oportunidades };
+    }
+
+    if (query.sql.includes('crm_productos_agro')) {
+      const productosCollection = this.db.collection('crm_productos_agro');
+      let filter = { is_active: 1 };
+      
+      if (query.args && query.args[0]) {
+        filter.organization_id = parseInt(query.args[0]);
+      }
+      
+      const productos = await productosCollection.find(filter).toArray();
+      console.log('📊 Productos CRM encontrados:', productos.length);
+      return { rows: productos };
     }
     
     return { rows: [] };

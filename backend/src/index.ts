@@ -17,40 +17,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // ===== RUTAS PÚBLICAS (SIN AUTENTICACIÓN) =====
 
-// RUTA DE BYPASS TEMPORAL PARA DESARROLLO - DEBE IR PRIMERO
-app.get('/api/dev/bypass', (req: Request, res: Response) => {
-  const mockUser = {
-    id: 1,
-    email: 'admin@9001app.com',
-    role: 'admin',
-    organization_id: 1,
-    organization_name: '9001app Demo',
-    organization_plan: 'premium'
-  };
-
-  const accessToken = jwt.sign(
-    { 
-      userId: mockUser.id, 
-      organizationId: mockUser.organization_id, 
-      role: mockUser.role 
-    },
-    process.env.JWT_SECRET || 'fallback-secret',
-    { expiresIn: '24h' }
-  );
-
-  res.json({
-    success: true,
-    message: 'Bypass de desarrollo activado',
-    data: {
-      user: mockUser,
-      tokens: {
-        accessToken,
-        refreshToken: 'dev-bypass-token'
-      }
-    }
-  });
-});
-
 // Ruta de salud
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({

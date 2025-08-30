@@ -1,22 +1,21 @@
 // src/services/indicadoresService.js
 
-import { createService } from './serviceFactory';
+import { createApiClient } from './apiService.js';
 
-// 1. Creamos un cliente de servicio para el recurso '/indicadores'
-// La factory se encargará de decidir si es mock o real.
-const apiClient = createService('/indicadores');
+const apiClient = createApiClient('/indicadores');
 
-// 2. Definimos el objeto de servicio con métodos que usan el apiClient.
+/**
+ * Servicio para gestionar las operaciones CRUD de indicadores
+ */
 const indicadoresService = {
   /**
-   * Obtiene todos los indicadores.
-   * @returns {Promise<Array>} Lista de indicadores.
+   * Obtiene todos los indicadores
+   * @returns {Promise<Array>} Lista de indicadores
    */
-  async getAll() {
+  getAll: async () => {
     try {
-      const data = await apiClient.get();
-      console.log('📊 Indicadores response:', data);
-      return Array.isArray(data) ? data : (data?.data || []);
+      const response = await apiClient.get('');
+      return Array.isArray(response.data) ? response.data : (response.data?.data || []);
     } catch (error) {
       console.error('❌ Error al obtener indicadores:', error);
       return [];
@@ -24,41 +23,41 @@ const indicadoresService = {
   },
 
   /**
-   * Obtiene un indicador por su ID.
-   * @param {string} id - ID del indicador.
-   * @returns {Promise<Object>} Datos del indicador.
+   * Obtiene un indicador por su ID
+   * @param {string} id - ID del indicador
+   * @returns {Promise<Object>} Indicador encontrado
    */
-  getById(id) {
-    return apiClient.get(`/${id}`);
+  getById: async (id: string) => {
+    return await apiClient.get(`/${id}`);
   },
 
   /**
-   * Crea un nuevo indicador.
-   * @param {Object} indicadorData - Datos del indicador a crear.
-   * @returns {Promise<Object>} Indicador creado.
+   * Crea un nuevo indicador
+   * @param {Object} indicadorData - Datos del indicador a crear
+   * @returns {Promise<Object>} Indicador creado
    */
-  create(indicadorData) {
-    return apiClient.post('', indicadorData);
+  create: async (indicadorData: any) => {
+    return await apiClient.post('', indicadorData);
   },
 
   /**
-   * Actualiza un indicador existente.
-   * @param {string} id - ID del indicador a actualizar.
-   * @param {Object} indicadorData - Datos actualizados.
-   * @returns {Promise<Object>} Indicador actualizado.
+   * Actualiza un indicador existente
+   * @param {string} id - ID del indicador a actualizar
+   * @param {Object} indicadorData - Nuevos datos del indicador
+   * @returns {Promise<Object>} Indicador actualizado
    */
-  update(id, indicadorData) {
-    return apiClient.put(`/${id}`, indicadorData);
+  update: async (id: string, indicadorData: any) => {
+    return await apiClient.put(`/${id}`, indicadorData);
   },
 
   /**
-   * Elimina un indicador.
-   * @param {string} id - ID del indicador a eliminar.
-   * @returns {Promise<Object>} Mensaje de confirmación.
+   * Elimina un indicador
+   * @param {string} id - ID del indicador a eliminar
+   * @returns {Promise<Object>} Respuesta de confirmación
    */
-  delete(id) {
-    return apiClient.delete(`/${id}`);
-  },
+  delete: async (id: string) => {
+    return await apiClient.delete(`/${id}`);
+  }
 };
 
 export default indicadoresService;
