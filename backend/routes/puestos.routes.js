@@ -3,7 +3,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const crypto = require('crypto');
 const ActivityLogService = require('../services/activityLogService.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
-const mongoConfig = require('../config/mongodb.config.js');
+require('dotenv').config();
 
 const router = Router();
 
@@ -16,16 +16,16 @@ router.get('/', async (req, res, next) => {
     const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log('🔓 Obteniendo puestos para organización:', organizationId);
     
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('puestos');
     
-    // Buscar puestos por organizationId con lookup a departamentos
+    // Buscar puestos por organizationId con lookup a departamento
     const puestos = await collection.aggregate([
       {
-        $match: { organizationId: organizationId }
+        $match: { organization_id: new ObjectId(organizationId) }
       },
       {
         $lookup: {
@@ -63,10 +63,10 @@ router.get('/:id', async (req, res, next) => {
     const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log(`🔓 Obteniendo puesto ${id} para organización ${organizationId}`);
     
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('puestos');
     
     // Buscar puesto por _id y organizationId con lookup a departamento

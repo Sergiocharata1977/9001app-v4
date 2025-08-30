@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const mongoClient = require('../lib/mongoClient.js');
+const { MongoClient, ObjectId } = require('mongodb');
+require('dotenv').config();
 
 // Unificar secreto con el usado al firmar en authController (fallback-secret)
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
@@ -36,20 +37,38 @@ const authMiddleware = async (req, res, next) => {
     
     console.log('👤 User ID from token:', userId);
     
-    // Obtener usuario actual de la base de datos
-    const userResult = await mongoClient.execute({
-      sql: `SELECT _id as id, organization_id, name, email, role, is_active 
-            FROM usuarios 
-            WHERE _id = ? AND is_active = 1`,
-      args: [userId]
-    });
+    // Conectar a MongoDB y buscar usuario
+    const client = new MongoClient(process.env.MONGODB_URI);
+    await client.connect();
+    
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
+    const usersCollection = db.collection('users');
+    
+    // Buscar usuario por ObjectId (MongoDB)
+    let user;
+    try {
+      user = await usersCollection.findOne({ 
+        _id: new ObjectId(userId),
+        is_active: true 
+      });
+      
+      if (!user) {
+        console.log('❌ Usuario no encontrado por ObjectId:', userId);
+      } else {
+        console.log('✅ Usuario encontrado por ObjectId:', userId);
+      }
+    } catch (error) {
+      console.log('❌ Error al buscar por ObjectId:', error.message);
+      user = null;
+    }
+    
+    await client.close();
 
-    if (userResult.rows.length === 0) {
+    if (!user) {
       console.log('❌ DEBUG - Usuario no encontrado en BD');
       return res.status(401).json({ message: 'Usuario no válido o inactivo.' });
     }
 
-    const user = userResult.rows[0];
     console.log('👤 User from DB:', user);
 
     // Agregar usuario al request para uso en controladores

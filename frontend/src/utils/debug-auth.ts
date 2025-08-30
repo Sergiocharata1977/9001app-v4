@@ -1,39 +1,32 @@
-// Script de depuración para verificar el estado de autenticación
+import useAuthStore from '@/store/authStore';
+
 export const debugAuth = () => {
-  console.log('🔍 DEBUG AUTH: Verificando estado de autenticación...');
+  const { user, isAuthenticated, isLoading } = useAuthStore();
+  
+  console.log('🔍 DEBUG AUTH - Estado actual:');
+  console.log('   isAuthenticated:', isAuthenticated);
+  console.log('   isLoading:', isLoading);
+  console.log('   user:', user);
+  
+  if (user) {
+    console.log('   user.id:', user.id);
+    console.log('   user.email:', user.email);
+    console.log('   user.role:', user.role);
+    console.log('   user.organization_id:', user.organization_id);
+    console.log('   user.organizationId:', user.organizationId);
+    console.log('   user.org_id:', user.org_id);
+    console.log('   Todos los campos del usuario:', Object.keys(user));
+  } else {
+    console.log('   ❌ No hay usuario autenticado');
+  }
   
   // Verificar localStorage
   const token = localStorage.getItem('token');
   const refreshToken = localStorage.getItem('refreshToken');
+  console.log('   localStorage.token:', token ? 'Presente' : 'Ausente');
+  console.log('   localStorage.refreshToken:', refreshToken ? 'Presente' : 'Ausente');
   
-  console.log('📦 Token en localStorage:', token ? '✅ Presente' : '❌ Ausente');
-  console.log('🔄 RefreshToken en localStorage:', refreshToken ? '✅ Presente' : '❌ Ausente');
-  
-  if (token) {
-    try {
-      // Decodificar el token JWT (sin verificar firma)
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      console.log('🔓 Token payload:', payload);
-      console.log('👤 Usuario ID:', payload.id || payload.userId);
-      console.log('🏢 Organización ID:', payload.organization_id);
-      console.log('⏰ Expira:', new Date(payload.exp * 1000).toLocaleString());
-    } catch (error) {
-      console.error('❌ Error decodificando token:', error);
-    }
-  }
-  
-  // Verificar Zustand store
-  const authStore = window.__ZUSTAND_DEVTOOLS__?.stores?.authStore;
-  if (authStore) {
-    console.log('🏪 Auth Store State:', authStore.getState());
-  }
-  
-  return {
-    hasToken: !!token,
-    hasRefreshToken: !!refreshToken,
-    token,
-    refreshToken
-  };
+  return { user, isAuthenticated, isLoading };
 };
 
 // Función para probar una llamada a la API

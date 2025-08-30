@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const mongoClient = require('../lib/mongoClient.js');
+const { MongoClient, ObjectId } = require('mongodb');
+require('dotenv').config();
 
 // Unificar secreto con el usado en middlewares
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
@@ -75,44 +76,31 @@ const login = async (req, res) => {
 
     console.log('🔍 Buscando usuario con email:', email);
     
-    // DATOS MOCK TEMPORALES - Mientras arreglamos MongoDB
-    const mockUsers = [
-      {
-        id: 1,
-        name: 'Admin User',
-        email: 'admin@9001app.com',
-        password_hash: '$2a$10$AZldzatjvsu/tl2nEDFGpO71JXr0lZ3VDqE0AG7/bkXtrpz85ti72', // admin123
-        role: 'admin',
-        organization_id: 1,
-        organization_name: '9001app Demo',
-        organization_plan: 'premium'
-      },
-      {
-        id: 2,
-        name: 'Super Admin',
-        email: 'superadmin@9001app.com',
-        password_hash: '$2a$10$AZldzatjvsu/tl2nEDFGpO71JXr0lZ3VDqE0AG7/bkXtrpz85ti72', // admin123
-        role: 'super_admin',
-        organization_id: 1,
-        organization_name: '9001app Demo',
-        organization_plan: 'premium'
-      }
-    ];
-
-    // Buscar usuario en datos mock
-    const user = mockUsers.find(u => u.email === email);
+    // Conectar a MongoDB y buscar usuario
+    const client = new MongoClient(process.env.MONGODB_URI);
+    await client.connect();
+    
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
+    const usersCollection = db.collection('users');
+    
+    // Buscar usuario por email
+    const user = await usersCollection.findOne({ email: email });
     
     console.log('📊 Resultado de búsqueda:', user ? 'Usuario encontrado' : 'Usuario no encontrado');
-
+    
     if (!user) {
-      console.log('❌ Usuario no encontrado');
+      await client.close();
       return res.status(401).json({
         success: false,
         message: 'Credenciales inválidas'
       });
     }
-
-    console.log('✅ Usuario encontrado:', { id: user.id, email: user.email, role: user.role });
+    
+    console.log('✅ Usuario encontrado:', { 
+      id: user._id, 
+      email: user.email, 
+      role: user.role 
+    });
 
     // Verificar contraseña
     console.log('🔐 Verificando contraseña...');
@@ -120,6 +108,7 @@ const login = async (req, res) => {
     console.log('✅ Contraseña válida:', isValidPassword);
     
     if (!isValidPassword) {
+      await client.close();
       console.log('❌ Contraseña inválida');
       return res.status(401).json({
         success: false,
@@ -127,10 +116,10 @@ const login = async (req, res) => {
       });
     }
 
-    // Generar tokens
+    // Generar tokens usando el ObjectId de MongoDB
     const accessToken = jwt.sign(
       { 
-        userId: user.id, 
+        userId: user._id.toString(), 
         organizationId: user.organization_id, 
         role: user.role 
       },
@@ -140,7 +129,7 @@ const login = async (req, res) => {
 
     const refreshToken = jwt.sign(
       { 
-        userId: user.id, 
+        userId: user._id.toString(), 
         type: 'refresh' 
       },
       JWT_SECRET,
@@ -149,7 +138,7 @@ const login = async (req, res) => {
 
     // Preparar respuesta del usuario (sin password)
     const userResponse = {
-      id: user.id,
+      id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -158,6 +147,7 @@ const login = async (req, res) => {
       organization_plan: user.organization_plan || 'basic'
     };
 
+    await client.close();
     console.log('🎉 Login exitoso para:', user.email);
 
     res.json({

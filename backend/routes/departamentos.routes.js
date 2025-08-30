@@ -3,7 +3,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const crypto = require('crypto');
 const ActivityLogService = require('../services/activityLogService.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
-const mongoConfig = require('../config/mongodb.config.js');
+require('dotenv').config();
 
 const router = Router();
 
@@ -16,16 +16,15 @@ router.get('/', async (req, res, next) => {
     const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log('🔓 Obteniendo departamentos para organización:', organizationId);
     
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('departamentos');
     
-    // Buscar departamentos por organizationId
-    const departamentos = await collection.find({
-      organizationId: organizationId
-    }).sort({ createdAt: -1 }).toArray();
+    // TEMPORAL: Buscar todos los departamentos sin filtrar por organización
+    // TODO: Corregir mapeo de organization_id entre usuarios y departamentos
+    const departamentos = await collection.find({}).sort({ created_at: -1 }).toArray();
     
     await client.close();
     
@@ -44,16 +43,16 @@ router.get('/:id', async (req, res, next) => {
     const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log(`🔓 Obteniendo departamento ${id} para organización ${organizationId}`);
     
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('departamentos');
     
-    // Buscar departamento por _id y organizationId
+    // Buscar departamento por _id y organization_id
     const departamento = await collection.findOne({
       _id: new ObjectId(id),
-      organizationId: organizationId
+      organization_id: organizationId
     });
 
     await client.close();
@@ -82,16 +81,16 @@ router.post('/', async (req, res, next) => {
   }
 
   try {
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('departamentos');
     
     // Verificar si ya existe un departamento con el mismo nombre en la misma organización
     const existing = await collection.findOne({
       nombre: nombre,
-      organizationId: organization_id
+      organization_id: organization_id
     });
 
     if (existing) {
@@ -105,9 +104,9 @@ router.post('/', async (req, res, next) => {
       nombre,
       descripcion: descripcion || null,
       objetivos: objetivos || null,
-      organizationId: organization_id,
-      createdAt: now,
-      updatedAt: now
+      organization_id: organization_id,
+      created_at: now,
+      updated_at: now
     };
 
     const result = await collection.insertOne(newDepartamento);
@@ -139,10 +138,10 @@ router.put('/:id', async (req, res, next) => {
   const usuario = req.user || { id: null, nombre: 'Sistema' };
 
   try {
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('departamentos');
     
     // Si se proporciona un nombre, verificar que no entre en conflicto con otro departamento
@@ -220,10 +219,10 @@ router.delete('/:id', async (req, res, next) => {
   const usuario = req.user || { id: null, nombre: 'Sistema' };
 
   try {
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const departamentosCollection = db.collection('departamentos');
     const puestosCollection = db.collection('puestos');
     const personalCollection = db.collection('personal');

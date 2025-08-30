@@ -3,7 +3,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const crypto = require('crypto');
 const ActivityLogService = require('../services/activityLogService.js');
 const authMiddleware = require('../middleware/authMiddleware.js');
-const mongoConfig = require('../config/mongodb.config.js');
+require('dotenv').config();
 
 const router = Router();
 
@@ -16,16 +16,16 @@ router.get('/', async (req, res, next) => {
     const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log('🔓 Obteniendo personal para organización:', organizationId);
     
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('personal');
     
     // Buscar personal por organizationId con lookup a puestos y departamentos
     const personal = await collection.aggregate([
       {
-        $match: { organizationId: organizationId }
+        $match: { organization_id: new ObjectId(organizationId) }
       },
       {
         $lookup: {
@@ -77,10 +77,10 @@ router.get('/:id', async (req, res, next) => {
     const organizationId = req.user?.organization_id || req.user?.org_id;
     console.log(`🔓 Obteniendo empleado ${id} para organización ${organizationId}`);
     
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('personal');
     
     // Buscar empleado por _id y organizationId con lookup a puesto y departamento
@@ -230,10 +230,10 @@ router.put('/:id', async (req, res, next) => {
   const usuario = req.user || { id: null, nombre: 'Sistema' };
 
   try {
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('personal');
     
     // Si se proporciona un email, verificar que no entre en conflicto con otro empleado
@@ -316,10 +316,10 @@ router.delete('/:id', async (req, res, next) => {
   const usuario = req.user || { id: null, nombre: 'Sistema' };
 
   try {
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const personalCollection = db.collection('personal');
     
     // Obtener datos anteriores para la bitácora

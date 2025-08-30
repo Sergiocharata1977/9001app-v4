@@ -1,7 +1,11 @@
+import dotenv from 'dotenv';
 import cors from 'cors';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
+
+// Cargar variables de entorno
+dotenv.config();
 
 // Importar middleware de autenticación
 import authMiddleware from '../middleware/authMiddleware.js';

@@ -7,6 +7,7 @@ import PersonalTableView from './PersonalTableView';
 import PersonalCard from './PersonalCard';
 import UnifiedHeader from '../common/UnifiedHeader';
 import UnifiedCard from '../common/UnifiedCard';
+import UserInfoHeader from '../common/UserInfoHeader';
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
