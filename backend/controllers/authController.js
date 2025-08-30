@@ -75,21 +75,36 @@ const login = async (req, res) => {
 
     console.log('🔍 Buscando usuario con email:', email);
     
-    // Buscar usuario
-    const userResult = await mongoClient.execute({
-      sql: `
-        SELECT u.id, u.name, u.email, u.password_hash, u.role, u.organization_id,
-               o.name as organization_name, o.plan as organization_plan
-        FROM usuarios u
-        LEFT JOIN organizations o ON u.organization_id = o.id
-        WHERE u.email = ? AND u.is_active = 1
-      `,
-      args: [email]
-    });
+    // DATOS MOCK TEMPORALES - Mientras arreglamos MongoDB
+    const mockUsers = [
+      {
+        id: 1,
+        name: 'Admin User',
+        email: 'admin@9001app.com',
+        password_hash: '$2a$10$AZldzatjvsu/tl2nEDFGpO71JXr0lZ3VDqE0AG7/bkXtrpz85ti72', // admin123
+        role: 'admin',
+        organization_id: 1,
+        organization_name: '9001app Demo',
+        organization_plan: 'premium'
+      },
+      {
+        id: 2,
+        name: 'Super Admin',
+        email: 'superadmin@9001app.com',
+        password_hash: '$2a$10$AZldzatjvsu/tl2nEDFGpO71JXr0lZ3VDqE0AG7/bkXtrpz85ti72', // admin123
+        role: 'super_admin',
+        organization_id: 1,
+        organization_name: '9001app Demo',
+        organization_plan: 'premium'
+      }
+    ];
 
-    console.log('📊 Resultado de búsqueda:', userResult.rows);
+    // Buscar usuario en datos mock
+    const user = mockUsers.find(u => u.email === email);
+    
+    console.log('📊 Resultado de búsqueda:', user ? 'Usuario encontrado' : 'Usuario no encontrado');
 
-    if (userResult.rows.length === 0) {
+    if (!user) {
       console.log('❌ Usuario no encontrado');
       return res.status(401).json({
         success: false,
@@ -97,7 +112,6 @@ const login = async (req, res) => {
       });
     }
 
-    const user = userResult.rows[0];
     console.log('✅ Usuario encontrado:', { id: user.id, email: user.email, role: user.role });
 
     // Verificar contraseña
