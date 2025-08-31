@@ -83,12 +83,12 @@ router.get('/:id', async (req, res, next) => {
     const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const collection = db.collection('personal');
     
-    // Buscar empleado por _id y organizationId con lookup a puesto y departamento
+    // Buscar empleado por _id y organization_id con lookup a puesto y departamento
     const empleado = await collection.aggregate([
       {
         $match: {
           _id: new ObjectId(id),
-          organizationId: organizationId
+          organization_id: new ObjectId(organizationId)
         }
       },
       {
@@ -120,14 +120,14 @@ router.get('/:id', async (req, res, next) => {
         }
       }
     ]).toArray();
-
+    
     await client.close();
-
+    
     if (empleado.length === 0) {
-      const err = new Error('Empleado no encontrado en tu organización.');
-      err.statusCode = 404;
-      return next(err);
+      return res.status(404).json({ message: 'Empleado no encontrado' });
     }
+    
+    console.log(`✅ Empleado ${id} encontrado`);
     res.json(empleado[0]);
   } catch (error) {
     console.error('❌ Error obteniendo empleado:', error);

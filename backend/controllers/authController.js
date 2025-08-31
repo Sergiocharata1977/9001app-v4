@@ -96,10 +96,43 @@ const login = async (req, res) => {
       });
     }
     
+    // Buscar datos de la organización si existe
+    let organizationData = null;
+    let organizationStats = {
+      personalCount: 0,
+      departamentosCount: 0,
+      puestosCount: 0
+    };
+    
+    if (user.organization_id) {
+      const organizationsCollection = db.collection('organizations');
+      organizationData = await organizationsCollection.findOne({ 
+        id: user.organization_id 
+      });
+      
+      // Obtener estadísticas de la organización
+      if (organizationData) {
+        const personalCollection = db.collection('personal');
+        const departamentosCollection = db.collection('departamentos');
+        const puestosCollection = db.collection('puestos');
+        
+        organizationStats.personalCount = await personalCollection.countDocuments({ 
+          organization_id: user.organization_id 
+        });
+        organizationStats.departamentosCount = await departamentosCollection.countDocuments({ 
+          organization_id: user.organization_id 
+        });
+        organizationStats.puestosCount = await puestosCollection.countDocuments({ 
+          organization_id: user.organization_id 
+        });
+      }
+    }
+    
     console.log('✅ Usuario encontrado:', { 
       id: user._id, 
       email: user.email, 
-      role: user.role 
+      role: user.role,
+      organization: organizationData?.name || 'N/A'
     });
 
     // Verificar contraseña
@@ -143,8 +176,14 @@ const login = async (req, res) => {
       email: user.email,
       role: user.role,
       organization_id: user.organization_id,
-      organization_name: user.organization_name || 'Sin organización',
-      organization_plan: user.organization_plan || 'basic'
+      organization_name: organizationData?.name || 'Sin organización',
+      organization_code: organizationData?.id || null,
+      organization_plan: organizationData?.plan || 'basic',
+      organization_active: organizationData?.is_active || false,
+      organization_stats: organizationStats,
+      is_super_admin: user.role === 'super_admin',
+      is_admin: user.role === 'admin' || user.role === 'super_admin',
+      is_active: user.is_active || true
     };
 
     await client.close();

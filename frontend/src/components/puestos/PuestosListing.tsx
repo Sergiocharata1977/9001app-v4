@@ -18,6 +18,7 @@ import PuestoModal from "./PuestoModal";
 import PuestoSingle from "./PuestoSingle";
 import PuestoCard from './PuestoCard';
 import UnifiedHeader from "../common/UnifiedHeader";
+import UserInfoHeader from "../common/UserInfoHeader";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { puestosService } from "@/services/puestosService";
 import { Input } from "@/components/ui/input";
@@ -296,6 +297,7 @@ function PuestosListing() {
 
   return (
     <div className="p-6 space-y-6">
+      <UserInfoHeader />
       <UnifiedHeader
         title="Gestión de Puestos"
         description="Administra los puestos de trabajo según ISO 9001"

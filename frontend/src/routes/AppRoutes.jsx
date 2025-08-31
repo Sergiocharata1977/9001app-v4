@@ -97,6 +97,9 @@ const AuditoriaFormPage = lazy(() => import("../components/auditorias/AuditoriaF
 // Menú de Tarjetas
 const MainMenuCards = lazy(() => import("../components/menu/MainMenuCards"));
 
+// Dashboard Multitenant
+const MultitenantDashboard = lazy(() => import("../pages/MultitenantDashboard"));
+
 // Menús de Segundo Nivel - Ahora manejados por SecondLevelSidebar
 // const CalidadMenu = lazy(() => import("../components/menu/CalidadMenu"));
 // const RRHHMenu = lazy(() => import("../components/menu/RRHHMenu"));
@@ -308,6 +311,13 @@ const AppRoutes = () => {
 
                   {/* Jerarquía SGC */}
                   <Route path="sgc-hierarchy" element={<SGCHierarchyPage />} />
+                  
+                  {/* Dashboard Multitenant - Verificación del Sistema */}
+                  <Route path="multitenant-dashboard" element={
+                    <SuperAdminRoute>
+                      <MultitenantDashboard />
+                    </SuperAdminRoute>
+                  } />
 
                   {/* Redirección por defecto dentro del layout */}
                   <Route path="/" element={<Navigate to="/app/menu-cards" replace />} />

@@ -1,37 +1,119 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Plus, Users, Calendar } from 'lucide-react';
+import { Building2, Plus, Users, Calendar, Loader2 } from 'lucide-react';
+import useAuthStore from '@/store/authStore';
+
+interface Organization {
+  _id: string;
+  name: string;
+  plan: string;
+  is_active: boolean;
+  created_at: string;
+  stats: {
+    personalCount: number;
+    departamentosCount: number;
+    puestosCount: number;
+    usersCount: number;
+  };
+}
 
 const OrganizationsManagement: React.FC = () => {
-  console.log('🏢 OrganizationsManagement renderizado');
+  const { user } = useAuthStore();
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const organizations = [
-    {
-      id: 1,
-      name: 'Agroindustria del Norte S.A.',
-      plan: 'enterprise',
-      users: 12,
-      status: 'active',
-      created: '2024-01-15'
-    },
-    {
-      id: 2,
-      name: 'Tecnología Avanzada Ltda.',
-      plan: 'premium',
-      users: 8,
-      status: 'active',
-      created: '2024-01-20'
-    },
-    {
-      id: 3,
-      name: 'Servicios Integrales S.A.',
-      plan: 'basic',
-      users: 5,
-      status: 'inactive',
-      created: '2024-01-25'
+  useEffect(() => {
+    fetchOrganizations();
+  }, []);
+
+  const fetchOrganizations = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setError('No hay token de autenticación');
+        return;
+      }
+
+      const response = await fetch('/api/organizations', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setOrganizations(data.data.organizations);
+        console.log('🏢 Organizaciones cargadas:', data.data.organizations);
+      } else {
+        setError(data.message || 'Error al cargar organizaciones');
+      }
+    } catch (error) {
+      console.error('Error cargando organizaciones:', error);
+      setError(error instanceof Error ? error.message : 'Error desconocido');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getPlanBadge = (plan: string) => {
+    const planColors = {
+      enterprise: 'text-purple-700 bg-purple-100',
+      premium: 'text-blue-700 bg-blue-100',
+      basic: 'text-green-700 bg-green-100'
+    };
+    
+    return (
+      <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${planColors[plan as keyof typeof planColors] || planColors.basic}`}>
+        {plan.charAt(0).toUpperCase() + plan.slice(1)}
+      </span>
+    );
+  };
+
+  const getStatusBadge = (isActive: boolean) => {
+    return (
+      <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
+        isActive 
+          ? 'text-green-700 bg-green-100' 
+          : 'text-red-700 bg-red-100'
+      }`}>
+        {isActive ? 'Activa' : 'Inactiva'}
+      </span>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Cargando organizaciones...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={fetchOrganizations}>Reintentar</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const activeOrganizations = organizations.filter(org => org.is_active);
+  const totalUsers = organizations.reduce((sum, org) => sum + org.stats.usersCount, 0);
 
   return (
     <div className="space-y-6">
@@ -57,7 +139,7 @@ const OrganizationsManagement: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold">{organizations.length}</div>
             <p className="text-xs text-muted-foreground">
-              {organizations.filter(org => org.status === 'active').length} activas
+              {activeOrganizations.length} activas
             </p>
           </CardContent>
         </Card>
@@ -68,9 +150,7 @@ const OrganizationsManagement: React.FC = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {organizations.reduce((sum, org) => sum + org.users, 0)}
-            </div>
+            <div className="text-2xl font-bold">{totalUsers}</div>
             <p className="text-xs text-muted-foreground">
               Promedio por organización
             </p>
@@ -79,13 +159,15 @@ const OrganizationsManagement: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Nuevas este mes</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Personal Total</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">
+              {organizations.reduce((sum, org) => sum + org.stats.personalCount, 0)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Crecimiento del 25%
+              Empleados registrados
             </p>
           </CardContent>
         </Card>
@@ -98,33 +180,42 @@ const OrganizationsManagement: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {organizations.map((org) => (
-              <div key={org.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{org.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      Plan: {org.plan} • {org.users} usuarios
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    org.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {org.status}
-                  </span>
-                  <Button variant="outline" size="sm">
-                    Editar
-                  </Button>
-                </div>
+            {organizations.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No hay organizaciones registradas
               </div>
-            ))}
+            ) : (
+              organizations.map((org) => (
+                <div key={org._id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Building2 className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{org.name}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        {getPlanBadge(org.plan)}
+                        {getStatusBadge(org.is_active)}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-6">
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900">
+                        {org.stats.usersCount} usuarios
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {org.stats.personalCount} personal
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Ver detalles
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

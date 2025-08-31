@@ -333,6 +333,7 @@ const PersonalListing = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <UserInfoHeader />
       <UnifiedHeader
         title="Gestión de Personal"
         description="Administra los empleados de la organización según ISO 9001"

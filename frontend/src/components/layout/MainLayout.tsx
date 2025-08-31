@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import SecondLevelSidebar from '../menu/SecondLevelSidebar';
 import TopBar from '../menu/TopBar';
+import TenantInfoHeader from '../TenantInfoHeader';
+import TenantDebugPanel from '../TenantDebugPanel';
 
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -106,6 +108,9 @@ const MainLayout = ({ children }) => {
           sidebarOpen={sidebarOpen}
           showSidebarToggle={!!currentModule}
         />
+        
+        {/* Tenant Info Header - Información del tenant actual */}
+        <TenantInfoHeader />
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50">
@@ -122,6 +127,9 @@ const MainLayout = ({ children }) => {
           </motion.div>
         </main>
       </div>
+      
+      {/* Debug Panel - Solo visible en desarrollo */}
+      {import.meta.env.DEV && <TenantDebugPanel />}
     </div>
   );
 };

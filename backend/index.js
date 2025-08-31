@@ -45,6 +45,7 @@ const coordinacionRoutes = require('./routes/coordinacion.routes.js');
 const crmRoutes = require('./routes/crm.routes.js');
 const databaseRoutes = require('./routes/database.routes.js');
 const fileStructureRoutes = require('./routes/fileStructure.routes.js');
+const organizationRoutes = require('./routes/organization.routes.js');
 
 // Importar rutas RAG del nuevo sistema
 let ragRoutes = null;
@@ -70,6 +71,9 @@ app.use('/api/suscripciones', suscripcionesRoutes);
 
 // Rutas de usuarios (requieren autenticación)
 app.use('/api/usuarios', authMiddleware, userRoutes);
+
+// Rutas de organizaciones (requieren autenticación)
+app.use('/api/organizations', organizationRoutes);
 
 // Rutas de departamentos
 app.use('/api/departamentos', departamentosRoutes);

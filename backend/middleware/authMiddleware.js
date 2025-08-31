@@ -43,6 +43,7 @@ const authMiddleware = async (req, res, next) => {
     
     const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     const usersCollection = db.collection('users');
+    const organizationsCollection = db.collection('organizations');
     
     // Buscar usuario por ObjectId (MongoDB)
     let user;
@@ -61,19 +62,83 @@ const authMiddleware = async (req, res, next) => {
       console.log('❌ Error al buscar por ObjectId:', error.message);
       user = null;
     }
-    
-    await client.close();
 
     if (!user) {
+      await client.close();
       console.log('❌ DEBUG - Usuario no encontrado en BD');
       return res.status(401).json({ message: 'Usuario no válido o inactivo.' });
     }
 
-    console.log('👤 User from DB:', user);
+    // Obtener información de la organización si existe
+    let organization = null;
+    let organizationStats = {
+      personalCount: 0,
+      departamentosCount: 0,
+      puestosCount: 0,
+      usersCount: 0
+    };
 
-    // Agregar usuario al request para uso en controladores
-    req.user = user;
-    console.log('✅ DEBUG - Usuario agregado a req.user');
+    if (user.organization_id) {
+      try {
+        organization = await organizationsCollection.findOne({ 
+          _id: new ObjectId(user.organization_id),
+          is_active: true 
+        });
+
+        if (organization) {
+          // Obtener estadísticas de la organización
+          const personalCollection = db.collection('personal');
+          const departamentosCollection = db.collection('departamentos');
+          const puestosCollection = db.collection('puestos');
+          
+          organizationStats.personalCount = await personalCollection.countDocuments({ 
+            organization_id: user.organization_id 
+          });
+          organizationStats.departamentosCount = await departamentosCollection.countDocuments({ 
+            organization_id: user.organization_id 
+          });
+          organizationStats.puestosCount = await puestosCollection.countDocuments({ 
+            organization_id: user.organization_id 
+          });
+          organizationStats.usersCount = await usersCollection.countDocuments({ 
+            organization_id: user.organization_id,
+            is_active: true 
+          });
+        }
+      } catch (error) {
+        console.log('⚠️ Error obteniendo organización:', error.message);
+      }
+    }
+
+    await client.close();
+
+    console.log('👤 User from DB:', {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      organization_id: user.organization_id
+    });
+
+    // Agregar usuario y organización al request para uso en controladores
+    req.user = {
+      ...user,
+      organization: organization ? {
+        id: organization._id,
+        name: organization.name,
+        plan: organization.plan || 'basic',
+        is_active: organization.is_active,
+        stats: organizationStats
+      } : null,
+      organization_id: user.organization_id,
+      organization_name: organization?.name || 'Sin Organización',
+      organization_plan: organization?.plan || 'basic',
+      organization_active: organization?.is_active || false,
+      organization_stats: organizationStats
+    };
+
+    console.log('✅ DEBUG - Usuario y organización agregados a req.user');
+    console.log(`🔐 Usuario autenticado: ${req.user.email} (Org: ${req.user.organization_name})`);
+    
     next();
 
   } catch (error) {
