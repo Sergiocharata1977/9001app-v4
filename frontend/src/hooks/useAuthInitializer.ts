@@ -22,7 +22,6 @@ export const useAuthInitializer = () => {
         console.log('🔄 Iniciando verificación de autenticación...');
         const authResult = await initializeAuth();
         console.log('✅ Resultado de autenticación:', authResult);
-        console.log('🔍 Estado actual:', { isAuthenticated, user: user?.role });
         
         // Si la autenticación fue exitosa y el componente sigue montado
         if (mounted && authResult) {
@@ -59,7 +58,7 @@ export const useAuthInitializer = () => {
     return () => {
       mounted = false;
     };
-  }, [initializeAuth, navigate, isAuthenticated, user]);
+  }, [initializeAuth, navigate]); // Removidas las dependencias que causan el bucle
 
   return { isLoading };
 };
