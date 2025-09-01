@@ -67,11 +67,7 @@ const checkFeatureAccess = (requiredFeature) => {
         organization_id: user.organization_id
       });
 
-      // Super admin tiene acceso total
-      if (user.role === 'super_admin') {
-        console.log('👑 Super admin - acceso total permitido');
-        return next();
-      }
+
 
       // Verificar que el usuario tenga una organización válida
       if (!user.organization_id) {
@@ -139,10 +135,7 @@ const checkUserLimits = async (req, res, next) => {
       return res.status(401).json({ message: 'Usuario no autenticado' });
     }
 
-    // Super admin no tiene límites
-    if (user.role === 'super_admin') {
-      return next();
-    }
+
 
     // Por ahora no aplicamos límites, solo log
     console.log('ℹ️ Verificación de límites (sin restricciones activas):', {

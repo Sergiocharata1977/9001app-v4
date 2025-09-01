@@ -26,7 +26,7 @@ interface TenantInfo {
     email: string;
     role: string;
     is_active: boolean;
-    is_super_admin: boolean;
+
     is_admin: boolean;
   };
   organization: {
@@ -54,7 +54,7 @@ const TenantInfoHeader: React.FC = () => {
           email: user.email || '',
           role: user.role || 'user',
           is_active: user.is_active !== false,
-          is_super_admin: user.is_super_admin === true,
+
           is_admin: user.is_admin === true
         },
         organization: {

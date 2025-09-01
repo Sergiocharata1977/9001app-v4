@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import useAuthStore from "../store/authStore";
-import ProtectedRoute, { SuperAdminRoute } from "./ProtectedRoute";
+import ProtectedRoute from "./ProtectedRoute";
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -62,10 +62,6 @@ const VerificacionesPage = lazy(() => import("../pages/VerificacionesPage"));
 // Gestión de Usuarios (desde pages)
 const UsersPage = lazy(() => import("../pages/UsersPage"));
 const UsuariosSingle = lazy(() => import("../pages/UsuariosSingle"));
-
-// Administración
-const SuperAdminPage = lazy(() => import("../pages/Admin/SuperAdminPage"));
-const OrganizationAdminPage = lazy(() => import("../pages/Admin/OrganizationAdminPage"));
 
 // Componentes usados como páginas (desde components)
 const DepartamentosPage = lazy(() => import("../components/departamentos/DepartamentosListing"));
@@ -147,6 +143,7 @@ const PoliticaCalidadPage = lazy(() => import("../pages/PoliticaCalidadPage"));
 
 const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   return (
     <Suspense fallback={<LoadingFallback />}>
@@ -254,8 +251,6 @@ const AppRoutes = () => {
                   {/* Administración */}
                   <Route path="usuarios" element={<UsersPage />} />
                   <Route path="usuarios-single" element={<UsuariosSingle />} />
-                  <Route path="admin/super" element={<SuperAdminPage />} />
-                  <Route path="admin/organization" element={<OrganizationAdminPage />} />
 
                   {/* Documentación */}
                   <Route path="documentacion" element={<DocumentacionLayout />}>
@@ -263,45 +258,16 @@ const AppRoutes = () => {
                     <Route path="casos-uso" element={<CasosUsoPage />} />
                     <Route path="manual-usuario" element={<ManualUsuarioPage />} />
                     <Route path="soporte" element={<SoportePage />} />
-                    <Route path="arquitectura" element={
-                      <SuperAdminRoute>
-                        <ArquitecturaPage />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="base-datos" element={
-                      <SuperAdminRoute>
-                        <BaseDatosPage />
-                      </SuperAdminRoute>
-                    } />
-
-                    <Route path="administracion" element={
-                      <SuperAdminRoute>
-                        <AdministracionPage />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="configuracion-entornos" element={
-                      <SuperAdminRoute>
-                        <ConfiguracionEntornos />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="api" element={
-                      <SuperAdminRoute>
-                        <ApiDocsPage />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="guias" element={
-                      <SuperAdminRoute>
-                        <GuiasPage />
-                      </SuperAdminRoute>
-                    } />
+                    <Route path="arquitectura" element={<ArquitecturaPage />} />
+                    <Route path="base-datos" element={<BaseDatosPage />} />
+                    <Route path="administracion" element={<AdministracionPage />} />
+                    <Route path="configuracion-entornos" element={<ConfiguracionEntornos />} />
+                    <Route path="api" element={<ApiDocsPage />} />
+                    <Route path="guias" element={<GuiasPage />} />
                   </Route>
 
                   {/* Base de Datos y Esquemas */}
-                  <Route path="database-schema" element={
-                    <SuperAdminRoute>
-                      <DatabaseSchemaPage />
-                    </SuperAdminRoute>
-                  } />
+                  <Route path="database-schema" element={<DatabaseSchemaPage />} />
 
                   {/* Prueba de renderizado */}
                   <Route path="test-simple" element={<TestSimpleComponent />} />
@@ -313,10 +279,33 @@ const AppRoutes = () => {
                   <Route path="sgc-hierarchy" element={<SGCHierarchyPage />} />
                   
                   {/* Dashboard Multitenant - Verificación del Sistema */}
-                  <Route path="multitenant-dashboard" element={
-                    <SuperAdminRoute>
-                      <MultitenantDashboard />
-                    </SuperAdminRoute>
+                  <Route path="multitenant-dashboard" element={<MultitenantDashboard />} />
+
+                  {/* Ruta temporal para Super Admin Dashboard */}
+                  <Route path="super-admin/tablero" element={
+                    <div className="p-6">
+                      <h1 className="text-2xl font-bold mb-4">Tablero Super Administrador</h1>
+                      <p>Esta es la página del tablero para el Super Admin.</p>
+                      <p>Usuario: {user?.email}</p>
+                      <p>Rol: {user?.role}</p>
+                      <p>Organización: {user?.organization_name}</p>
+                      <p>ID Organización: {user?.organization_id}</p>
+                    </div>
+                  } />
+
+                  {/* Ruta de prueba para verificar autenticación */}
+                  <Route path="test-auth" element={
+                    <div className="p-6">
+                      <h1 className="text-2xl font-bold mb-4">Prueba de Autenticación</h1>
+                      <div className="space-y-2">
+                        <p><strong>Autenticado:</strong> {isAuthenticated ? '✅ Sí' : '❌ No'}</p>
+                        <p><strong>Usuario:</strong> {user?.email || 'N/A'}</p>
+                        <p><strong>Rol:</strong> {user?.role || 'N/A'}</p>
+                        <p><strong>Organización:</strong> {user?.organization_name || 'N/A'}</p>
+                        <p><strong>ID Org:</strong> {user?.organization_id || 'N/A'}</p>
+                        <p><strong>Token:</strong> {localStorage.getItem('token') ? '✅ Presente' : '❌ Ausente'}</p>
+                      </div>
+                    </div>
                   } />
 
                   {/* Redirección por defecto dentro del layout */}

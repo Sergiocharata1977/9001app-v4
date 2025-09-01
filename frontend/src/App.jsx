@@ -1,8 +1,6 @@
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import LoginDebug from './components/common/LoginDebug.jsx';
-import SuperAdminRedirect from './components/common/SuperAdminRedirect.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { useAuthInitializer } from './hooks/useAuthInitializer.js';
@@ -28,16 +26,13 @@ const AppContent = () => {
 
   return (
     <div className="App">
-      {/* Componente de redirección automática para Super Admins */}
-      <SuperAdminRedirect />
-      
       <Routes>
         {/* Usar AppRoutes, toda la app va bajo /app y públicas fuera */}
         <Route path="/*" element={<AppRoutes />} />
       </Routes>
       
       {/* Componente de debug para desarrollo */}
-      <LoginDebug />
+      {/* <LoginDebug /> */}
       
       <Toaster
         position="top-right"

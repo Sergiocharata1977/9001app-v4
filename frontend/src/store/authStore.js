@@ -19,6 +19,7 @@ const useAuthStore = create(
         // Acciones
         login: async (credentials) => {
           try {
+            console.log('🔐 Iniciando login con credenciales:', { email: credentials.email });
             set({ isLoading: true, error: null });
             const response = await authApi.login(credentials);
 
@@ -27,6 +28,13 @@ const useAuthStore = create(
             const rawUser = body?.data?.user || body?.user || null;
             const accessToken = body?.data?.tokens?.accessToken || body?.token || null;
             const refreshToken = body?.data?.tokens?.refreshToken || body?.refreshToken || null;
+
+            console.log('📦 Respuesta del backend:', { 
+              hasUser: !!rawUser, 
+              hasToken: !!accessToken,
+              userRole: rawUser?.role,
+              userOrg: rawUser?.organization_name
+            });
 
             if (!rawUser || !accessToken) {
               throw new Error('Respuesta de login inválida');
@@ -39,6 +47,14 @@ const useAuthStore = create(
               organization_name: rawUser.organization_name || rawUser.organization?.name || null,
               organization_plan: rawUser.organization_plan || rawUser.organization?.plan || null,
             };
+
+            console.log('👤 Usuario normalizado:', {
+              id: user.id,
+              email: user.email,
+              role: user.role,
+              organization_id: user.organization_id,
+              organization_name: user.organization_name
+            });
 
             // Guardar en localStorage inmediatamente
             localStorage.setItem('token', accessToken);
@@ -54,8 +70,10 @@ const useAuthStore = create(
               isLoading: false
             });
 
+            console.log('✅ Login exitoso, estado actualizado');
             return body?.data || body;
           } catch (error) {
+            console.error('❌ Error en login:', error);
             set({
               error: error.response?.data?.message || error.message || 'Error al iniciar sesión',
               isLoading: false
@@ -105,7 +123,15 @@ const useAuthStore = create(
             }
 
             const response = await authApi.verifyToken();
-            const { user } = response.data;
+            const rawUser = response.data.user;
+            
+            // Normalizar shape de usuario para compatibilidad con código legado
+            const user = {
+              ...rawUser,
+              organization_id: rawUser.organization_id || rawUser.organization?.id || rawUser.organizationId || null,
+              organization_name: rawUser.organization_name || rawUser.organization?.name || null,
+              organization_plan: rawUser.organization_plan || rawUser.organization?.plan || null,
+            };
             
             set({
               user,
@@ -194,8 +220,29 @@ const useAuthStore = create(
             }
 
             set({ isLoading: true });
+            console.log('🔍 Llamando a verifyToken...');
             const response = await authApi.verifyToken();
-            const { user } = response.data;
+            console.log('📦 Respuesta completa de verifyToken:', response);
+            console.log('📦 response.data:', response.data);
+            
+            const rawUser = response.data?.user;
+            console.log('👤 rawUser extraído:', rawUser);
+            
+            // Verificar que rawUser existe antes de procesarlo
+            if (!rawUser) {
+              console.error('❌ rawUser es null o undefined');
+              throw new Error('No se recibieron datos de usuario válidos');
+            }
+            
+            // Normalizar shape de usuario para compatibilidad con código legado
+            const user = {
+              ...rawUser,
+              organization_id: rawUser.organization_id || rawUser.organization?.id || rawUser.organizationId || null,
+              organization_name: rawUser.organization_name || rawUser.organization?.name || null,
+              organization_plan: rawUser.organization_plan || rawUser.organization?.plan || null,
+            };
+            
+            console.log('✅ Usuario normalizado:', user);
             
             set({
               user,
@@ -205,6 +252,7 @@ const useAuthStore = create(
             });
             return true;
           } catch (error) {
+            console.error('❌ Error en initializeAuth:', error);
             console.warn('Token inválido, limpiando sesión:', error);
             set({
               user: null,
@@ -213,6 +261,7 @@ const useAuthStore = create(
               isLoading: false
             });
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
             return false;
           }
         },

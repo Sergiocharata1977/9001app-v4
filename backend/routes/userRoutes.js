@@ -6,10 +6,7 @@ const {
   updateOrganizationUser,
   deleteOrganizationUser,
   
-  // Nivel 2: Gestión global (super-admin)
-  getAllOrganizations,
-  createOrganization,
-  updateOrganizationPlan
+
 } = require('../controllers/userController.js');
 const { auditCreateUser, auditUpdateUser, auditDeleteUser } = require('../middleware/auditMiddleware.js');
 
@@ -74,47 +71,6 @@ router.get('/profile', (req, res) => {
   });
 });
 
-// ===============================================
-// NIVEL 2: GESTIÓN GLOBAL (SUPER-ADMIN)
-// ===============================================
 
-// @route   GET /api/users/organizations
-// @desc    Obtener todas las organizaciones del sistema
-// @access  Private (Super-Admin only)
-router.get('/organizations', 
-  (req, res, next) => {
-    if (req.user.role !== 'super_admin') {
-      return res.status(403).json({ message: 'Solo super-admin puede acceder' });
-    }
-    next();
-  },
-  getAllOrganizations
-);
-
-// @route   POST /api/users/organizations
-// @desc    Crear una nueva organización
-// @access  Private (Super-Admin only)
-router.post('/organizations', 
-  (req, res, next) => {
-    if (req.user.role !== 'super_admin') {
-      return res.status(403).json({ message: 'Solo super-admin puede crear organizaciones' });
-    }
-    next();
-  },
-  createOrganization
-);
-
-// @route   PUT /api/users/organizations/:id/plan
-// @desc    Actualizar plan de una organización
-// @access  Private (Super-Admin only)
-router.put('/organizations/:id/plan', 
-  (req, res, next) => {
-    if (req.user.role !== 'super_admin') {
-      return res.status(403).json({ message: 'Solo super-admin puede modificar planes' });
-    }
-    next();
-  },
-  updateOrganizationPlan
-);
 
 module.exports = router;

@@ -7,6 +7,13 @@ import { User, Building, Shield, AlertTriangle } from 'lucide-react';
 const UserInfoHeader: React.FC = () => {
   const { user, isAuthenticated, isLoading } = useAuthStore();
 
+  // Debug: mostrar datos del usuario
+  console.log('🔍 UserInfoHeader - Datos del usuario:', {
+    user,
+    isAuthenticated,
+    isLoading
+  });
+
   if (isLoading) {
     return (
       <Card className="mb-4 border-yellow-200 bg-yellow-50">

@@ -20,8 +20,7 @@ import MainLayout from "../components/layout/MainLayout";
 import MenuCardsLayout from "../components/layout/MenuCardsLayout";
 import SecondLevelLayout from "../components/layout/SecondLevelLayout";
 import useAuthStore from "../store/authStore";
-import ProtectedRoute, { OrganizationAdminRoute, SuperAdminRoute } from "./ProtectedRoute";
-import SuperAdminRoutes from "../components/admin/super-admin/SuperAdminRoutes";
+import ProtectedRoute, { OrganizationAdminRoute } from "./ProtectedRoute";
 
 // Páginas de Acceso Directo Temporal
 import AccessDirectoCRM from '../pages/AccessDirectoCRM';
@@ -98,8 +97,12 @@ const UsersPage = lazy(() => import("../pages/UsersPage"));
 const UsuariosSingle = lazy(() => import("../pages/UsuariosSingle"));
 
 // Administración
-const SuperAdminPage = lazy(() => import("../pages/Admin/SuperAdminPage"));
 const OrganizationAdminPage = lazy(() => import("../pages/Admin/OrganizationAdminPage"));
+
+// Super Admin
+const SuperAdminLayout = lazy(() => import("../components/super-admin/SuperAdminLayout"));
+const SuperAdminDashboard = lazy(() => import("../pages/SuperAdmin/SuperAdminDashboard"));
+const SuperAdminOrganizations = lazy(() => import("../pages/SuperAdmin/OrganizationsManagement"));
 
 // Componentes usados como páginas (desde components)
 const DepartamentosPage = lazy(() => import("../components/departamentos/DepartamentosListing"));
@@ -291,41 +294,12 @@ const AppRoutes = () => {
                     <Route path="casos-uso" element={<CasosUsoPage />} />
                     <Route path="manual-usuario" element={<ManualUsuarioPage />} />
                     <Route path="soporte" element={<SoportePage />} />
-                    <Route path="arquitectura" element={
-                      <SuperAdminRoute>
-                        <ArquitecturaPage />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="base-datos" element={
-                      <SuperAdminRoute>
-                        <BaseDatosPage />
-                      </SuperAdminRoute>
-                    } />
-                    {/* <Route path="desarrollo" element={
-                      <SuperAdminRoute>
-                        <DesarrolloPage />
-                      </SuperAdminRoute>
-                    } /> */}
-                    <Route path="administracion" element={
-                      <SuperAdminRoute>
-                        <AdministracionPage />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="configuracion-entornos" element={
-                      <SuperAdminRoute>
-                        <ConfiguracionEntornos />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="api" element={
-                      <SuperAdminRoute>
-                        <ApiDocsPage />
-                      </SuperAdminRoute>
-                    } />
-                    <Route path="guias" element={
-                      <SuperAdminRoute>
-                        <GuiasPage />
-                      </SuperAdminRoute>
-                    } />
+                    <Route path="arquitectura" element={<ArquitecturaPage />} />
+                    <Route path="base-datos" element={<BaseDatosPage />} />
+                    <Route path="administracion" element={<AdministracionPage />} />
+                    <Route path="configuracion-entornos" element={<ConfiguracionEntornos />} />
+                    <Route path="api" element={<ApiDocsPage />} />
+                    <Route path="guias" element={<GuiasPage />} />
                   </Route>
 
                   {/* Base de Datos y Esquemas */}
@@ -378,19 +352,18 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Rutas Super Admin - Nuevo Sistema Unificado */}
+
+
+        {/* Rutas Super Admin */}
         <Route path="/super-admin/*" element={
-          <SuperAdminRoute>
-            <SuperAdminRoutes />
-          </SuperAdminRoute>
-        } />
-        
-        {/* Redirección del Super Admin antiguo al nuevo */}
-        <Route path="/app/admin/super" element={
-          <SuperAdminRoute>
-            <Navigate to="/super-admin/dashboard" replace />
-          </SuperAdminRoute>
-        } />
+          <ProtectedRoute>
+            <SuperAdminLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Navigate to="/super-admin/dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="organizations" element={<SuperAdminOrganizations />} />
+        </Route>
 
         {/* Rutas de Acceso Directo Temporal */}
         <Route path="/access-crm" element={<AccessDirectoCRM />} />

@@ -42,7 +42,6 @@ app.get('/api/test', (req: Request, res: Response) => {
 
 // Importar rutas
 import accionesRoutes from '../routes/acciones.routes.js';
-import adminRoutes from '../routes/admin.routes.js';
 import auditoriasRoutes from '../routes/auditorias.routes.js';
 import authRoutes from '../routes/authRoutes.js';
 import capacitacionesRoutes from '../routes/capacitaciones.routes.js';
@@ -73,9 +72,6 @@ import userRoutes from '../routes/userRoutes.js';
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
-
-// Rutas de administración (requieren autenticación)
-app.use('/api/admin', authMiddleware, adminRoutes);
 
 // Rutas de planes
 app.use('/api/planes', planesRoutes);

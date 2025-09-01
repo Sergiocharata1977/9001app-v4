@@ -33,7 +33,6 @@ export const useAuth = () => {
     organizationPlan: authStore.user?.organization_plan,
     
     // Roles y permisos
-    isSuperAdmin: authStore.user?.role === 'super_admin',
     isAdmin: authStore.user?.role === 'admin',
     isManager: authStore.user?.role === 'manager',
     isUser: authStore.user?.role === 'user',

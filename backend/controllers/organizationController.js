@@ -16,8 +16,8 @@ const getOrganization = async (req, res) => {
     await client.connect();
     const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
     
-    // Verificar permisos: super_admin puede ver todo, otros solo su organización
-    if (userRole !== 'super_admin' && userOrgId !== id) {
+    // Verificar permisos: usuarios solo pueden ver su propia organización
+    if (userOrgId !== id) {
       return res.status(403).json({
         success: false,
         message: 'No tienes permisos para ver esta organización'
@@ -119,23 +119,7 @@ const verifyTenant = async (req, res) => {
     let accessibleOrganizations = [];
     let accessibleData = {};
     
-    if (userRole === 'super_admin') {
-      // Super admin puede ver todas las organizaciones
-      accessibleOrganizations = await organizationsCollection.find({}).toArray();
-      
-      // Obtener estadísticas globales
-      const personalCollection = db.collection('personal');
-      const departamentosCollection = db.collection('departamentos');
-      const puestosCollection = db.collection('puestos');
-      
-      accessibleData = {
-        totalOrganizations: accessibleOrganizations.length,
-        totalPersonal: await personalCollection.countDocuments({}),
-        totalDepartamentos: await departamentosCollection.countDocuments({}),
-        totalPuestos: await puestosCollection.countDocuments({}),
-        totalUsers: await usersCollection.countDocuments({})
-      };
-    } else {
+    {
       // Usuarios normales solo ven su organización
       if (userOrganization) {
         accessibleOrganizations = [userOrganization];
@@ -171,16 +155,14 @@ const verifyTenant = async (req, res) => {
     };
     
     // Test 1: Verificar que el usuario solo puede ver datos de su organización
-    if (userRole !== 'super_admin') {
-      const personalCollection = db.collection('personal');
-      const unauthorizedAccess = await personalCollection.findOne({
-        organization_id: { $ne: userOrgId }
-      });
-      
-      if (unauthorizedAccess) {
-        verificationTests.dataIsolation = false;
-        verificationTests.crossContamination = true;
-      }
+    const personalCollection = db.collection('personal');
+    const unauthorizedAccess = await personalCollection.findOne({
+      organization_id: { $ne: userOrgId }
+    });
+    
+    if (unauthorizedAccess) {
+      verificationTests.dataIsolation = false;
+      verificationTests.crossContamination = true;
     }
     
     res.json({
@@ -208,7 +190,7 @@ const verifyTenant = async (req, res) => {
           isolationLevel: 'ROW_LEVEL',
           tenantField: 'organization_id',
           currentTenant: userOrgId,
-          isSuperAdmin: userRole === 'super_admin'
+          isSuperAdmin: false
         }
       }
     });
@@ -224,79 +206,14 @@ const verifyTenant = async (req, res) => {
   }
 };
 
-// @desc    Obtener todas las organizaciones (solo super_admin)
-// @route   GET /api/organizations
-// @access  Private (Super Admin)
-const getAllOrganizations = async (req, res) => {
-  const client = new MongoClient(process.env.MONGODB_URI);
-  
-  try {
-    const userRole = req.user?.role;
-    
-    // Solo super_admin puede ver todas las organizaciones
-    if (userRole !== 'super_admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'No tienes permisos para ver todas las organizaciones'
-      });
-    }
-    
-    await client.connect();
-    const db = client.db(process.env.MONGODB_DB_NAME || '9001app-v2');
-    
-    const organizationsCollection = db.collection('organizations');
-    const organizations = await organizationsCollection.find({}).toArray();
-    
-    // Obtener estadísticas para cada organización
-    const personalCollection = db.collection('personal');
-    const departamentosCollection = db.collection('departamentos');
-    const puestosCollection = db.collection('puestos');
-    const usersCollection = db.collection('users');
-    
-    const organizationsWithStats = await Promise.all(
-      organizations.map(async (org) => {
-        const stats = {
-          personalCount: await personalCollection.countDocuments({ 
-            organization_id: org._id.toString() 
-          }),
-          departamentosCount: await departamentosCollection.countDocuments({ 
-            organization_id: org._id.toString() 
-          }),
-          puestosCount: await puestosCollection.countDocuments({ 
-            organization_id: org._id.toString() 
-          }),
-          usersCount: await usersCollection.countDocuments({ 
-            organization_id: org._id.toString() 
-          })
-        };
-        
-        return {
-          ...org,
-          stats
-        };
-      })
-    );
-    
-    res.json({
-      success: true,
-      data: {
-        organizations: organizationsWithStats
-      }
-    });
-    
-  } catch (error) {
-    console.error('Error obteniendo organizaciones:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
-    });
-  } finally {
-    await client.close();
-  }
-};
+
 
 module.exports = {
   getOrganization,
+<<<<<<< Current (Your changes)
   verifyTenant,
   getAllOrganizations
+=======
+  verifyTenant
+>>>>>>> Incoming (Background Agent changes)
 };

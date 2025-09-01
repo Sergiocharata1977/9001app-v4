@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import useAuthStore from '../../store/authStore';
 
 /**
@@ -10,7 +10,6 @@ const LoginDebug = () => {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isLoading = useAuthStore((state) => state.isLoading);
-  const isSuperAdmin = useAuthStore((state) => state.isSuperAdmin);
   
   const [isVisible, setIsVisible] = useState(true);
 
@@ -28,6 +27,8 @@ const LoginDebug = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const isSuperAdmin = user?.role === 'super_admin';
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -43,7 +44,7 @@ const LoginDebug = () => {
           <div className="space-y-0.5">
             <div>Loading: {isLoading ? '✅' : '❌'}</div>
             <div>Authenticated: {isAuthenticated ? '✅' : '❌'}</div>
-            <div>Super Admin: {isSuperAdmin() ? '✅' : '❌'}</div>
+            <div>Super Admin: {isSuperAdmin ? '✅' : '❌'}</div>
             <div>User Role: {user?.role || 'N/A'}</div>
             <div>User ID: {user?.id || 'N/A'}</div>
             <div>Org ID: {user?.organization_id || 'N/A'}</div>

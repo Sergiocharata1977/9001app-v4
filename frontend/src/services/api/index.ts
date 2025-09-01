@@ -31,8 +31,12 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    console.log('🔑 Interceptor - Token en localStorage:', token ? 'Presente' : 'Ausente');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔑 Interceptor - Token agregado al header:', token.substring(0, 20) + '...');
+    } else {
+      console.log('⚠️ Interceptor - No hay token en localStorage');
     }
     return config;
   },

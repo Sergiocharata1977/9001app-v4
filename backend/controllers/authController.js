@@ -181,8 +181,7 @@ const login = async (req, res) => {
       organization_plan: organizationData?.plan || 'basic',
       organization_active: organizationData?.is_active || false,
       organization_stats: organizationStats,
-      is_super_admin: user.role === 'super_admin',
-      is_admin: user.role === 'admin' || user.role === 'super_admin',
+      is_admin: user.role === 'admin',
       is_active: user.is_active || true
     };
 

@@ -57,6 +57,16 @@ try {
   console.log('Error:', error.message);
 }
 
+// Importar rutas de Super Admin (TypeScript compilado)
+let superAdminRoutes = null;
+try {
+  superAdminRoutes = require('./routes/superAdmin.routes.js');
+  console.log('✅ Sistema Super Admin cargado correctamente');
+} catch (error) {
+  console.log('⚠️  Módulo Super Admin no encontrado, compilando TypeScript...');
+  // El archivo TypeScript necesita ser compilado primero
+}
+
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
 
@@ -142,6 +152,12 @@ app.use('/api/file-structure', fileStructureRoutes);
 if (ragRoutes) {
   app.use('/api/rag', ragRoutes);
   console.log('✅ Rutas RAG registradas');
+}
+
+// Rutas de Super Admin (si está disponible)
+if (superAdminRoutes) {
+  app.use('/api/super-admin', superAdminRoutes);
+  console.log('✅ Rutas Super Admin registradas');
 }
 
 // Rutas de evaluaciones (SGC estandarizado) - TEMPORALMENTE DESHABILITADAS

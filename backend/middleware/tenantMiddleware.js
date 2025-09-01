@@ -60,9 +60,8 @@ const secureQuery = (req) => {
 const checkPermission = (req, requiredRole) => {
   const userRole = req.userRole;
   
-  // Jerarquía de roles: super_admin > admin > manager > employee
+  // Jerarquía de roles: admin > manager > employee
   const roleHierarchy = {
-    'super_admin': 4,
     'admin': 3,
     'manager': 2,
     'employee': 1
