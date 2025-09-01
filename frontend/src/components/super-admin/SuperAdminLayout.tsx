@@ -26,22 +26,22 @@ const SuperAdminLayout: React.FC = () => {
   
   const navItems = [
     {
-      path: '/super-admin/dashboard',
+      path: '/app/super-admin/tablero',
       icon: LayoutDashboard,
       label: 'Dashboard'
     },
     {
-      path: '/super-admin/organizations',
+      path: '/app/super-admin/organizations',
       icon: Building2,
       label: 'Organizaciones'
     },
     {
-      path: '/super-admin/users',
+      path: '/app/super-admin/users',
       icon: Users,
       label: 'Usuarios Globales'
     },
     {
-      path: '/super-admin/settings',
+      path: '/app/super-admin/settings',
       icon: Settings,
       label: 'Configuración'
     }

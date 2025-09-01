@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { MongoClient, ObjectId } = require('mongodb');
+const mongoClient = require('../lib/mongoClient.js');
 require('dotenv').config();
 
 // Unificar secreto con el usado en middlewares
@@ -220,16 +221,14 @@ const verifyToken = async (req, res) => {
     res.json({
       success: true,
       message: 'Token válido',
-      data: {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          organization_id: user.organization_id,
-          organization_name: user.organization_name,
-          organization_plan: user.organization_plan
-        }
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organization_id: user.organization_id,
+        organization_name: user.organization_name,
+        organization_plan: user.organization_plan
       }
     });
 

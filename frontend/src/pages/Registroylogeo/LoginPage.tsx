@@ -30,14 +30,19 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      await login(formData);
+      const loginResult = await login(formData);
       
       setIsSubmitted(true);
       toast.success('¡Inicio de sesión exitoso!');
       
-      // Redirección inteligente basada en el rol
-      const redirectPath = isSuperAdmin() ? '/super-admin/dashboard' : '/app/menu-cards';
-      navigate(redirectPath);
+      // Esperar un momento para que el estado se actualice completamente
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Redirección inteligente basada en el rol del resultado del login
+      const userRole = loginResult?.user?.role || loginResult?.data?.user?.role;
+      const redirectPath = userRole === 'super_admin' ? '/app/super-admin/tablero' : '/app/menu-cards';
+      console.log('🚀 Redirigiendo a:', redirectPath, 'para rol:', userRole);
+      navigate(redirectPath, { replace: true });
     } catch (error) {
       toast.error(error.message || 'Error al iniciar sesión');
       console.error('Login error:', error);

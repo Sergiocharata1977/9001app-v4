@@ -22,6 +22,14 @@ import SecondLevelLayout from "../components/layout/SecondLevelLayout";
 import useAuthStore from "../store/authStore";
 import ProtectedRoute, { OrganizationAdminRoute } from "./ProtectedRoute";
 
+// Componente para redirección inteligente basada en el rol
+const SmartRedirect = () => {
+  const user = useAuthStore((state) => state.user);
+  const redirectPath = user?.role === 'super_admin' ? '/app/super-admin/tablero' : '/app/menu-cards';
+  console.log('🎯 SmartRedirect - Usuario:', user?.role, '-> Redirigiendo a:', redirectPath);
+  return <Navigate to={redirectPath} replace />;
+};
+
 // Páginas de Acceso Directo Temporal
 import AccessDirectoCRM from '../pages/AccessDirectoCRM';
 import AccessDirectoCalidad from '../pages/AccessDirectoCalidad';
@@ -320,8 +328,15 @@ const AppRoutes = () => {
 
 
 
+                  {/* Rutas Super Admin dentro de /app */}
+                  <Route path="super-admin" element={<SuperAdminLayout />}>
+                    <Route index element={<Navigate to="tablero" replace />} />
+                    <Route path="tablero" element={<SuperAdminDashboard />} />
+                    <Route path="organizations" element={<SuperAdminOrganizations />} />
+                  </Route>
+
                   {/* Redirección por defecto dentro del layout */}
-                  <Route path="/" element={<Navigate to="/app/menu-cards" replace />} />
+                  <Route path="/" element={<SmartRedirect />} />
                   <Route path="*" element={<Navigate to="/app/menu-cards" replace />} />
                 </Routes>
               </MainLayout>
@@ -354,16 +369,7 @@ const AppRoutes = () => {
 
 
 
-        {/* Rutas Super Admin */}
-        <Route path="/super-admin/*" element={
-          <ProtectedRoute>
-            <SuperAdminLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<Navigate to="/super-admin/dashboard" replace />} />
-          <Route path="dashboard" element={<SuperAdminDashboard />} />
-          <Route path="organizations" element={<SuperAdminOrganizations />} />
-        </Route>
+
 
         {/* Rutas de Acceso Directo Temporal */}
         <Route path="/access-crm" element={<AccessDirectoCRM />} />

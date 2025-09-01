@@ -415,26 +415,6 @@ const changeUserRole = async (req, res) => {
     finally {
         await client.close();
     }
-<<<<<<< Current (Your changes)
-
-    const countResult = await mongoClient.execute({ sql: countSql, args: countArgs });
-    const total = countResult.rows[0].total;
-
-    res.json({
-      logs: result.rows,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    console.error('Error al obtener logs del sistema:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-}; 
-=======
 };
 exports.changeUserRole = changeUserRole;
 /**
@@ -448,4 +428,3 @@ function getFeaturesByPlan(plan) {
     };
     return features[plan] || features.basic;
 }
->>>>>>> Incoming (Background Agent changes)

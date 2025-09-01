@@ -71,6 +71,11 @@ const useAuthStore = create(
             });
 
             console.log('✅ Login exitoso, estado actualizado');
+            console.log('🔍 Estado final después del login:', {
+              isAuthenticated: get().isAuthenticated,
+              userRole: get().user?.role,
+              userName: get().user?.name
+            });
             return body?.data || body;
           } catch (error) {
             console.error('❌ Error en login:', error);
@@ -230,7 +235,7 @@ const useAuthStore = create(
             
             // Verificar que rawUser existe antes de procesarlo
             if (!rawUser) {
-              console.error('❌ rawUser es null o undefined');
+              console.error('❌ rawUser es null o undefined - Estructura de respuesta:', response.data);
               throw new Error('No se recibieron datos de usuario válidos');
             }
             

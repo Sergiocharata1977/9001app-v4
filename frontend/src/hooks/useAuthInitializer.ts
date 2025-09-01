@@ -25,17 +25,26 @@ export const useAuthInitializer = () => {
         console.log('🔍 Estado actual:', { isAuthenticated, user: user?.role });
         
         // Si la autenticación fue exitosa y el componente sigue montado
-        if (mounted && authResult && isAuthenticated) {
-          // Redirección inteligente basada en el rol
-          const currentPath = window.location.pathname;
-          console.log('📍 Ruta actual:', currentPath);
+        if (mounted && authResult) {
+          // Esperar un momento para que el estado se sincronice
+          await new Promise(resolve => setTimeout(resolve, 50));
           
-          // Si está en la página de login y ya está autenticado, redirigir
-          if (currentPath === '/app/login' || currentPath === '/login') {
-            const isSuperAdmin = user?.role === 'super_admin';
-            const redirectPath = isSuperAdmin ? '/app/super-admin/tablero' : '/app/menu-cards';
-            console.log('🚀 Redirigiendo a:', redirectPath);
-            navigate(redirectPath, { replace: true });
+          // Obtener el estado actualizado después del delay
+          const currentState = useAuthStore.getState();
+          
+          if (currentState.isAuthenticated && currentState.user) {
+            // Redirección inteligente basada en el rol
+            const currentPath = window.location.pathname;
+            console.log('📍 Ruta actual:', currentPath);
+            console.log('👤 Usuario autenticado:', currentState.user.role);
+            
+            // Si está en la página de login y ya está autenticado, redirigir
+            if (currentPath === '/app/login' || currentPath === '/login') {
+              const isSuperAdmin = currentState.user?.role === 'super_admin';
+              const redirectPath = isSuperAdmin ? '/app/super-admin/tablero' : '/app/menu-cards';
+              console.log('🚀 Redirigiendo a:', redirectPath);
+              navigate(redirectPath, { replace: true });
+            }
           }
         }
       } catch (error) {
