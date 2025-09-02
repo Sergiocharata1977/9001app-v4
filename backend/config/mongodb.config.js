@@ -5,8 +5,8 @@
 
 const MONGODB_CONFIG = {
   // Configuración de conexión
-  uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/9001app',
-  database: process.env.MONGODB_DB_NAME || process.env.MONGODB_DB || '9001app',
+  uri: process.env.MONGODB_URI,
+  database: process.env.MONGODB_DB_NAME,
   
   // Opciones de conexión
   options: {

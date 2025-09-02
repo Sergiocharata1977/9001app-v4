@@ -99,6 +99,17 @@ export class WorkflowEngine extends EventEmitter {
   }
 
   /**
+   * Alias para runWorkflow (compatibilidad con AgentCoordinator)
+   */
+  async runWorkflow(
+    workflow: WorkflowDefinition, 
+    coordinator: any, 
+    params?: any
+  ): Promise<WorkflowExecution> {
+    return this.executeWorkflow(workflow, coordinator, params);
+  }
+
+  /**
    * Construir grafo de dependencias de tareas
    */
   private buildTaskGraph(workflow: WorkflowDefinition): Map<string, WorkflowStep> {
@@ -220,7 +231,8 @@ export class WorkflowEngine extends EventEmitter {
                 runningTasks.delete(taskId);
               }, retryDelay);
               
-              continue;
+              // Continuar con la siguiente iteración del forEach
+              return;
             }
           }
           

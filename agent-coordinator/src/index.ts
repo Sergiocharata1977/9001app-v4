@@ -15,8 +15,8 @@ const program = new Command();
 const logger = new Logger('Main');
 
 class MainCoordinator {
-  private coordinator: AgentCoordinator;
-  private agents: Map<string, any> = new Map();
+  public coordinator: AgentCoordinator;
+  public agents: Map<string, any> = new Map();
 
   constructor() {
     this.coordinator = new AgentCoordinator();
@@ -305,7 +305,8 @@ program
 
 // Manejar errores no capturados
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection at:', promise);
+  logger.error('Reason:', reason);
   process.exit(1);
 });
 

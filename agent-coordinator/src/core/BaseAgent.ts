@@ -1,11 +1,13 @@
 import { EventEmitter } from 'events';
-import {
+import type {
     AgentBase,
     AgentConfig,
     AgentEvent,
     AgentHealth,
     AgentMetrics,
     AgentStatus,
+    AgentType,
+    AgentPriority,
     EventType
 } from '../types/agent.types';
 import { Logger } from '../utils/Logger';
@@ -13,9 +15,9 @@ import { Logger } from '../utils/Logger';
 export abstract class BaseAgent extends EventEmitter implements AgentBase {
   public id: string;
   public name: string;
-  public type: string;
+  public type: AgentType;
   public status: AgentStatus = 'idle';
-  public priority: string = 'medium';
+  public priority: AgentPriority = 'medium';
   public capabilities: string[] = [];
   public dependencies: string[] = [];
   public health: AgentHealth;
@@ -27,16 +29,17 @@ export abstract class BaseAgent extends EventEmitter implements AgentBase {
   protected isRunning: boolean = false;
 
   constructor(
-    id: string,
     name: string,
-    type: string,
+    type: AgentType,
+    priority: AgentPriority = 'medium',
     config: Partial<AgentConfig> = {}
   ) {
     super();
     
-    this.id = id;
+    this.id = `${type}-${Date.now()}`;
     this.name = name;
     this.type = type;
+    this.priority = priority;
     this.logger = new Logger(`Agent:${name}`);
     
     // Configuración por defecto
@@ -87,6 +90,14 @@ export abstract class BaseAgent extends EventEmitter implements AgentBase {
    * Método para obtener información específica del agente
    */
   abstract getInfo(): Record<string, any>;
+
+  /**
+   * Método para actualizar el estado del agente
+   */
+  updateStatus(status: AgentStatus): void {
+    this.status = status;
+    this.emit('statusChanged', { agentId: this.id, status });
+  }
 
   /**
    * Ejecutar el agente con manejo de errores y métricas

@@ -150,7 +150,7 @@ export class AgentCoordinator extends EventEmitter {
       this.emit('task_failed', { execution, error });
       
       // Reintentar si es posible
-      if (execution.retries < taskDefinition.priority === 'critical' ? 5 : 3) {
+      if (execution.retries < (taskDefinition.priority === 'critical' ? 5 : 3)) {
         await this.retryTask(execution, taskDefinition);
       }
       
@@ -174,7 +174,8 @@ export class AgentCoordinator extends EventEmitter {
     this.logger.info(`Iniciando workflow ${workflow.name}`);
     
     try {
-      await this.workflowEngine.execute(workflow, this, params);
+      // Ejecutar workflow usando el método correcto
+      await this.workflowEngine.runWorkflow(workflow, this, params);
       this.logger.info(`Workflow ${workflow.name} completado exitosamente`);
     } catch (error) {
       this.logger.error(`Workflow ${workflow.name} falló`, error);
@@ -216,7 +217,7 @@ export class AgentCoordinator extends EventEmitter {
       return a.metrics.memoryUsage - b.metrics.memoryUsage;
     });
 
-    return availableAgents[0];
+    return availableAgents[0] || null;
   }
 
   /**
