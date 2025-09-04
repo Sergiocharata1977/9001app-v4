@@ -40,6 +40,7 @@ const SuperAdminLayout: React.FC = () => {
       icon: Users,
       label: 'Usuarios Globales'
     },
+    
     {
       path: '/app/super-admin/settings',
       icon: Settings,

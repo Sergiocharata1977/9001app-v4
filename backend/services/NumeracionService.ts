@@ -1,27 +1,8 @@
 import mongoose from 'mongoose';
 import PlantillaRegistro from '../models/PlantillaRegistro';
 import Registro from '../models/Registro';
-
-interface IContadorNumeracion {
-  organizacion_id: string;
-  plantilla_id: string;
-  año?: number;
-  mes?: number;
-  ultimo_numero: number;
-}
-
-// Modelo para contadores
-const ContadorSchema = new mongoose.Schema({
-  organizacion_id: { type: mongoose.Schema.Types.ObjectId, required: true },
-  plantilla_id: { type: mongoose.Schema.Types.ObjectId, required: true },
-  año: Number,
-  mes: Number,
-  ultimo_numero: { type: Number, default: 0 }
-});
-
-ContadorSchema.index({ organizacion_id: 1, plantilla_id: 1, año: 1, mes: 1 }, { unique: true });
-
-const Contador = mongoose.model('ContadorNumeracion', ContadorSchema);
+import ContadorNumeracion from '../models/ContadorNumeracion';
+import LogNumeracion from '../models/LogNumeracion';
 
 export class NumeracionService {
   /**
@@ -29,7 +10,8 @@ export class NumeracionService {
    */
   async generarCodigoRegistro(
     plantillaId: string,
-    organizacionId: string
+    organizacionId: string,
+    usuarioId?: string
   ): Promise<string> {
     const plantilla = await PlantillaRegistro.findById(plantillaId);
     
@@ -53,11 +35,32 @@ export class NumeracionService {
     );
     
     // Construir el código
-    return this.construirCodigo(
+    const codigo = this.construirCodigo(
       config,
       siguienteNumero,
       plantilla.codigo
     );
+    
+    // Log de la operación si hay usuario
+    if (usuarioId) {
+      try {
+        const log = await LogNumeracion.crearLog(
+          plantillaId,
+          organizacionId,
+          'crear',
+          usuarioId,
+          {
+            codigo_nuevo: codigo,
+            contador_nuevo: siguienteNumero
+          }
+        );
+        await log.registrarExito();
+      } catch (error) {
+        console.error('Error al crear log de numeración:', error);
+      }
+    }
+    
+    return codigo;
   }
   
   /**
@@ -83,15 +86,12 @@ export class NumeracionService {
       filtro.mes = ahora.getMonth() + 1;
     }
     
-    // Usar findOneAndUpdate para operación atómica
-    const contador = await Contador.findOneAndUpdate(
-      filtro,
-      { $inc: { ultimo_numero: 1 } },
-      { 
-        new: true, 
-        upsert: true,
-        setDefaultsOnInsert: true
-      }
+    // Usar el nuevo modelo ContadorNumeracion
+    const contador = await ContadorNumeracion.crearOIncrementar(
+      organizacionId,
+      plantillaId,
+      filtro.año,
+      filtro.mes
     );
     
     return contador.ultimo_numero;
@@ -172,7 +172,10 @@ export class NumeracionService {
   /**
    * Reinicia los contadores anuales (ejecutar al inicio del año)
    */
-  async reiniciarContadoresAnuales(organizacionId: string): Promise<void> {
+  async reiniciarContadoresAnuales(organizacionId: string): Promise<{
+    plantillas_afectadas: number;
+    contadores_reiniciados: number;
+  }> {
     const año = new Date().getFullYear();
     
     // Buscar todas las plantillas con reinicio anual
@@ -181,27 +184,43 @@ export class NumeracionService {
       'configuracion_avanzada.numeracion_automatica.reiniciar_anual': true
     });
     
+    let contadoresReiniciados = 0;
+    
     for (const plantilla of plantillas) {
-      await Contador.findOneAndUpdate(
-        {
-          organizacion_id: organizacionId,
-          plantilla_id: plantilla._id,
-          año
-        },
-        {
-          ultimo_numero: 0
-        },
-        {
-          upsert: true
-        }
-      );
+      try {
+        await ContadorNumeracion.findOneAndUpdate(
+          {
+            organizacion_id: organizacionId,
+            plantilla_id: plantilla._id,
+            año
+          },
+          {
+            ultimo_numero: 0,
+            fecha_ultima_actualizacion: new Date()
+          },
+          {
+            upsert: true
+          }
+        );
+        contadoresReiniciados++;
+      } catch (error) {
+        console.error(`Error al reiniciar contador para plantilla ${plantilla._id}:`, error);
+      }
     }
+    
+    return {
+      plantillas_afectadas: plantillas.length,
+      contadores_reiniciados: contadoresReiniciados
+    };
   }
   
   /**
    * Reinicia los contadores mensuales (ejecutar al inicio del mes)
    */
-  async reiniciarContadoresMensuales(organizacionId: string): Promise<void> {
+  async reiniciarContadoresMensuales(organizacionId: string): Promise<{
+    plantillas_afectadas: number;
+    contadores_reiniciados: number;
+  }> {
     const ahora = new Date();
     const año = ahora.getFullYear();
     const mes = ahora.getMonth() + 1;
@@ -212,22 +231,35 @@ export class NumeracionService {
       'configuracion_avanzada.numeracion_automatica.reiniciar_mensual': true
     });
     
+    let contadoresReiniciados = 0;
+    
     for (const plantilla of plantillas) {
-      await Contador.findOneAndUpdate(
-        {
-          organizacion_id: organizacionId,
-          plantilla_id: plantilla._id,
-          año,
-          mes
-        },
-        {
-          ultimo_numero: 0
-        },
-        {
-          upsert: true
-        }
-      );
+      try {
+        await ContadorNumeracion.findOneAndUpdate(
+          {
+            organizacion_id: organizacionId,
+            plantilla_id: plantilla._id,
+            año,
+            mes
+          },
+          {
+            ultimo_numero: 0,
+            fecha_ultima_actualizacion: new Date()
+          },
+          {
+            upsert: true
+          }
+        );
+        contadoresReiniciados++;
+      } catch (error) {
+        console.error(`Error al reiniciar contador para plantilla ${plantilla._id}:`, error);
+      }
     }
+    
+    return {
+      plantillas_afectadas: plantillas.length,
+      contadores_reiniciados: contadoresReiniciados
+    };
   }
   
   /**
@@ -264,7 +296,7 @@ export class NumeracionService {
       filtro.mes = ahora.getMonth() + 1;
     }
     
-    const contador = await Contador.findOne(filtro);
+    const contador = await ContadorNumeracion.findOne(filtro);
     const ultimoNumero = contador?.ultimo_numero || 0;
     const proximoNumero = ultimoNumero + 1;
     
@@ -320,7 +352,7 @@ export class NumeracionService {
           filtro.mes = ahora.getMonth() + 1;
         }
         
-        await Contador.findOneAndUpdate(
+        await ContadorNumeracion.findOneAndUpdate(
           filtro,
           { $setOnInsert: { ultimo_numero: 0 } },
           { upsert: true }
@@ -407,7 +439,7 @@ export class NumeracionService {
         filtro.mes = mes;
       }
       
-      await Contador.findOneAndUpdate(
+      await ContadorNumeracion.findOneAndUpdate(
         filtro,
         { ultimo_numero: numero - 1 },
         { upsert: true }

@@ -333,6 +333,7 @@ const AppRoutes = () => {
                     <Route index element={<Navigate to="tablero" replace />} />
                     <Route path="tablero" element={<SuperAdminDashboard />} />
                     <Route path="organizations" element={<SuperAdminOrganizations />} />
+                    <Route path="numeracion" element={<NumeracionConfig />} />
                   </Route>
 
                   {/* Redirección por defecto dentro del layout */}
