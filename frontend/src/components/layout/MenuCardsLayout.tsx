@@ -24,7 +24,6 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import TenantInfoHeader from '../TenantInfoHeader';
 import TenantDebugPanel from '../TenantDebugPanel';
 
 
@@ -142,7 +141,7 @@ const MenuCardsLayout = ({ children }) => {
                 </motion.header>
                 
                 {/* Tenant Info Header - Información del tenant actual */}
-                <TenantInfoHeader />
+                {/* <TenantInfoHeader /> */}
 
                 {/* Page Content */}
                 <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">

@@ -111,7 +111,8 @@ const SecondLevelSidebar = ({ moduleType, onBackToMainMenu }) => {
                     title: 'Gestión',
                     icon: RefreshCw,
                     items: [
-                        { name: 'Procesos', path: '/app/procesos' },
+                        { name: 'Registros de Procesos', path: '/app/registros-procesos' },
+                        { name: 'Procesos', path: '/app/procesos-documentales' },
                         { name: 'Mejoras', path: '/app/mejoras' },
                         { name: 'Indicadores', path: '/app/indicadores' }
                     ]
@@ -222,7 +223,7 @@ const SecondLevelSidebar = ({ moduleType, onBackToMainMenu }) => {
                         </div>
                         <div>
                             <h2 className="text-lg font-bold">{currentModule.title}</h2>
-                            <p className="text-sm text-gray-400">Módulo Especializado</p>
+                            <p className="text-sm text-gray-400">Navegación</p>
                         </div>
                     </div>
                     <Button

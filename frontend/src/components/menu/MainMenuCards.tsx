@@ -6,6 +6,7 @@ import {
     ArrowLeft,
     ArrowRight,
     Heart,
+    Lightbulb,
     RefreshCw,
     Shield,
     Star as StarIcon,
@@ -108,6 +109,24 @@ const MainMenuCards = ({ onBackToSidebar }) => {
         reportes: '8'
       },
       features: ['Gestión de usuarios', 'Configuración organizacional', 'Reportes', 'Seguridad']
+    },
+    {
+      id: 'innovacion-desarrollo',
+      title: 'Innovación y Desarrollo',
+      subtitle: 'I+D y Transformación Digital',
+      description: 'Gestión de proyectos de innovación, desarrollo tecnológico y transformación digital',
+      icon: Lightbulb,
+      color: 'orange',
+      gradient: 'from-orange-500 to-orange-600',
+      hoverGradient: 'from-orange-600 to-orange-700',
+      path: '/app/innovacion-desarrollo',
+      metrics: {
+        proyectos: '8',
+        innovaciones: '15',
+        tecnologias: '6',
+        patentes: '3'
+      },
+      features: ['Gestión de proyectos I+D', 'Innovación tecnológica', 'Transformación digital', 'Propiedad intelectual']
     }
   ];
 

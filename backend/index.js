@@ -26,6 +26,7 @@ const competenciasRoutes = require('./routes/competencias.routes.js');
 const documentosRoutes = require('./routes/documentos.routes.js');
 const normasRoutes = require('./routes/normas.routes.js');
 const procesosRoutes = require('./routes/procesos.routes.js');
+const procesosMongoDBRoutes = require('./routes/procesos-mongodb.routes.js');
 const objetivosCalidadRoutes = require('./routes/objetivos-calidad.routes.js');
 const indicadoresRoutes = require('./routes/indicadores.routes.js');
 const medicionesRoutes = require('./routes/mediciones.routes.js');
@@ -64,6 +65,16 @@ try {
   console.log('✅ Sistema Super Admin cargado correctamente');
 } catch (error) {
   console.log('⚠️  Módulo Super Admin no encontrado, compilando TypeScript...');
+  // El archivo TypeScript necesita ser compilado primero
+}
+
+// Importar rutas del Editor de Registros (TypeScript compilado)
+let editorRegistrosRoutes = null;
+try {
+  editorRegistrosRoutes = require('./routes/editorRegistros.integration.js');
+  console.log('✅ Sistema Editor de Registros cargado correctamente');
+} catch (error) {
+  console.log('⚠️  Módulo Editor de Registros no encontrado, compilando TypeScript...');
   // El archivo TypeScript necesita ser compilado primero
 }
 
@@ -108,6 +119,7 @@ app.use('/api/normas', normasRoutes);
 
 // Rutas de procesos
 app.use('/api/procesos', procesosRoutes);
+app.use('/api/procesos-mongodb', procesosMongoDBRoutes);
 
 // Rutas de objetivos de calidad
 app.use('/api/objetivos-calidad', objetivosCalidadRoutes);
@@ -158,6 +170,12 @@ if (ragRoutes) {
 if (superAdminRoutes) {
   app.use('/api/super-admin', superAdminRoutes);
   console.log('✅ Rutas Super Admin registradas');
+}
+
+// Rutas del Editor de Registros (si está disponible)
+if (editorRegistrosRoutes) {
+  editorRegistrosRoutes.registrarRutasEditorRegistros(app);
+  console.log('✅ Rutas Editor de Registros registradas');
 }
 
 // Rutas de evaluaciones (SGC estandarizado) - TEMPORALMENTE DESHABILITADAS

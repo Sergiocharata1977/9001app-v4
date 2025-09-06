@@ -1,0 +1,184 @@
+name: 🔄 Cursor Web → GitHub → Servidor Prueba → Producción
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: "18"
+  PM2_APP_NAME: "9001app"
+
+jobs:
+  # 🎯 FASE 1: Impacto Automático en GitHub
+  github-impact:
+    runs-on: ubuntu-latest
+    name: "Cursor Web → GitHub Impact"
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: 📦 Instalar dependencias
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: 🧪 Tests automáticos
+        run: |
+          cd backend && npm test
+          cd ../frontend && npm test
+
+      - name: 🏗️ Build automático
+        run: |
+          cd frontend && npm run build
+          cd ../backend && npm run build
+
+      - name: 📊 Crear comentario en PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ **Impacto automático completado**\n\n- Tests: ✅ Pasaron\n- Build: ✅ Exitoso\n- Listo para servidor de prueba'
+            })
+
+  # 🧪 FASE 2: Despliegue Automático a Servidor de Prueba
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: github-impact
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
+    name: "GitHub → Servidor Prueba"
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: 📦 Instalar dependencias
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: 🏗️ Build para staging
+        run: |
+          cd frontend && npm run build
+          cd ../backend && npm run build
+
+      - name: 🚀 Desplegar a Servidor de Prueba
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /var/www/9001app-staging
+            git pull origin develop
+            npm ci
+            npm run build
+            pm2 restart 9001app-staging
+            echo "✅ Servidor de prueba actualizado: https://staging.9001app.com"
+
+      - name: 📧 Notificar despliegue a prueba
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🧪 **Desplegado en Servidor de Prueba**\n\n- URL: https://staging.9001app.com\n- Estado: ✅ Activo\n- Listo para aprobación de producción'
+            })
+
+  # 🎯 FASE 3: Sistema de Orden para Producción
+  production-approval:
+    runs-on: ubuntu-latest
+    needs: [github-impact, deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    name: "Orden → Producción"
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: 📦 Instalar dependencias
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: 🏗️ Build para producción
+        run: |
+          cd frontend && npm run build
+          cd ../backend && npm run build
+
+      - name: 🚀 Desplegar a Producción
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /var/www/9001app
+            git pull origin main
+            npm ci
+            npm run build
+            pm2 restart 9001app
+            echo "✅ Producción actualizada: https://9001app.com"
+
+      - name: 📧 Notificar despliegue a producción
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🎯 **Desplegado en Producción**\n\n- URL: https://9001app.com\n- Estado: ✅ Activo\n- Flujo completado exitosamente'
+            })
+
+  # 📊 FASE 4: Monitoreo y Notificaciones
+  monitoring:
+    runs-on: ubuntu-latest
+    needs: [github-impact, deploy-staging, production-approval]
+    if: always()
+    name: "Monitoreo del Flujo"
+
+    steps:
+      - name: 📊 Crear reporte de estado
+        run: |
+          echo "## 📊 Reporte de Flujo Cursor Web → GitHub → Producción" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Fase | Estado | Descripción |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Cursor Web → GitHub | ${{ needs.github-impact.result }} | Impacto automático |" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub → Servidor Prueba | ${{ needs.deploy-staging.result }} | Despliegue automático |" >> $GITHUB_STEP_SUMMARY
+          echo "| Orden → Producción | ${{ needs.production-approval.result }} | Despliegue final |" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📧 Notificación final
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: "#deployments"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow

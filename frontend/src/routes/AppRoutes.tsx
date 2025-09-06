@@ -1,24 +1,27 @@
-import CRMDashboard from '@/components/crm/CRMDashboard';
+import AnalisisRiesgoListing from '@/components/crm/AnalisisRiesgoListing';
 import ClienteAgroSingle from '@/components/crm/ClienteAgroSingle';
+import CRMDashboard from '@/components/crm/CRMDashboard';
 import OportunidadAgroSingle from '@/components/crm/OportunidadAgroSingle';
 import TestClientes from '@/components/crm/TestClientes';
 import VendedoresListing from '@/components/crm/VendedoresListing';
-import AnalisisRiesgoListing from '@/components/crm/AnalisisRiesgoListing';
-import TestSimpleComponent from '@/components/TestSimpleComponent';
+import DirectRegistrosProcesos from '@/components/DirectRegistrosProcesos';
 import CalidadMenu from '@/components/menu/CalidadMenu';
 import MainMenuCards from '@/components/menu/MainMenuCards';
-import ProcesosMenu from '@/components/menu/ProcesosMenu';
 import RRHHMenu from '@/components/menu/RRHHMenu';
+import SimpleTest from '@/components/SimpleTest';
+import TestSimpleComponent from '@/components/TestSimpleComponent';
 import CRMLayout from '@/layouts/CRMLayout';
 import ActividadesAgroPage from '@/pages/CRM/ActividadesAgroPage';
 import ClientesAgroPage from '@/pages/CRM/ClientesAgroPage';
 import ContactosPage from '@/pages/CRM/ContactosPage';
 import OportunidadesAgroPage from '@/pages/CRM/OportunidadesAgroPage';
-import React, { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import MenuCardsLayout from "../components/layout/MenuCardsLayout";
 import SecondLevelLayout from "../components/layout/SecondLevelLayout";
+import CalidadLayout from "../layouts/CalidadLayout";
+import RRHHLayout from "../layouts/RRHHLayout";
 import useAuthStore from "../store/authStore";
 import ProtectedRoute, { OrganizationAdminRoute } from "./ProtectedRoute";
 
@@ -31,11 +34,10 @@ const SmartRedirect = () => {
 };
 
 // Páginas de Acceso Directo Temporal
-import AccessDirectoCRM from '../pages/AccessDirectoCRM';
 import AccessDirectoCalidad from '../pages/AccessDirectoCalidad';
+import AccessDirectoCRM from '../pages/AccessDirectoCRM';
 import AccessDirectoProcesos from '../pages/AccessDirectoProcesos';
 import AccessDirectoRRHH from '../pages/AccessDirectoRRHH';
-import DevBypass from '../pages/DevBypass';
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -74,6 +76,14 @@ const BaseDatosPage = lazy(() => import("../pages/Documentacion/tecnica/BaseDato
 
 // Menu Piramidal ISO 9001
 const ProcesosISO = lazy(() => import("../pages/ProcesosISO"));
+const ProcesosMenu = lazy(() => import("../pages/ProcesosMenu"));
+const RegistrosProcesos = lazy(() => import("../pages/RegistrosProcesos"));
+const RegistrosProcesos2 = lazy(() => import("../pages/RegistrosProcesos2"));
+const RegistrosProcesosSingle = lazy(() => import("../components/registros-procesos/RegistrosProcesosSingle-NEW"));
+const NumeracionCorrelativa = lazy(() => import("../components/trazabilidad/NumeracionCorrelativa"));
+const TestAuth = lazy(() => import("../components/TestAuth"));
+const TestRegistrosProcesos = lazy(() => import("../pages/TestRegistrosProcesos"));
+const Trazabilidad = lazy(() => import("../pages/Trazabilidad"));
 const AdministracionPage = lazy(() => import("../pages/Documentacion/tecnica/AdministracionPage"));
 const ConfiguracionEntornos = lazy(() => import("../pages/Documentacion/ConfiguracionEntornos"));
 const ApiDocsPage = lazy(() => import("../pages/Documentacion/ApiDocsPage"));
@@ -163,6 +173,9 @@ const DatabaseSchemaPage = lazy(() => import("../pages/DatabaseSchemaPage"));
 // Política de Calidad
 const PoliticaCalidadPage = lazy(() => import("../pages/PoliticaCalidadPage"));
 
+// Trazabilidad ISO 9001
+const TrazabilidadPage = lazy(() => import("../pages/Trazabilidad"));
+
 
 const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -202,14 +215,14 @@ const AppRoutes = () => {
 
                   {/* Menús Especializados por Módulo */}
                   <Route path="calidad" element={
-                    <SecondLevelLayout moduleType="calidad" onBackToMainMenu={() => navigate('/app/menu-cards')}>
+                    <CalidadLayout>
                       <CalidadMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
-                    </SecondLevelLayout>
+                    </CalidadLayout>
                   } />
                   <Route path="rrhh" element={
-                    <SecondLevelLayout moduleType="rrhh" onBackToMainMenu={() => navigate('/app/menu-cards')}>
+                    <RRHHLayout>
                       <RRHHMenu onBackToMainMenu={() => navigate('/app/menu-cards')} />
-                    </SecondLevelLayout>
+                    </RRHHLayout>
                   } />
                   <Route path="procesos" element={
                     <SecondLevelLayout moduleType="procesos" onBackToMainMenu={() => navigate('/app/menu-cards')}>
@@ -238,10 +251,11 @@ const AppRoutes = () => {
                   <Route path="puestos" element={<PuestosPage />} />
                   <Route path="personal/:id" element={<PersonalSingle />} />
                   <Route path="personal" element={<PersonalPage />} />
+                  <Route path="capacitaciones" element={<CapacitacionesPage />} />
 
                   {/* Sistema de Gestión */}
-                  <Route path="procesos" element={<ProcesosPage />} />
-                  <Route path="procesos/:id" element={<ProcesoSingle />} />
+                  <Route path="procesos-documentales" element={<ProcesosPage />} />
+                  <Route path="procesos-documentales/:id" element={<ProcesoSingle />} />
                   <Route path="politica-calidad" element={<PoliticaCalidadPage />} />
                   <Route path="documentos" element={<DocumentosPage />} />
                   <Route path="documentos/:id" element={<DocumentoSingle />} />
@@ -262,12 +276,34 @@ const AppRoutes = () => {
 
                   {/* Menu Piramidal ISO 9001 */}
                   <Route path="procesos-iso" element={<ProcesosISO />} />
+                  
+                  {/* Procesos Menu */}
+                  <Route path="procesos-menu" element={<ProcesosMenu />} />
+                  <Route path="registros-procesos" element={<RegistrosProcesos />} />
+                  <Route path="registros-procesos-2" element={<RegistrosProcesos2 />} />
+                  <Route path="registros-procesos/:id" element={<RegistrosProcesosSingle />} />
+                  <Route path="numeracion-correlativa" element={<NumeracionCorrelativa />} />
+                  <Route path="trazabilidad" element={<Trazabilidad />} />
 
                   {/* Otros */}
                   <Route path="productos" element={<ProductosPage />} />
 
                   {/* RUTA DE PRUEBA: Nuevo componente con TypeScript */}
                   <Route path="productos-test" element={<ProductosListingNEW />} />
+                  
+                  {/* RUTA DE PRUEBA: Test de Autenticación */}
+                  <Route path="test-auth" element={<TestAuth />} />
+                  
+                  {/* RUTA DE PRUEBA: Test Registros Procesos */}
+                  <Route path="test-registros" element={<TestRegistrosProcesos />} />
+                  <Route path="test-registros/:id" element={<TestRegistrosProcesos />} />
+                  
+                  {/* RUTA DIRECTA: Registros Procesos (sin lazy loading) */}
+                  <Route path="direct-registros" element={<DirectRegistrosProcesos />} />
+                  <Route path="direct-registros/:id" element={<DirectRegistrosProcesos />} />
+                  
+                  {/* RUTA SÚPER SIMPLE: Test básico sin dependencias */}
+                  <Route path="simple-test" element={<SimpleTest />} />
 
                   <Route path="tickets" element={<TicketsPage />} />
                   <Route path="encuestas" element={<EncuestasPage />} />
@@ -326,18 +362,18 @@ const AppRoutes = () => {
                   {/* Jerarquía SGC */}
                   <Route path="sgc-hierarchy" element={<SGCHierarchyPage />} />
 
-
+                  {/* Trazabilidad ISO 9001 */}
+                  <Route path="trazabilidad" element={<TrazabilidadPage />} />
 
                   {/* Rutas Super Admin dentro de /app */}
                   <Route path="super-admin" element={<SuperAdminLayout />}>
                     <Route index element={<Navigate to="tablero" replace />} />
                     <Route path="tablero" element={<SuperAdminDashboard />} />
                     <Route path="organizations" element={<SuperAdminOrganizations />} />
-                    <Route path="numeracion" element={<NumeracionConfig />} />
+                    <Route path="numeracion" element={<NumeracionCorrelativa />} />
                   </Route>
 
-                  {/* Redirección por defecto dentro del layout */}
-                  <Route path="/" element={<SmartRedirect />} />
+                  {/* Redirección por defecto dentro del layout - DEBE IR AL FINAL */}
                   <Route path="*" element={<Navigate to="/app/menu-cards" replace />} />
                 </Routes>
               </MainLayout>

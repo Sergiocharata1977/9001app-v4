@@ -1,14 +1,13 @@
-import dotenv from 'dotenv';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
-import jwt from 'jsonwebtoken';
 
 // Cargar variables de entorno
 dotenv.config();
 
 // Importar middleware de autenticación
-import authMiddleware from '../middleware/authMiddleware.js';
+import authMiddleware from '../middleware/authMiddleware';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -41,32 +40,33 @@ app.get('/api/test', (req: Request, res: Response) => {
 // ===== FIN RUTAS PÚBLICAS =====
 
 // Importar rutas
-import accionesRoutes from '../routes/acciones.routes.js';
-import auditoriasRoutes from '../routes/auditorias.routes.js';
-import authRoutes from '../routes/authRoutes.js';
-import capacitacionesRoutes from '../routes/capacitaciones.routes.js';
-import competenciasRoutes from '../routes/competencias.routes.js';
-import coordinacionRoutes from '../routes/coordinacion.routes.js';
-import crmRoutes from '../routes/crm.routes.js';
-import databaseRoutes from '../routes/database.routes.js';
-import departamentosRoutes from '../routes/departamentos.routes.js';
-import documentosRoutes from '../routes/documentos.routes.js';
-import eventsRoutes from '../routes/events.routes.js';
-import fileStructureRoutes from '../routes/fileStructure.routes.js';
-import hallazgosRoutes from '../routes/hallazgos.routes.js';
-import indicadoresRoutes from '../routes/indicadores.routes.js';
-import medicionesRoutes from '../routes/mediciones.routes.js';
-import minutasRoutes from '../routes/minutas.routes.js';
-import normasRoutes from '../routes/normas.routes.js';
-import objetivosCalidadRoutes from '../routes/objetivos-calidad.routes.js';
-import personalRoutes from '../routes/personal.routes.js';
-import planesRoutes from '../routes/planes.js';
-import politicaCalidadRoutes from '../routes/politica-calidad.routes.js';
-import procesosRoutes from '../routes/procesos.routes.js';
-import productosRoutes from '../routes/productos.routes.js';
-import puestosRoutes from '../routes/puestos.routes.js';
-import suscripcionesRoutes from '../routes/suscripciones.js';
-import userRoutes from '../routes/userRoutes.js';
+import accionesRoutes from '../routes/acciones.routes';
+import auditoriasRoutes from '../routes/auditorias.routes';
+import authRoutes from '../routes/authRoutes';
+import capacitacionesRoutes from '../routes/capacitaciones.routes';
+import competenciasRoutes from '../routes/competencias.routes';
+import coordinacionRoutes from '../routes/coordinacion.routes';
+import crmRoutes from '../routes/crm.routes';
+import databaseRoutes from '../routes/database.routes';
+import departamentosRoutes from '../routes/departamentos.routes';
+import documentosRoutes from '../routes/documentos.routes';
+import eventsRoutes from '../routes/events.routes';
+import fileStructureRoutes from '../routes/fileStructure.routes';
+import hallazgosRoutes from '../routes/hallazgos.routes';
+import indicadoresRoutes from '../routes/indicadores.routes';
+import medicionesRoutes from '../routes/mediciones.routes';
+import minutasRoutes from '../routes/minutas.routes';
+import normasRoutes from '../routes/normas.routes';
+import numeracionCorrelativaRoutes from '../routes/numeracionCorrelativa.routes';
+import objetivosCalidadRoutes from '../routes/objetivos-calidad.routes';
+import personalRoutes from '../routes/personal.routes';
+import planesRoutes from '../routes/planes';
+import politicaCalidadRoutes from '../routes/politica-calidad.routes';
+import procesosRoutes from '../routes/procesos.routes';
+import productosRoutes from '../routes/productos.routes';
+import puestosRoutes from '../routes/puestos.routes';
+import suscripcionesRoutes from '../routes/suscripciones';
+import userRoutes from '../routes/userRoutes';
 
 // ===== RUTAS CON AUTENTICACIÓN =====
 
@@ -147,6 +147,9 @@ app.use('/api/file-structure', fileStructureRoutes);
 
 // Rutas de productos (requieren autenticación)
 app.use('/api/productos', authMiddleware, productosRoutes);
+
+// Rutas de numeración correlativa ISO 9001
+app.use('/api/numeracion-correlativa', numeracionCorrelativaRoutes);
 
 // ===== FIN RUTAS CON AUTENTICACIÓN =====
 

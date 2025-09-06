@@ -1,30 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import ProcesosDashboard from '@/components/procesos/ProcesosDashboard';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Building2, 
-  Users, 
-  Target,
-  TrendingUp,
-  Calendar,
-  FileText,
-  BarChart3,
-  CheckCircle,
-  AlertTriangle
-} from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { ProcesoSgcCompleto } from '@/types/procesos';
+import { ProcesoSgcCompleto, ProcesoSgcDashboard, ProcesoSgcFiltros } from '@/types/procesos';
+import {
+    AlertTriangle,
+    BarChart3,
+    CheckCircle,
+    FileText,
+    Filter,
+    Plus,
+    TrendingUp,
+    Users
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 // Definir tipos faltantes
 type ProcesoTipo = 'principal' | 'soporte' | 'mejora';
@@ -38,14 +30,16 @@ const Procesos: React.FC<ProcesosProps> = () => {
   const [procesos, setProcesos] = useState<ProcesoSgcCompleto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [dashboard, setDashboard] = useState<any>(null);
+  const [dashboard, setDashboard] = useState<ProcesoSgcDashboard | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [filtros, setFiltros] = useState({
-    tipo: '' as ProcesoTipo | '',
-    departamento: '',
-    estado: '',
+  const [filtros, setFiltros] = useState<ProcesoSgcFiltros>({
     search: '',
-    nivel_critico: ''
+    tipo: undefined,
+    categoria: undefined,
+    estado: undefined,
+    nivel_critico: undefined,
+    departamento_id: undefined,
+    responsable_id: undefined
   });
   
   // Estados para modales
@@ -62,7 +56,7 @@ const Procesos: React.FC<ProcesosProps> = () => {
     try {
       setLoading(true);
       // TODO: Implementar llamada a API
-      const response = await fetch('/api/procesos', {
+      const response = await fetch('/api/procesos-mongodb', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -83,7 +77,7 @@ const Procesos: React.FC<ProcesosProps> = () => {
 
   const cargarDashboard = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/procesos/dashboard/sgc', {
+      const response = await fetch('/api/procesos-mongodb/dashboard/sgc', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -168,61 +162,8 @@ const Procesos: React.FC<ProcesosProps> = () => {
       </div>
 
       {/* Dashboard Cards */}
-      {dashboard && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Procesos</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboard.resumen.total_procesos}</div>
-              <p className="text-xs text-muted-foreground">
-                {dashboard.resumen.activos} activos
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Estratégicos</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboard.resumen.estrategicos}</div>
-              <p className="text-xs text-muted-foreground">
-                Procesos clave
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Operativos</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboard.resumen.operativos}</div>
-              <p className="text-xs text-muted-foreground">
-                Procesos diarios
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">De Apoyo</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboard.resumen.apoyo}</div>
-              <p className="text-xs text-muted-foreground">
-                Procesos de soporte
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Dashboard de Estadísticas */}
+      <ProcesosDashboard organizationId={1} />
 
       {/* Filtros */}
       <Card>

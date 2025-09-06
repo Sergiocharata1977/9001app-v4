@@ -256,6 +256,16 @@ export interface IPlantillaRegistro {
   categoria?: string;
   modulo?: string;
   tags?: string[];
+  
+  // Relaciones con procesos SGC
+  proceso_id?: string; // Proceso principal asociado
+  proceso_padre_id?: string; // Para jerarquías de procesos
+  relaciones_procesos?: {
+    procesos_entrada: string[];
+    procesos_salida: string[];
+    procesos_control: string[];
+    procesos_apoyo: string[];
+  };
   configuracion_visual: IConfiguracionVisual;
   estados: IEstado[];
   configuracion_avanzada: IConfiguracionAvanzada;
@@ -448,4 +458,28 @@ export interface IRegistro {
   progreso: number;
   dias_abierto: number;
   esta_vencido: boolean;
+}
+
+// Tipos para Relaciones de Procesos
+export interface IProcesoRelacion {
+  _id?: string;
+  organization_id: string;
+  proceso_origen_id: string;
+  proceso_destino_id: string;
+  tipo_relacion: 'entrada' | 'salida' | 'control' | 'apoyo' | 'mejora' | 'padre' | 'hijo' | 'hermano';
+  descripcion?: string;
+  prioridad: 'baja' | 'media' | 'alta';
+  activo: boolean;
+  configuracion: {
+    es_obligatoria: boolean;
+    requiere_aprobacion: boolean;
+    tiempo_maximo_dias?: number;
+    notificar_cambios: boolean;
+  };
+  metadata: {
+    creado_por: string;
+    fecha_creacion: Date;
+    modificado_por?: string;
+    fecha_modificacion?: Date;
+  };
 }

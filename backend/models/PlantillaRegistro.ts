@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 // Tipos de campos soportados
 export enum TipoCampo {
@@ -274,6 +274,16 @@ export interface IPlantillaRegistro extends Document {
   modulo?: string;
   tags?: string[];
   
+  // Relaciones con procesos SGC
+  proceso_id?: Types.ObjectId; // Proceso principal asociado
+  proceso_padre_id?: Types.ObjectId; // Para jerarquías de procesos
+  relaciones_procesos?: {
+    procesos_entrada: Types.ObjectId[];
+    procesos_salida: Types.ObjectId[];
+    procesos_control: Types.ObjectId[];
+    procesos_apoyo: Types.ObjectId[];
+  };
+  
   // Configuración
   configuracion_visual: IConfiguracionVisual;
   estados: IEstado[];
@@ -330,6 +340,36 @@ const PlantillaRegistroSchema = new Schema<IPlantillaRegistro>({
   categoria: String,
   modulo: String,
   tags: [String],
+  
+  // Relaciones con procesos SGC
+  proceso_id: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Proceso',
+    index: true 
+  },
+  proceso_padre_id: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Proceso',
+    index: true 
+  },
+  relaciones_procesos: {
+    procesos_entrada: [{ 
+      type: Schema.Types.ObjectId, 
+      ref: 'Proceso' 
+    }],
+    procesos_salida: [{ 
+      type: Schema.Types.ObjectId, 
+      ref: 'Proceso' 
+    }],
+    procesos_control: [{ 
+      type: Schema.Types.ObjectId, 
+      ref: 'Proceso' 
+    }],
+    procesos_apoyo: [{ 
+      type: Schema.Types.ObjectId, 
+      ref: 'Proceso' 
+    }]
+  },
   
   // Configuración visual
   configuracion_visual: {

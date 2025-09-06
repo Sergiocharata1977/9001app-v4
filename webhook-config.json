@@ -1,10 +1,43 @@
 {
-  "port": 9000,
-  "hooks": [
-    {
-      "id": "deploy-9001app2",
-      "execute-command": "/root/deploy-9001app2.sh",
-      "command-working-directory": "/root"
+  "webhooks": {
+    "github": {
+      "url": "https://api.github.com/repos/USUARIO/9001app-v2/hooks",
+      "events": [
+        "push",
+        "pull_request",
+        "pull_request_review",
+        "deployment_status",
+        "workflow_run"
+      ],
+      "config": {
+        "url": "https://tu-servidor.com/webhook/github",
+        "content_type": "json",
+        "secret": "tu-secret-webhook"
+      }
+    },
+    "cursor-web": {
+      "url": "https://cursor.sh/api/webhooks",
+      "events": [
+        "file_saved",
+        "project_built",
+        "tests_completed"
+      ],
+      "config": {
+        "url": "https://api.github.com/repos/USUARIO/9001app-v2/dispatches",
+        "content_type": "json",
+        "secret": "tu-github-token"
+      }
     }
-  ]
+  },
+  "automation": {
+    "auto_commit": true,
+    "auto_push": true,
+    "auto_deploy_staging": true,
+    "require_approval_production": true,
+    "notifications": {
+      "slack": true,
+      "email": true,
+      "github_comments": true
+    }
+  }
 }

@@ -1,6 +1,6 @@
 // ========== TIPOS PARA PROCESOS SGC ==========
 
-import { SgcPersonalRelacion, SgcDocumentoRelacionado, SgcNormaRelacionada } from './index';
+import { SgcDocumentoRelacionado, SgcNormaRelacionada, SgcPersonalRelacion } from './index';
 
 // Tipo principal de Proceso SGC
 export interface ProcesoSgc {
@@ -114,6 +114,8 @@ export interface ProcesoSgcFiltros {
   departamento_id?: string;
   fecha_desde?: string;
   fecha_hasta?: string;
+  limit?: number;
+  page?: number;
 }
 
 // Dashboard de procesos SGC
@@ -136,6 +138,49 @@ export interface ProcesoSgcDashboard {
   }>;
   procesos_recientes: ProcesoSgc[];
   procesos_criticos: ProcesoSgc[];
+}
+
+// Estadísticas resumidas
+export interface ProcesoSgcStats {
+  total_procesos: number;
+  distribucion_tipos: Array<{
+    tipo: string;
+    categoria: string;
+    cantidad: number;
+  }>;
+  distribucion_estados: Array<{
+    estado: string;
+    cantidad: number;
+  }>;
+  distribucion_niveles: Array<{
+    nivel: string;
+    cantidad: number;
+  }>;
+}
+
+// Resultado de búsqueda avanzada
+export interface ProcesoSgcSearchResult {
+  data: ProcesoSgcCompleto[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+// Respuesta de API estándar
+export interface ProcesoSgcApiResponse<T = any> {
+  status: 'success' | 'error';
+  data?: T;
+  message?: string;
+  errors?: string[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
 }
 
 // Tipos para relaciones entre procesos
