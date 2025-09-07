@@ -157,16 +157,16 @@ router.post('/', async (req, res, next) => {
   }
 
   try {
-    const client = new MongoClient(mongoConfig.uri);
+    const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
     
-    const db = client.db('9001app');
+    const db = client.db(process.env.MONGODB_DB_NAME || '9001app');
     const collection = db.collection('personal');
     
     // Verificar si ya existe un empleado con el mismo email en la misma organización
     const existing = await collection.findOne({
       email: email,
-      organizationId: organization_id
+      organization_id: new ObjectId(organization_id)
     });
 
     if (existing) {
@@ -185,7 +185,7 @@ router.post('/', async (req, res, next) => {
       tipo_personal: tipo_personal || 'empleado',
       puestoId: puestoId ? new ObjectId(puestoId) : null,
       departamentoId: departamentoId ? new ObjectId(departamentoId) : null,
-      organizationId: organization_id,
+      organization_id: new ObjectId(organization_id),
       estado: 'activo',
       createdAt: now,
       updatedAt: now
@@ -238,9 +238,11 @@ router.put('/:id', async (req, res, next) => {
     
     // Si se proporciona un email, verificar que no entre en conflicto con otro empleado
     if (email) {
+      const organizationId = req.user?.organization_id || req.user?.org_id;
       const existing = await collection.findOne({
         email: email,
-        _id: { $ne: new ObjectId(id) }
+        _id: { $ne: new ObjectId(id) },
+        organization_id: new ObjectId(organizationId)
       });
       if (existing) {
         const err = new Error('Ya existe otro empleado con ese email.');
@@ -250,7 +252,11 @@ router.put('/:id', async (req, res, next) => {
     }
 
     // Obtener datos anteriores para la bitácora
-    const prevData = await collection.findOne({ _id: new ObjectId(id) });
+    const organizationId = req.user?.organization_id || req.user?.org_id;
+    const prevData = await collection.findOne({ 
+      _id: new ObjectId(id),
+      organization_id: new ObjectId(organizationId)
+    });
 
     if (!prevData) {
       const err = new Error('Empleado no encontrado.');
@@ -288,7 +294,10 @@ router.put('/:id', async (req, res, next) => {
     }
 
     // Devolver el empleado actualizado
-    const updatedEmpleado = await collection.findOne({ _id: new ObjectId(id) });
+    const updatedEmpleado = await collection.findOne({ 
+      _id: new ObjectId(id),
+      organization_id: new ObjectId(organizationId)
+    });
 
     await client.close();
 
@@ -299,7 +308,7 @@ router.put('/:id', async (req, res, next) => {
       prevData,
       updatedEmpleado,
       usuario,
-      updatedEmpleado.organizationId
+      updatedEmpleado.organization_id
     );
 
     res.json(updatedEmpleado);
@@ -323,7 +332,11 @@ router.delete('/:id', async (req, res, next) => {
     const personalCollection = db.collection('personal');
     
     // Obtener datos anteriores para la bitácora
-    const prevData = await personalCollection.findOne({ _id: new ObjectId(id) });
+    const organizationId = req.user?.organization_id || req.user?.org_id;
+    const prevData = await personalCollection.findOne({ 
+      _id: new ObjectId(id),
+      organization_id: new ObjectId(organizationId)
+    });
 
     if (!prevData) {
       const err = new Error('Empleado no encontrado.');
@@ -372,7 +385,7 @@ router.delete('/:id', async (req, res, next) => {
       id,
       prevData,
       usuario,
-      prevData.organizationId
+      prevData.organization_id
     );
 
     res.json({ message: 'Empleado eliminado exitosamente' });

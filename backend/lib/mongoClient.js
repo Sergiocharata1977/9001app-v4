@@ -6,7 +6,7 @@ class MongoClientWrapper {
     this.client = null;
     this.db = null;
     this.isConnected = false;
-    this.useMockData = true; // Temporalmente usar datos mock
+    this.useMockData = process.env.ENABLE_MOCK_DATA === 'true'; // Usar configuración de entorno
   }
 
   async connect() {
