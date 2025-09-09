@@ -1,7 +1,7 @@
 const express = require('express');
-const { register, login, refreshToken, logout, verifyToken } = require('../controllers/authController.js');
-const authenticateToken = require('../middleware/authMiddleware.js');
-const { auditLogin, auditLogout, auditRegister } = require('../middleware/auditMiddleware.js');
+const { register, login, refreshToken, logout, verifyToken } = require('../controllers/authController');
+const authenticateToken = require('../middleware/authMiddleware');
+const { auditLogin, auditLogout, auditRegister } = require('../middleware/auditMiddleware');
 
 const router = express.Router();
 

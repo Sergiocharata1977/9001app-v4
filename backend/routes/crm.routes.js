@@ -1,7 +1,7 @@
 const express = require('express');
-const mongoClient = require('../lib/mongoClient.js');
-const { auditMiddleware, auditActions, resourceTypes } = require('../middleware/auditMiddleware.js');
-const authMiddleware = require('../middleware/authMiddleware.js');
+const mongoClient = require('../lib/mongoClient');
+const { auditMiddleware, auditActions, resourceTypes } = require('../middleware/auditMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 const crypto = require('crypto');
 
 const router = express.Router();
@@ -18,7 +18,7 @@ router.post('/setup-tables', async (req, res) => {
   try {
     console.log('🔧 Iniciando creación de tablas CRM...');
     
-    const databaseSetupService = require('../services/databaseSetupService.js');
+    const databaseSetupService = require('../services/databaseSetupService');
     const result = await databaseSetupService.createCRMTables();
 
     res.json({

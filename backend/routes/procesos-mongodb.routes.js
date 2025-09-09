@@ -1,7 +1,7 @@
 const express = require('express');
-const authMiddleware = require('../middleware/authMiddleware.js');
-const procesosController = require('../controllers/procesosController.js');
-const { validateProcesoFiltros, validateProcesoId } = require('../validators/procesosValidator.js');
+const authMiddleware = require('../middleware/authMiddleware');
+const procesosController = require('../controllers/procesosController');
+const { validateProcesoFiltros, validateProcesoId } = require('../validators/procesosValidator');
 
 const router = express.Router();
 

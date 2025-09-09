@@ -1,10 +1,10 @@
 const { Router  } = require('express');
 const multer = require('multer');
 const path = require('path');
-const mongoClient = require('../lib/mongoClient.js');
+const mongoClient = require('../lib/mongoClient');
 const { fileURLToPath  } = require('url');
 const fs = require('fs');
-const authMiddleware = require('../middleware/authMiddleware.js');
+const authMiddleware = require('../middleware/authMiddleware');
 
 const router = Router();
 

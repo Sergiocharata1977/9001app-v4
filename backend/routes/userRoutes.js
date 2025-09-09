@@ -7,8 +7,8 @@ const {
   deleteOrganizationUser,
   
 
-} = require('../controllers/userController.js');
-const { auditCreateUser, auditUpdateUser, auditDeleteUser } = require('../middleware/auditMiddleware.js');
+} = require('../controllers/userController');
+const { auditCreateUser, auditUpdateUser, auditDeleteUser } = require('../middleware/auditMiddleware');
 
 const router = express.Router();
 

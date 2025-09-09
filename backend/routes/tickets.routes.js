@@ -1,7 +1,7 @@
 const express = require('express');
-const mongoClient = require('../lib/mongoClient.js');
-const authMiddleware = require('../middleware/authMiddleware.js');
-const { ensureTenant, secureQuery, logTenantOperation, checkPermission } = require('../middleware/tenantMiddleware.js');
+const mongoClient = require('../lib/mongoClient');
+const authMiddleware = require('../middleware/authMiddleware');
+const { ensureTenant, secureQuery, logTenantOperation, checkPermission } = require('../middleware/tenantMiddleware');
 const crypto = require('crypto');
 
 const router = express.Router();

@@ -1,69 +1,22 @@
-import { Router } from 'express';
-import {
-  getDashboardStats,
-  getAllOrganizations,
-  createOrganization,
-  updateOrganization,
-  deleteOrganization,
-  getOrganizationUsers,
-  changeUserRole
-} from '../controllers/superAdminController';
-import {
-  requireSuperAdmin,
-  logSuperAdminAction,
-  rateLimitSuperAdmin
-} from '../middleware/superAdminMiddleware';
-
-const router = Router();
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const superAdminController_1 = require("../controllers/superAdminController");
+const superAdminMiddleware_1 = require("../middleware/superAdminMiddleware");
+const router = (0, express_1.Router)();
 // Aplicar middleware de super admin a todas las rutas
-router.use(requireSuperAdmin);
-router.use(rateLimitSuperAdmin(100, 60000)); // 100 requests por minuto
-
+router.use(superAdminMiddleware_1.requireSuperAdmin);
+router.use((0, superAdminMiddleware_1.rateLimitSuperAdmin)(100, 60000)); // 100 requests por minuto
 // Dashboard y estadísticas
-router.get(
-  '/dashboard/stats',
-  logSuperAdminAction('VIEW_DASHBOARD_STATS'),
-  getDashboardStats
-);
-
+router.get('/dashboard/stats', (0, superAdminMiddleware_1.logSuperAdminAction)('VIEW_DASHBOARD_STATS'), superAdminController_1.getDashboardStats);
 // Gestión de organizaciones
-router.get(
-  '/organizations',
-  logSuperAdminAction('LIST_ORGANIZATIONS'),
-  getAllOrganizations
-);
-
-router.post(
-  '/organizations',
-  logSuperAdminAction('CREATE_ORGANIZATION'),
-  createOrganization
-);
-
-router.put(
-  '/organizations/:id',
-  logSuperAdminAction('UPDATE_ORGANIZATION'),
-  updateOrganization
-);
-
-router.delete(
-  '/organizations/:id',
-  logSuperAdminAction('DELETE_ORGANIZATION'),
-  deleteOrganization
-);
-
+router.get('/organizations', (0, superAdminMiddleware_1.logSuperAdminAction)('LIST_ORGANIZATIONS'), superAdminController_1.getAllOrganizations);
+router.post('/organizations', (0, superAdminMiddleware_1.logSuperAdminAction)('CREATE_ORGANIZATION'), superAdminController_1.createOrganization);
+router.put('/organizations/:id', (0, superAdminMiddleware_1.logSuperAdminAction)('UPDATE_ORGANIZATION'), superAdminController_1.updateOrganization);
+router.delete('/organizations/:id', (0, superAdminMiddleware_1.logSuperAdminAction)('DELETE_ORGANIZATION'), superAdminController_1.deleteOrganization);
 // Gestión de usuarios de organizaciones
-router.get(
-  '/organizations/:id/users',
-  logSuperAdminAction('LIST_ORGANIZATION_USERS'),
-  getOrganizationUsers
-);
+router.get('/organizations/:id/users', (0, superAdminMiddleware_1.logSuperAdminAction)('LIST_ORGANIZATION_USERS'), superAdminController_1.getOrganizationUsers);
+router.put('/users/:userId/role', (0, superAdminMiddleware_1.logSuperAdminAction)('CHANGE_USER_ROLE'), superAdminController_1.changeUserRole);
+exports.default = router;
 
-router.put(
-  '/users/:userId/role',
-  logSuperAdminAction('CHANGE_USER_ROLE'),
-  changeUserRole
-);
-
-export default router;
 

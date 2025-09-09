@@ -4,8 +4,8 @@ const { getProgramaciones,
   getProgramacionById,
   updateProgramacion,
   deleteProgramacion,
- } = require('../controllers/evaluacionProgramacionController.js');
-const authMiddleware = require('../middleware/authMiddleware.js');
+ } = require('../controllers/evaluacionProgramacionController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 const router = Router();
 

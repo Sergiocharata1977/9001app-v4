@@ -411,4 +411,4 @@ export class NumeracionCorrelativaController {
   }
 }
 
-export default new NumeracionCorrelativaController();
+module.exports = new NumeracionCorrelativaController();

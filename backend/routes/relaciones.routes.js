@@ -1,6 +1,6 @@
 const express = require('express');
-const mongoClient = require('../lib/mongoClient.js');
-const authMiddleware = require('../middleware/authMiddleware.js');
+const mongoClient = require('../lib/mongoClient');
+const authMiddleware = require('../middleware/authMiddleware');
 const crypto = require('crypto');
 
 const router = express.Router();

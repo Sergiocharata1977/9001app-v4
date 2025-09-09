@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 import NumeracionCorrelativaController from '../controllers/NumeracionCorrelativaController';
 import { authenticateToken } from '../middleware/auth';
 
@@ -43,4 +43,4 @@ router.post('/reiniciar-anual', NumeracionCorrelativaController.reiniciarContado
 // Reinicia los contadores mensuales
 router.post('/reiniciar-mensual', NumeracionCorrelativaController.reiniciarContadoresMensuales);
 
-export default router;
+module.exports = router;

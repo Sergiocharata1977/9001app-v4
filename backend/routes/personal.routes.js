@@ -1,8 +1,8 @@
 const { Router } = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const crypto = require('crypto');
-const ActivityLogService = require('../services/activityLogService.js');
-const authMiddleware = require('../middleware/authMiddleware.js');
+const ActivityLogService = require('../services/activityLogService');
+const authMiddleware = require('../middleware/authMiddleware');
 require('dotenv').config();
 
 const router = Router();

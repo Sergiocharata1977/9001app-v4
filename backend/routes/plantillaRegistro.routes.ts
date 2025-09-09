@@ -27,4 +27,4 @@ router.put('/:id/estados/:estadoId', checkRole(['admin', 'supervisor']), Plantil
 router.delete('/:id/estados/:estadoId', checkRole(['admin']), PlantillaRegistroController.eliminarEstado);
 router.put('/:id/estados/reordenar', checkRole(['admin', 'supervisor']), PlantillaRegistroController.reordenarEstados);
 
-export default router;
+module.exports = router;

@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoClient = require('../lib/mongoClient.js');
+const mongoClient = require('../lib/mongoClient');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const { getSuscripcionActual, createSuscripcion, cancelSuscripcion } = require('../controllers/planesController.js');
+const { getSuscripcionActual, createSuscripcion, cancelSuscripcion } = require('../controllers/planesController');
 const router = express.Router();
 
 // GET - Obtener suscripción de la organización actual

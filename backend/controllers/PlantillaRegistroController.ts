@@ -753,4 +753,4 @@ export class PlantillaRegistroController {
   }
 }
 
-export default new PlantillaRegistroController();
+module.exports = new PlantillaRegistroController();

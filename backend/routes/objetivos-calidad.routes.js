@@ -1,7 +1,7 @@
 const express = require('express');
-const mongoClient = require('../lib/mongoClient.js');
-const ActivityLogService = require('../services/activityLogService.js');
-const authMiddleware = require('../middleware/authMiddleware.js');
+const mongoClient = require('../lib/mongoClient');
+const ActivityLogService = require('../services/activityLogService');
+const authMiddleware = require('../middleware/authMiddleware');
 const crypto = require('crypto');
 
 const router = express.Router();

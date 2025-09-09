@@ -27,6 +27,8 @@ const documentosRoutes = require('./routes/documentos.routes.js');
 const normasRoutes = require('./routes/normas.routes.js');
 const procesosRoutes = require('./routes/procesos.routes.js');
 const procesosMongoDBRoutes = require('./routes/procesos-mongodb.routes.js');
+const procesosAbmRoutes = require('./routes/procesos-abm.routes.js');
+const registrosProcesosAbmRoutes = require('./routes/registros-procesos-abm.routes.js');
 const objetivosCalidadRoutes = require('./routes/objetivos-calidad.routes.js');
 const indicadoresRoutes = require('./routes/indicadores.routes.js');
 const medicionesRoutes = require('./routes/mediciones.routes.js');
@@ -120,6 +122,8 @@ app.use('/api/normas', normasRoutes);
 // Rutas de procesos
 app.use('/api/procesos', procesosRoutes);
 app.use('/api/procesos-mongodb', procesosMongoDBRoutes);
+app.use('/api/procesos-abm', procesosAbmRoutes);
+app.use('/api/registros-procesos-abm', registrosProcesosAbmRoutes);
 
 // Rutas de objetivos de calidad
 app.use('/api/objetivos-calidad', objetivosCalidadRoutes);

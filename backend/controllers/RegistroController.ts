@@ -1047,4 +1047,4 @@ export class RegistroController {
   }
 }
 
-export default new RegistroController();
+module.exports = new RegistroController();

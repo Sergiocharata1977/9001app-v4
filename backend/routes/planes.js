@@ -1,5 +1,5 @@
 const express = require('express');
-const { getOrganizationPlanes } = require('../controllers/planesController.js');
+const { getOrganizationPlanes } = require('../controllers/planesController');
 const router = express.Router();
 
 // GET - Obtener todos los planes

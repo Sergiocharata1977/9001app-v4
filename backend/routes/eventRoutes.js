@@ -3,8 +3,8 @@ const { getAllEvents,
   createEvent,
   updateEvent,
   deleteEvent,
- } = require('../controllers/eventController.js');
-const { protect  } = require('../middleware/authMiddleware.js');
+ } = require('../controllers/eventController');
+const { protect  } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 

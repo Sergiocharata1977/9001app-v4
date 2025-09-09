@@ -70,4 +70,4 @@ router.post('/:id/clonar', RegistroController.clonar);
 // Exportación
 router.get('/exportar', RegistroController.exportar);
 
-export default router;
+module.exports = router;

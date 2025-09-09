@@ -14,7 +14,8 @@
     "check-db": "node scripts/check-database-tables.js",
     "verify-db": "node scripts/verificar-base-datos-completa.js",
     "verify-db-continuo": "node scripts/verificar-base-datos-completa.js --continuo",
-    "diagnostico": "node scripts/diagnostico-turso-simple.js"
+    "diagnostico": "node scripts/diagnostico-turso-simple.js",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "isoflow4",
@@ -49,9 +50,9 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.3.0",
+    "@types/express": "^4.17.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
     "eslint": "^8.57.0",
@@ -61,6 +62,8 @@
     "prettier": "^3.0.0",
     "supertest": "^6.3.3",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.0.0",
+    "@types/bcrypt": "^5.0.0",
+    "ts-node": "^10.9.0"
   }
 }
