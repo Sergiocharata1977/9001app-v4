@@ -25,6 +25,13 @@ import departmentRoutes from './modules/departments/department.routes.js';
 import positionRoutes from './modules/positions/position.routes.js';
 import personnelRoutes from './modules/personnel/personnel.routes.js';
 
+// Importar rutas SGC
+import procesoRoutes from './modules/procesos/proceso.routes.js';
+import objetivoRoutes from './modules/objetivos/objetivo.routes.js';
+import indicadorRoutes from './modules/indicadores/indicador.routes.js';
+import medicionRoutes from './modules/mediciones/medicion.routes.js';
+import registroRoutes from './modules/registros-procesos/registro.routes.js';
+
 // Crear aplicación Express
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
@@ -67,6 +74,13 @@ app.use('/api/organizations', organizationRoutes);
 app.use('/api/departamentos', departmentRoutes);
 app.use('/api/puestos', positionRoutes);
 app.use('/api/personal', personnelRoutes);
+
+// Rutas SGC (Sistema de Gestión de Calidad)
+app.use('/api/procesos', procesoRoutes);
+app.use('/api/objetivos', objetivoRoutes);
+app.use('/api/indicadores', indicadorRoutes);
+app.use('/api/mediciones', medicionRoutes);
+app.use('/api/registros', registroRoutes);
 
 // Manejo de rutas no encontradas
 app.use(notFound);
