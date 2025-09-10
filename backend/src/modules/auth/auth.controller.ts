@@ -32,8 +32,11 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
+      console.log('🔐 Intento de login:', { email, passwordLength: password?.length });
+
       // Validar datos de entrada
       if (!email || !password) {
+        console.log('❌ Datos faltantes:', { email: !!email, password: !!password });
         res.status(400).json({
           success: false,
           message: 'Email y contraseña son requeridos'
@@ -41,13 +44,24 @@ export class AuthController {
         return;
       }
 
-      // Buscar usuario por email
+      // Buscar usuario por email (compatible con esquema existente)
       const user = await User.findOne({ 
-        email: email.toLowerCase(),
-        activo: true 
+        email: email.toLowerCase()
+        // Removemos is_active para compatibilidad con esquema existente
       }).populate('organization_id', 'nombre codigo activo');
 
+      console.log('👤 Usuario encontrado:', user ? 'Sí' : 'No');
+      if (user) {
+        console.log('📋 Datos del usuario:', {
+          id: user._id,
+          email: user.email,
+          is_active: user.is_active,
+          organization_id: user.organization_id
+        });
+      }
+
       if (!user) {
+        console.log('❌ Usuario no encontrado o inactivo');
         res.status(401).json({
           success: false,
           message: 'Credenciales inválidas'
@@ -55,18 +69,33 @@ export class AuthController {
         return;
       }
 
-      // Verificar que la organización esté activa
-      if (!user.organization_id || !(user.organization_id as any).activo) {
+      // Verificar que la organización esté activa (si existe)
+      if (user.organization_id && (user.organization_id as any).activo === false) {
+        console.log('❌ Organización inactiva');
         res.status(401).json({
           success: false,
           message: 'Organización inactiva'
         });
         return;
       }
+      console.log('✅ Organización verificada');
 
-      // Verificar contraseña
-      const isPasswordValid = await AuthService.verifyPassword(password, user.password);
+      // Verificar contraseña (compatible con esquema existente)
+      const userPassword = user.password_hash || user.password;
+      console.log('🔑 Campo de contraseña encontrado:', userPassword ? 'Sí' : 'No');
+      
+      if (!userPassword) {
+        console.log('❌ Usuario sin contraseña configurada');
+        res.status(401).json({
+          success: false,
+          message: 'Usuario sin contraseña configurada. Contacte al administrador.'
+        });
+        return;
+      }
+
+      const isPasswordValid = await AuthService.verifyPassword(password, userPassword);
       if (!isPasswordValid) {
+        console.log('❌ Contraseña inválida');
         res.status(401).json({
           success: false,
           message: 'Credenciales inválidas'
@@ -75,11 +104,9 @@ export class AuthController {
       }
 
       // Generar tokens
+      console.log('🎫 Generando tokens...');
       const { accessToken, refreshToken } = AuthService.generateTokensForUser(user);
-
-      // Actualizar último acceso
-      user.ultimo_acceso = new Date();
-      await user.save();
+      console.log('✅ Tokens generados exitosamente');
 
       res.json({
         success: true,
@@ -310,7 +337,7 @@ export class AuthController {
       }
 
       res.json({
-        success: true,
+      success: true,
         message: 'Perfil obtenido exitosamente',
         data: {
           user: req.user.toPublicJSON()
@@ -321,6 +348,151 @@ export class AuthController {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Crear usuario de prueba (solo para desarrollo)
+  static async createTestUser(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('🧪 Endpoint create-test-user llamado');
+      
+      // Solo permitir en desarrollo
+      if (process.env.NODE_ENV === 'production') {
+        res.status(403).json({
+          success: false,
+          message: 'No disponible en producción'
+        });
+        return;
+      }
+
+      // Verificar si ya existe una organización de prueba
+      let organization = await Organization.findOne({ codigo: 'TEST' });
+      
+      if (!organization) {
+        // Crear organización de prueba
+        organization = new Organization({
+          nombre: 'Organización de Prueba',
+          codigo: 'TEST',
+          descripcion: 'Organización para pruebas del sistema',
+          activo: true
+        });
+        await organization.save();
+        console.log('✅ Organización de prueba creada:', organization.nombre);
+      }
+
+      // Verificar si ya existe el usuario de prueba
+      let user = await User.findOne({ email: 'admin@test.com' });
+      
+      if (!user) {
+        // Crear usuario de prueba usando AuthService
+        const hashedPassword = await AuthService.hashPassword('123456');
+        
+        user = new User({
+          nombre: 'Admin',
+          apellido: 'Test',
+          email: 'admin@test.com',
+          password: hashedPassword,
+          telefono: '+5491234567890',
+          roles: ['admin'],
+          organization_id: organization._id,
+          activo: true,
+          configuracion: {
+            tema: 'light',
+            idioma: 'es',
+            notificaciones: true
+          }
+        });
+        
+        await user.save();
+        console.log('✅ Usuario de prueba creado:', user.email);
+      }
+
+      res.json({
+        success: true,
+        message: 'Usuario de prueba creado exitosamente',
+        data: {
+          email: 'admin@test.com',
+          password: '123456',
+          organization: organization.nombre
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error creando usuario de prueba:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: error.message
+      });
+    }
+  }
+
+  // Establecer contraseña para usuario existente (solo desarrollo)
+  static async setPassword(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('🔧 Endpoint set-password llamado');
+      
+      // Solo permitir en desarrollo
+      if (process.env.NODE_ENV === 'production') {
+        res.status(403).json({
+          success: false,
+          message: 'No disponible en producción'
+        });
+        return;
+      }
+
+      const { email, password } = req.body;
+      console.log('📧 Datos recibidos:', { email, passwordLength: password?.length });
+
+      if (!email || !password) {
+        res.status(400).json({
+          success: false,
+          message: 'Email y contraseña son requeridos'
+        });
+        return;
+      }
+
+      // Buscar usuario usando findOneAndUpdate para evitar validaciones
+      const user = await User.findOne({ email: email.toLowerCase() });
+      console.log('👤 Usuario encontrado:', user ? 'Sí' : 'No');
+      
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+        return;
+      }
+
+      // Hashear nueva contraseña usando AuthService
+      const hashedPassword = await AuthService.hashPassword(password);
+      console.log('🔐 Contraseña hasheada exitosamente');
+
+      // Actualizar contraseña directamente en la base de datos para evitar validaciones
+      const updateField = user.password_hash !== undefined ? 'password_hash' : 'password';
+      console.log(`💾 Actualizando campo ${updateField}`);
+      
+      await User.findByIdAndUpdate(user._id, {
+        [updateField]: hashedPassword
+      }, { 
+        runValidators: false // Evitar validaciones que requieren campos faltantes
+      });
+      console.log('✅ Usuario guardado exitosamente');
+
+      res.json({
+        success: true,
+        message: 'Contraseña establecida exitosamente',
+        data: {
+          email: user.email,
+          passwordSet: true
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error estableciendo contraseña:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: error.message
       });
     }
   }

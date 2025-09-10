@@ -1,11 +1,10 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import compression from 'compression';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import express, { Application, Request, Response } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import compression from 'compression';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import { rateLimit } from 'express-rate-limit';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -19,11 +18,11 @@ import { notFound } from './middleware/notFound.js';
 
 // Importar rutas
 import authRoutes from './modules/auth/auth.routes.js';
-import userRoutes from './modules/users/user.routes.js';
-import organizationRoutes from './modules/organizations/organization.routes.js';
 import departmentRoutes from './modules/departments/department.routes.js';
-import positionRoutes from './modules/positions/position.routes.js';
+import organizationRoutes from './modules/organizations/organization.routes.js';
 import personnelRoutes from './modules/personnel/personnel.routes.js';
+import positionRoutes from './modules/positions/position.routes.js';
+import userRoutes from './modules/users/user.routes.js';
 
 // Crear aplicación Express
 const app: Application = express();

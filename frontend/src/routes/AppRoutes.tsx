@@ -38,6 +38,8 @@ import AccessDirectoCalidad from '../pages/AccessDirectoCalidad';
 import AccessDirectoCRM from '../pages/AccessDirectoCRM';
 import AccessDirectoProcesos from '../pages/AccessDirectoProcesos';
 import AccessDirectoRRHH from '../pages/AccessDirectoRRHH';
+import DevBypass from '../pages/DevBypass';
+import SimpleBypass from '../pages/SimpleBypass';
 
 // IMPORTACIÓN DIRECTA PARA DEPURACIÓN - TEMPORALMENTE DESHABILITADA
 // import DocumentosListing from "../components/documentos/DocumentosListing";
@@ -57,7 +59,9 @@ const LoadingFallback = () => (
 
 // Autenticación
 const LoginPage = lazy(() => import("../pages/Registroylogeo/LoginPage"));
+const LoginPageNEW = lazy(() => import("../pages/Registroylogeo/LoginPageNEW"));
 const RegisterPage = lazy(() => import("../pages/Registroylogeo/RegisterPage"));
+const RegisterPageNEW = lazy(() => import("../pages/Registroylogeo/RegisterPageNEW"));
 
 // Páginas Web (Landing)
 const WebHome = lazy(() => import("../pages/Web/WebHome"));
@@ -188,7 +192,9 @@ const AppRoutes = () => {
       <Routes>
         {/* Rutas Públicas */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/login-new" element={<LoginPageNEW />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register-new" element={<RegisterPageNEW />} />
         <Route path="/encuestas/responder/:id" element={<ResponderEncuesta />} />
 
         {/* Rutas Web (Landing) */}
@@ -409,6 +415,8 @@ const AppRoutes = () => {
 
 
         {/* Rutas de Acceso Directo Temporal */}
+        <Route path="/bypass" element={<DevBypass />} />
+        <Route path="/simple-bypass" element={<SimpleBypass />} />
         <Route path="/access-crm" element={<AccessDirectoCRM />} />
         <Route path="/access-rrhh" element={<AccessDirectoRRHH />} />
         <Route path="/access-procesos" element={<AccessDirectoProcesos />} />

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/iso9001';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/9001app';
 
 export const connectDatabase = async (): Promise<void> => {
   try {
@@ -11,7 +11,6 @@ export const connectDatabase = async (): Promise<void> => {
       maxPoolSize: 10, // Mantener hasta 10 conexiones socket
       serverSelectionTimeoutMS: 5000, // Mantener intentando enviar operaciones por 5 segundos
       socketTimeoutMS: 45000, // Cerrar sockets después de 45 segundos de inactividad
-      bufferMaxEntries: 0, // Deshabilitar mongoose buffering
       bufferCommands: false, // Deshabilitar mongoose buffering
     };
 
@@ -36,7 +35,34 @@ export const connectDatabase = async (): Promise<void> => {
     
   } catch (error) {
     console.error('❌ Error al conectar con MongoDB:', error);
-    process.exit(1);
+    console.log('🔄 Verificando configuración de MongoDB Atlas...');
+    
+    // Mostrar información de debug
+    console.log('🔍 URI configurada:', MONGODB_URI.replace(/\/\/.*@/, '//***:***@'));
+    console.log('🔍 Variables de entorno:');
+    console.log('  - NODE_ENV:', process.env.NODE_ENV);
+    console.log('  - MONGODB_URI presente:', !!process.env.MONGODB_URI);
+    
+    // Para desarrollo, intentar conectar con configuración más permisiva
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Intentando conexión con configuración de desarrollo...');
+      try {
+        await mongoose.connect(MONGODB_URI, {
+          maxPoolSize: 5,
+          serverSelectionTimeoutMS: 10000,
+          socketTimeoutMS: 45000,
+          bufferCommands: false,
+          retryWrites: true,
+          w: 'majority'
+        });
+        console.log('✅ Conectado a MongoDB Atlas exitosamente');
+      } catch (retryError) {
+        console.error('❌ Error en reintento de conexión:', retryError);
+        process.exit(1);
+      }
+    } else {
+      process.exit(1);
+    }
   }
 };
 

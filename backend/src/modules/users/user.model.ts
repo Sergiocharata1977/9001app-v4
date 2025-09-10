@@ -120,25 +120,46 @@ UserSchema.index({ roles: 1 });
 // Métodos de instancia
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   const bcrypt = await import('bcryptjs');
-  return bcrypt.compare(candidatePassword, this.password);
+  return bcrypt.compare(candidatePassword, this.password || this.password_hash);
 };
 
 UserSchema.methods.toPublicJSON = function(): any {
-  return {
-    id: this._id,
-    nombre: this.nombre,
-    apellido: this.apellido,
-    email: this.email,
-    telefono: this.telefono,
-    avatar: this.avatar,
-    roles: this.roles,
-    organization_id: this.organization_id,
-    activo: this.activo,
-    ultimo_acceso: this.ultimo_acceso,
-    configuracion: this.configuracion,
-    created_at: this.created_at,
-    updated_at: this.updated_at
-  };
+  try {
+    return {
+      id: this._id,
+      nombre: this.nombre || this.name || 'Usuario',
+      apellido: this.apellido || 'Sistema',
+      email: this.email,
+      telefono: this.telefono || '',
+      avatar: this.avatar || '',
+      roles: this.roles || (this.role ? [this.role] : ['user']),
+      organization: this.organization_id ? {
+        id: this.organization_id._id || this.organization_id,
+        nombre: this.organization_id.nombre || 'Organización',
+        codigo: this.organization_id.codigo || 'ORG'
+      } : null,
+      activo: this.activo !== undefined ? this.activo : (this.is_active !== undefined ? this.is_active : true),
+      ultimo_acceso: this.ultimo_acceso,
+      configuracion: this.configuracion || {
+        tema: 'light',
+        idioma: 'es',
+        notificaciones: true
+      },
+      created_at: this.created_at,
+      updated_at: this.updated_at
+    };
+  } catch (error) {
+    console.error('Error en toPublicJSON:', error);
+    return {
+      id: this._id,
+      nombre: 'Usuario',
+      apellido: 'Sistema',
+      email: this.email,
+      roles: ['user'],
+      organization: null,
+      activo: true
+    };
+  }
 };
 
 // Métodos estáticos

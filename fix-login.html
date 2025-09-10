@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solucionar Login - 9001app</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Solucionar Problema de Login</h1>
+        
+        <div class="step">
+            <h3>📋 Problema Identificado:</h3>
+            <p>Los usuarios existen en la base de datos pero no tienen contraseñas configuradas.</p>
+            <p><strong>Usuario de prueba:</strong> juan.lopez@agronorte.com</p>
+        </div>
+
+        <div class="step">
+            <h3>🔑 Paso 1: Establecer Contraseña</h3>
+            <button onclick="setPassword()">Establecer Contraseña para juan.lopez@agronorte.com</button>
+            <div id="setPasswordResult" class="log"></div>
+        </div>
+
+        <div class="step">
+            <h3>🚀 Paso 2: Probar Login</h3>
+            <button onclick="testLogin()">Probar Login</button>
+            <div id="loginResult" class="log"></div>
+        </div>
+
+        <div class="step">
+            <h3>👥 Paso 3: Verificar Otros Usuarios</h3>
+            <button onclick="listUsers()">Listar Usuarios sin Contraseña</button>
+            <div id="usersResult" class="log"></div>
+        </div>
+
+        <div class="step">
+            <h3>🎯 Paso 4: Ir a la Aplicación</h3>
+            <button onclick="goToApp()">Abrir Aplicación (localhost:3000)</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = isError ? 'error' : 'success';
+            element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+        }
+
+        async function setPassword() {
+            const resultDiv = document.getElementById('setPasswordResult');
+            resultDiv.innerHTML = '';
+            
+            try {
+                log('setPasswordResult', '🔄 Estableciendo contraseña...');
+                
+                const response = await fetch(`${API_BASE}/auth/set-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'juan.lopez@agronorte.com',
+                        password: '123456'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('setPasswordResult', `✅ ${data.message}`);
+                    log('setPasswordResult', `📧 Email: ${data.data.email}`);
+                    log('setPasswordResult', `🔑 Contraseña establecida: ${data.data.passwordSet}`);
+                } else {
+                    log('setPasswordResult', `❌ Error: ${data.message}`, true);
+                }
+            } catch (error) {
+                log('setPasswordResult', `❌ Error de conexión: ${error.message}`, true);
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '';
+            
+            try {
+                log('loginResult', '🔄 Probando login...');
+                
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'juan.lopez@agronorte.com',
+                        password: '123456'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('loginResult', `✅ ${data.message}`);
+                    log('loginResult', `👤 Usuario: ${data.data.user.nombre} ${data.data.user.apellido}`);
+                    log('loginResult', `📧 Email: ${data.data.user.email}`);
+                    log('loginResult', `🏢 Organización: ${data.data.user.organization?.nombre || 'N/A'}`);
+                    log('loginResult', `🎫 Token generado: ${data.data.tokens.accessToken ? 'Sí' : 'No'}`);
+                } else {
+                    log('loginResult', `❌ Error: ${data.message}`, true);
+                }
+            } catch (error) {
+                log('loginResult', `❌ Error de conexión: ${error.message}`, true);
+            }
+        }
+
+        async function listUsers() {
+            const resultDiv = document.getElementById('usersResult');
+            resultDiv.innerHTML = '';
+            
+            try {
+                log('usersResult', '🔄 Consultando usuarios...');
+                log('usersResult', '⚠️ Esta función requiere endpoint adicional en el backend');
+                log('usersResult', '📝 Usuarios conocidos que pueden necesitar contraseña:');
+                log('usersResult', '   - juan.lopez@agronorte.com');
+                log('usersResult', '   - Otros 9 usuarios en la base de datos');
+                log('usersResult', '💡 Usa el mismo proceso para establecer contraseñas a otros usuarios');
+            } catch (error) {
+                log('usersResult', `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        function goToApp() {
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        // Auto-ejecutar verificación inicial
+        window.onload = function() {
+            console.log('🚀 Herramienta de diagnóstico cargada');
+            console.log('📋 Backend detectado en puerto 5000');
+            console.log('🎯 Listo para solucionar el problema de login');
+        };
+    </script>
+</body>
+</html>
