@@ -1,0 +1,5 @@
+[33me921df7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Initial commit: 9001app-v2 project with TypeScript migration and MongoDB integration
+[33m9c219ea[m WIP: cambios locales antes de cambiar de rama
+[33mc4c40f4[m Eliminar agente coordinador completo - simplificar proyecto
+[33ma44233f[m Configurar tests básicos - backend funcionando, frontend configurado
+[33m0e0924c[m  primer paso edicion de procesos y otro cambios

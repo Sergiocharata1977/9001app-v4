@@ -1,177 +1,112 @@
+import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import morgan from 'morgan';
+import compression from 'compression';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import { rateLimit } from 'express-rate-limit';
 
 // Cargar variables de entorno
 dotenv.config();
 
-// Importar middleware de autenticación
-import authMiddleware from '../middleware/authMiddleware';
+// Importar configuración de base de datos
+import { connectDatabase } from './config/database.js';
 
-const app: Express = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors());
-app.use(helmet());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ===== RUTAS PÚBLICAS (SIN AUTENTICACIÓN) =====
-
-// Ruta de salud
-app.get('/api/health', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
-  });
-});
-
-// Ruta de prueba
-app.get('/api/test', (req: Request, res: Response) => {
-  res.json({ message: 'Backend funcionando correctamente!' });
-});
-
-// ===== FIN RUTAS PÚBLICAS =====
+// Importar middlewares
+import { errorHandler } from './middleware/errorHandler.js';
+import { notFound } from './middleware/notFound.js';
 
 // Importar rutas
-import accionesRoutes from '../routes/acciones.routes';
-import auditoriasRoutes from '../routes/auditorias.routes';
-import authRoutes from '../routes/authRoutes';
-import capacitacionesRoutes from '../routes/capacitaciones.routes';
-import competenciasRoutes from '../routes/competencias.routes';
-import coordinacionRoutes from '../routes/coordinacion.routes';
-import crmRoutes from '../routes/crm.routes';
-import databaseRoutes from '../routes/database.routes';
-import departamentosRoutes from '../routes/departamentos.routes';
-import documentosRoutes from '../routes/documentos.routes';
-import eventsRoutes from '../routes/events.routes';
-import fileStructureRoutes from '../routes/fileStructure.routes';
-import hallazgosRoutes from '../routes/hallazgos.routes';
-import indicadoresRoutes from '../routes/indicadores.routes';
-import medicionesRoutes from '../routes/mediciones.routes';
-import minutasRoutes from '../routes/minutas.routes';
-import normasRoutes from '../routes/normas.routes';
-import numeracionCorrelativaRoutes from '../routes/numeracionCorrelativa.routes';
-import objetivosCalidadRoutes from '../routes/objetivos-calidad.routes';
-import personalRoutes from '../routes/personal.routes';
-import planesRoutes from '../routes/planes';
-import politicaCalidadRoutes from '../routes/politica-calidad.routes';
-import procesosRoutes from '../routes/procesos.routes';
-import productosRoutes from '../routes/productos.routes';
-import puestosRoutes from '../routes/puestos.routes';
-import suscripcionesRoutes from '../routes/suscripciones';
-import userRoutes from '../routes/userRoutes';
+import authRoutes from './modules/auth/auth.routes.js';
+import userRoutes from './modules/users/user.routes.js';
+import organizationRoutes from './modules/organizations/organization.routes.js';
+import departmentRoutes from './modules/departments/department.routes.js';
+import positionRoutes from './modules/positions/position.routes.js';
+import personnelRoutes from './modules/personnel/personnel.routes.js';
 
-// ===== RUTAS CON AUTENTICACIÓN =====
+// Crear aplicación Express
+const app: Application = express();
+const PORT = process.env.PORT || 5000;
 
-// Rutas de autenticación
+// Configurar rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // límite de 100 requests por IP
+  message: 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde'
+});
+
+// Middlewares globales
+app.use(helmet()); // Seguridad
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
+app.use(compression()); // Comprimir respuestas
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(morgan('dev')); // Logging
+
+// Rate limiting en rutas sensibles
+app.use('/api/auth', limiter);
+
+// Health check
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime()
+  });
+});
+
+// Rutas API
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/organizations', organizationRoutes);
+app.use('/api/departamentos', departmentRoutes);
+app.use('/api/puestos', positionRoutes);
+app.use('/api/personal', personnelRoutes);
 
-// Rutas de planes
-app.use('/api/planes', planesRoutes);
+// Manejo de rutas no encontradas
+app.use(notFound);
 
-// Rutas de suscripciones
-app.use('/api/suscripciones', suscripcionesRoutes);
+// Manejo global de errores
+app.use(errorHandler);
 
-// Rutas de usuarios (requieren autenticación)
-app.use('/api/usuarios', authMiddleware, userRoutes);
+// Función para iniciar servidor
+const startServer = async (): Promise<void> => {
+  try {
+    // Conectar a MongoDB
+    await connectDatabase();
+    
+    // Iniciar servidor
+    app.listen(PORT, () => {
+      console.log(`
+        🚀 Servidor corriendo en http://localhost:${PORT}
+        📊 Ambiente: ${process.env.NODE_ENV || 'development'}
+        🔗 MongoDB: Conectado
+        ✅ Sistema listo para recibir peticiones
+      `);
+    });
+  } catch (error) {
+    console.error('❌ Error al iniciar el servidor:', error);
+    process.exit(1);
+  }
+};
 
-// Rutas de departamentos
-app.use('/api/departamentos', departamentosRoutes);
-
-// Rutas de personal
-app.use('/api/personal', personalRoutes);
-
-// Rutas de puestos
-app.use('/api/puestos', puestosRoutes);
-
-// Rutas de capacitaciones
-app.use('/api/capacitaciones', capacitacionesRoutes);
-
-// Rutas de competencias
-app.use('/api/competencias', competenciasRoutes);
-
-// Rutas de documentos (con subida y descarga)
-app.use('/api/documentos', documentosRoutes);
-
-// Rutas de puntos de la norma ISO
-app.use('/api/normas', normasRoutes);
-
-// Rutas de procesos
-app.use('/api/procesos', procesosRoutes);
-
-// Rutas de objetivos de calidad
-app.use('/api/objetivos-calidad', objetivosCalidadRoutes);
-
-// Rutas de indicadores
-app.use('/api/indicadores', indicadoresRoutes);
-
-// Rutas de mediciones
-app.use('/api/mediciones', medicionesRoutes);
-
-// Rutas de auditorías
-app.use('/api/auditorias', auditoriasRoutes);
-
-// Rutas de hallazgos
-app.use('/api/hallazgos', hallazgosRoutes);
-
-// Rutas de acciones
-app.use('/api/acciones', accionesRoutes);
-
-// Rutas de minutas
-app.use('/api/minutas', minutasRoutes);
-
-// Rutas de política de calidad
-app.use('/api/politica-calidad', politicaCalidadRoutes);
-
-// Rutas de eventos
-app.use('/api/events', eventsRoutes);
-
-// Rutas de coordinación de agentes
-app.use('/api', coordinacionRoutes);
-
-// Rutas de CRM
-app.use('/api/crm', crmRoutes);
-
-// Rutas de base de datos
-app.use('/api/database', databaseRoutes);
-
-// Rutas de estructura de archivos
-app.use('/api/file-structure', fileStructureRoutes);
-
-// Rutas de productos (requieren autenticación)
-app.use('/api/productos', authMiddleware, productosRoutes);
-
-// Rutas de numeración correlativa ISO 9001
-app.use('/api/numeracion-correlativa', numeracionCorrelativaRoutes);
-
-// ===== FIN RUTAS CON AUTENTICACIÓN =====
-
-// Manejo de errores
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Error interno del servidor',
-  });
+// Manejo de errores no capturados
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Cerrar servidor de forma segura
+  process.exit(1);
 });
 
-// Ruta 404
-app.use('*', (req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    message: 'Ruta no encontrada',
-  });
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Cerrar servidor de forma segura
+  process.exit(1);
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`📊 API disponible en http://localhost:${PORT}/api`);
-  console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
-});
+// Iniciar servidor
+startServer();

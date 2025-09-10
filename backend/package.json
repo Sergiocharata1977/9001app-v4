@@ -6,15 +6,12 @@
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "dev:clean": "rimraf dist && npm run dev",
     "test": "jest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "check-db": "node scripts/check-database-tables.js",
-    "verify-db": "node scripts/verificar-base-datos-completa.js",
-    "verify-db-continuo": "node scripts/verificar-base-datos-completa.js --continuo",
-    "diagnostico": "node scripts/diagnostico-turso-simple.js",
     "type-check": "tsc --noEmit"
   },
   "keywords": [

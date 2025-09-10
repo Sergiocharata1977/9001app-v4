@@ -1,73 +1,69 @@
 # Dependencies
-<<<<<<< HEAD
-=======
 node_modules/
->>>>>>> temp-branch
-/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment variables
 .env
-<<<<<<< HEAD
-=======
 .env.local
-.env.production
-.env.development
-.env.test
->>>>>>> temp-branch
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Databases
-*.db
-*.sqlite
-*.sqlite3
-
-# Logs
-<<<<<<< HEAD
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Misc
-.DS_Store
-=======
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Upload directories
-uploads/
-*/uploads/
-
-# Build outputs
+# Build output
 dist/
 build/
 
-# Coverage
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
 coverage/
-*.lcov
 
-# Cache
-.cache
-.eslintcache
+# nyc test coverage
+.nyc_output
 
-# Misc
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
-ehthumbs.db
 
-# PM2 files
-.pm2/
+# Uploads
+uploads/
+temp/
 
-# SSL certificates
-*.pem
-*.key
-*.crt
-
-# Backup files
-*.bak
-*.backup
-*.old
->>>>>>> temp-branch
+# Database
+*.db
+*.sqlite
