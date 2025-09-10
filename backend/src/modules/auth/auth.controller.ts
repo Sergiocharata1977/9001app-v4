@@ -1,6 +1,5 @@
-import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
-import { generateTokens, verifyRefreshToken } from '../../middleware/auth.middleware.js';
+import { AuthService } from '../../services/auth.service.js';
 import { Organization } from '../organizations/organization.model.js';
 import { User } from '../users/user.model.js';
 
@@ -66,7 +65,7 @@ export class AuthController {
       }
 
       // Verificar contraseña
-      const isPasswordValid = await user.comparePassword(password);
+      const isPasswordValid = await AuthService.verifyPassword(password, user.password);
       if (!isPasswordValid) {
         res.status(401).json({
           success: false,
@@ -76,7 +75,7 @@ export class AuthController {
       }
 
       // Generar tokens
-      const { accessToken, refreshToken } = generateTokens(user);
+      const { accessToken, refreshToken } = AuthService.generateTokensForUser(user);
 
       // Actualizar último acceso
       user.ultimo_acceso = new Date();
@@ -173,8 +172,7 @@ export class AuthController {
       }
 
       // Hash de la contraseña
-      const saltRounds = 12;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const hashedPassword = await AuthService.hashPassword(password);
 
       // Crear usuario
       const user = new User({
@@ -197,7 +195,7 @@ export class AuthController {
       }
 
       // Generar tokens
-      const { accessToken, refreshToken } = generateTokens(user);
+      const { accessToken, refreshToken } = AuthService.generateTokensForUser(user);
 
       res.status(201).json({
         success: true,
@@ -238,7 +236,7 @@ export class AuthController {
       }
 
       // Verificar refresh token
-      const decoded = verifyRefreshToken(refreshToken);
+      const decoded = AuthService.verifyRefreshToken(refreshToken);
       
       // Buscar usuario
       const user = await User.findById(decoded.userId)
@@ -262,7 +260,7 @@ export class AuthController {
       }
 
       // Generar nuevos tokens
-      const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+      const { accessToken, refreshToken: newRefreshToken } = AuthService.generateTokensForUser(user);
 
       res.json({
         success: true,
@@ -288,7 +286,7 @@ export class AuthController {
     try {
       // En una implementación más avanzada, podrías invalidar el token en una blacklist
       res.json({
-        success: true,
+      success: true,
         message: 'Logout exitoso'
       });
     } catch (error) {

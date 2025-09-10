@@ -1,39 +1,42 @@
-# 📋 Módulos ISO 9001
+# Módulos del Sistema ISO 9001 - Estructura Vertical
 
-## Estructura Modular del Sistema
+## 🏢 SECCIÓN 1: AUTENTICACIÓN Y USUARIOS
+- **auth/** - Autenticación JWT multi-tenant
+- **users/** - Gestión de usuarios
+- **organizations/** - Organizaciones
 
-### 👥 RRHH (Recursos Humanos)
-- **departments**: Gestión de departamentos
-- **positions**: Gestión de puestos de trabajo
-- **personnel**: Gestión de personal
-- **training**: Capacitaciones
-- **evaluations**: Evaluaciones de personal
+## 👥 SECCIÓN 2: RECURSOS HUMANOS
+1. **departments/** - Departamentos
+2. **positions/** - Puestos
+3. **personnel/** - Personal
+4. **training/** - Capacitaciones  
+5. **personnel-evaluations/** - Evaluaciones de Personal
 
-### 📊 SGC (Sistema de Gestión de Calidad)
-- **processes**: Procesos SGC
-- **records**: Registros del sistema
-- **objectives**: Objetivos de calidad
-- **indicators**: Indicadores de calidad
-- **measurements**: Mediciones
+## 📋 SECCIÓN 3: PROCESOS SGC
+1. **processes/** - Procesos
+2. **records/** - Registros
+3. **quality-objectives/** - Objetivos de calidad
+4. **quality-indicators/** - Indicadores de calidad
+5. **measurements/** - Mediciones
 
-### 🔧 Improvements (Mejoras)
-- **findings**: Hallazgos
-- **actions**: Acciones correctivas/preventivas
+## 🔧 SECCIÓN 4: MEJORAS
+1. **findings/** - Hallazgos
+2. **actions/** - Acciones (correctivas/preventivas)
 
-### 🔍 Audits (Auditorías)
-- **internal**: Auditorías internas
-- **findings**: Hallazgos de empleados
-- **satisfaction**: Satisfacción de clientes
+## 🔍 SECCIÓN 5: AUDITORÍAS
+- **audits/** - Auditorías
+- **audit-findings/** - Hallazgos empleados
+- **customer-satisfaction/** - Satisfacción de clientes
 
-### 📑 Policies (Políticas)
-- **quality**: Políticas de calidad
-- **amfe**: Análisis de Modo y Efecto de Falla
-- **minutes**: Minutas
+## 📄 SECCIÓN 6: POLÍTICAS Y DOCUMENTOS
+- **quality-policies/** - Políticas de calidad
+- **amfe/** - AMFE (Análisis Modal de Fallos y Efectos)
+- **minutes/** - Minutas
 
-### 🤖 RAG
-- **ai**: Sistema RAG con IA (pendiente)
+## 🤖 SECCIÓN 7: IA Y RAG (PENDIENTE)
+- **rag/** - Sistema RAG IA (deshabilitado temporalmente)
 
-## Estado de Desarrollo
-- ✅ Completado
-- 🚧 En desarrollo
-- ⏳ Pendiente
+## 📊 SECCIÓN 8: REPORTES Y CONFIGURACIÓN
+- **reports/** - Reportes
+- **settings/** - Configuraciones
+- **notifications/** - Notificaciones
